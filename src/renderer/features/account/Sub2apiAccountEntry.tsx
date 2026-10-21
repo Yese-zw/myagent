@@ -97,14 +97,22 @@ export function Sub2apiAccountDialog({ account, settings, onAccount, onClose }: 
     event.preventDefault();
     if (mode === 'register' && password !== confirmation) { setNotice(t('sub2api.passwordMismatch')); return; }
     await perform(async () => {
-      const next = await sub2api.authenticate({ email: resolvedEmail, password, verifyCode, invitationCode, agreed }, mode === 'register');
+      const requiredInvitation = settings?.invitation_code_enabled === true;
+      const code = invitationCode.trim();
+      const next = await sub2api.authenticate({
+        email: resolvedEmail, password, verifyCode, agreed,
+        invitationCode: requiredInvitation ? code : '',
+        affCode: requiredInvitation ? '' : code,
+      }, mode === 'register');
       if (mounted.current) { setPassword(''); setConfirmation(''); onAccount(next); onClose(); }
     });
   }
+  const invitationRequired = settings?.invitation_code_enabled === true;
   const allowSubmit = !busy
     && (!settings?.login_agreement_enabled || agreed)
     && (mode === 'login' || settings?.registration_enabled !== false)
-    && (!splitEmail || !!resolvedEmail);
+    && (!splitEmail || !!resolvedEmail)
+    && (mode === 'login' || !invitationRequired || invitationCode.trim().length > 0);
 
   return <OverlayBackdrop portal className="z-[260] px-4 py-6" onClose={busy || document ? undefined : onClose}>
     <section role="dialog" aria-modal="true" aria-labelledby="sub2api-account-title"
@@ -173,8 +181,16 @@ export function Sub2apiAccountDialog({ account, settings, onAccount, onClose }: 
                       const seconds = await sub2api.sendCode(resolvedEmail); if (mounted.current) { setRemaining(seconds); setNotice(t('sub2api.codeSent')); }
                     })}>{remaining > 0 ? `${remaining}s` : t('sub2api.sendCode')}</button></div>
               </div>}
-              {settings?.invitation_code_enabled && <div><label htmlFor="sub2api-invitation" className="mb-1.5 block text-sm text-[var(--ink)]">{t('sub2api.invitation')}</label>
-                <input id="sub2api-invitation" type="text" required value={invitationCode} disabled={busy} onChange={event => setInvitationCode(event.target.value)} className={field} /></div>}
+              <div>
+                <label htmlFor="sub2api-invitation" className="mb-1.5 flex items-center gap-2 text-sm font-medium text-[var(--ink)]">
+                  {t('sub2api.invitation')}
+                  {!invitationRequired && <span className="rounded-full bg-[var(--paper-inset)] px-2 py-0.5 text-[11px] font-normal text-[var(--ink-muted)]">{t('sub2api.optional')}</span>}
+                </label>
+                <input id="sub2api-invitation" type="text" autoComplete="off" maxLength={64} required={invitationRequired}
+                  value={invitationCode} disabled={busy} placeholder={t('sub2api.invitationPlaceholder')}
+                  onChange={event => setInvitationCode(event.target.value)} className={`${field} select-text`} />
+                <p className="mt-1.5 text-xs text-[var(--ink-muted)]">{invitationRequired ? t('sub2api.invitationRequiredHint') : t('sub2api.invitationOptionalHint')}</p>
+              </div>
             </>}
             {settings?.login_agreement_enabled && <div className="flex items-start gap-2 text-[13px] leading-5 text-[var(--ink-muted)]">
               <input id="sub2api-agreed" type="checkbox" checked={agreed} disabled={busy} onChange={event => setAgreed(event.target.checked)} className="mt-1 accent-[var(--accent)]" />

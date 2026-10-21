@@ -1,6 +1,7 @@
 //! App-owned sub2api login. The packaged origin identifies the deployment;
 //! access/refresh tokens stay in the local credential file and this process.
 mod captcha;
+mod codex_launch;
 mod store;
 
 use serde::{Deserialize, Serialize};
@@ -11,6 +12,9 @@ use tokio::sync::Mutex;
 
 const EVENT: &str = "sub2api-account:changed";
 const RESPONSE_LIMIT: usize = 256 * 1024;
+// Active announcements include markdown bodies. Keep the list bounded, but
+// larger than credential responses so a normal notice feed is not truncated.
+const ANNOUNCEMENT_LIMIT: usize = 1024 * 1024;
 // Public settings may include embedded site logos and community images. Keep
 // credential responses small while allowing the server's branding payload.
 const PUBLIC_SETTINGS_LIMIT: usize = 4 * 1024 * 1024;
@@ -85,6 +89,7 @@ pub struct PublicSettings {
     pub registration_enabled: bool,
     pub email_verify_enabled: bool,
     pub invitation_code_enabled: bool,
+    pub affiliate_enabled: bool,
     pub registration_email_suffix_whitelist: Vec<String>,
     pub login_agreement_enabled: bool,
     pub login_agreement_documents: Vec<Agreement>,
@@ -105,6 +110,8 @@ pub struct AuthInput {
     pub verify_code: String,
     #[serde(default)]
     pub invitation_code: String,
+    #[serde(default)]
+    pub aff_code: String,
     #[serde(default)]
     pub agreed: bool,
 }
@@ -236,6 +243,12 @@ fn response_error(status: u16, reason: &str) -> AuthError {
         }
         "REGISTRATION_DISABLED" => "REGISTRATION_DISABLED",
         "USER_NOT_ACTIVE" | "USER_DISABLED" => "USER_DISABLED",
+        "TOO_MANY_PENDING" => "TOO_MANY_PENDING",
+        "CANCEL_RATE_LIMITED" => "CANCEL_RATE_LIMITED",
+        "DAILY_LIMIT_EXCEEDED" => "DAILY_LIMIT_EXCEEDED",
+        "PAYMENT_INVALID_AMOUNT" => "PAYMENT_INVALID_AMOUNT",
+        "PAYMENT_DISABLED" | "BALANCE_PAYMENT_DISABLED" => "PAYMENT_DISABLED",
+        "PAYMENT_GATEWAY_ERROR" => "PAYMENT_GATEWAY_ERROR",
         _ => match status {
             401 => "UNAUTHORIZED",
             403 => "FORBIDDEN",
@@ -304,8 +317,12 @@ async fn request_method(
         .await
         .map_err(|_| AuthError::new("NETWORK_ERROR"))?;
     let status = response.status().as_u16();
-    let response_limit = if path == "settings/public" {
+    let route = path.split('?').next().unwrap_or(path);
+    // Checkout info carries operator-configured help markdown and images.
+    let response_limit = if route == "settings/public" || route == "payment/checkout-info" {
         PUBLIC_SETTINGS_LIMIT
+    } else if route == "announcements" || route.starts_with("announcements/") {
+        ANNOUNCEMENT_LIMIT
     } else {
         RESPONSE_LIMIT
     };
@@ -353,7 +370,7 @@ fn account_api_request(
         "keys" => ("keys".into(), reqwest::Method::GET),
         "groups" => ("groups/available".into(), reqwest::Method::GET),
         "create-key" => ("keys".into(), reqwest::Method::POST),
-        "update-key" | "delete-key" | "cancel-order" => {
+        "update-key" | "delete-key" | "cancel-order" | "get-order" | "announcement-read" => {
             let id = payload
                 .remove("id")
                 .and_then(|id| id.as_u64())
@@ -362,17 +379,25 @@ fn account_api_request(
             match operation {
                 "update-key" => (format!("keys/{id}"), reqwest::Method::PUT),
                 "delete-key" => (format!("keys/{id}"), reqwest::Method::DELETE),
+                "announcement-read" => (format!("announcements/{id}/read"), reqwest::Method::POST),
+                "get-order" => (format!("payment/orders/{id}"), reqwest::Method::GET),
                 _ => (format!("payment/orders/{id}/cancel"), reqwest::Method::POST),
             }
         }
+        "announcements" => ("announcements".into(), reqwest::Method::GET),
         "usage" => ("usage".into(), reqwest::Method::GET),
         "usage-stats" => ("usage/stats".into(), reqwest::Method::GET),
         "dashboard-stats" => ("usage/dashboard/stats".into(), reqwest::Method::GET),
         "dashboard-trend" => ("usage/dashboard/trend".into(), reqwest::Method::GET),
         "dashboard-models" => ("usage/dashboard/models".into(), reqwest::Method::GET),
         "orders" => ("payment/orders/my".into(), reqwest::Method::GET),
+        "checkout-info" => ("payment/checkout-info".into(), reqwest::Method::GET),
+        "create-order" => ("payment/orders".into(), reqwest::Method::POST),
+        "verify-order" => ("payment/orders/verify".into(), reqwest::Method::POST),
         "redeem" => ("redeem".into(), reqwest::Method::POST),
         "redeem-history" => ("redeem/history".into(), reqwest::Method::GET),
+        "affiliate" => ("user/aff".into(), reqwest::Method::GET),
+        "affiliate-transfer" => ("user/aff/transfer".into(), reqwest::Method::POST),
         _ => return Err(AuthError::new("INVALID_INPUT")),
     };
     match operation {
@@ -419,6 +444,52 @@ fn account_api_request(
                 return Err(AuthError::new("INVALID_INPUT"));
             }
             payload.retain(|key, _| matches!(key.as_str(), "email" | "code" | "disabled"));
+        }
+        "announcement-read" | "get-order" => {
+            payload.clear();
+        }
+        "create-order" => {
+            // Desktop recharge only creates balance orders. The client cannot
+            // pick a plan, return URL or WeChat in-app flow; the return URL is
+            // derived from the signed-in server in `authenticated_api`.
+            let amount = payload
+                .get("amount")
+                .and_then(Value::as_f64)
+                .filter(|amount| amount.is_finite() && *amount > 0.0 && *amount <= 1_000_000.0)
+                .ok_or_else(|| AuthError::new("INVALID_INPUT"))?;
+            let payment_type = payload
+                .get("payment_type")
+                .and_then(Value::as_str)
+                .filter(|kind| {
+                    !kind.is_empty()
+                        && kind.len() <= 64
+                        && kind
+                            .chars()
+                            .all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-')
+                })
+                .ok_or_else(|| AuthError::new("INVALID_INPUT"))?
+                .to_string();
+            payload.clear();
+            payload.insert("amount".into(), json!(amount));
+            payload.insert("payment_type".into(), json!(payment_type));
+            payload.insert("order_type".into(), json!("balance"));
+            payload.insert("is_mobile".into(), json!(false));
+            payload.insert("payment_source".into(), json!("hosted_redirect"));
+        }
+        "verify-order" => {
+            let out_trade_no = payload
+                .get("out_trade_no")
+                .and_then(Value::as_str)
+                .filter(|value| !value.is_empty() && value.len() <= 128)
+                .ok_or_else(|| AuthError::new("INVALID_INPUT"))?
+                .to_string();
+            payload.clear();
+            payload.insert("out_trade_no".into(), json!(out_trade_no));
+        }
+        "announcements" | "checkout-info" | "affiliate" | "affiliate-transfer"
+            if !payload.is_empty() =>
+        {
+            return Err(AuthError::new("INVALID_INPUT"));
         }
         _ => {}
     }
@@ -472,7 +543,7 @@ async fn authenticated_api(
     operation: &str,
     payload: Option<Value>,
 ) -> Result<Value> {
-    let (path, method, payload) = account_api_request(operation, payload)?;
+    let (path, method, mut payload) = account_api_request(operation, payload)?;
     let mut grant = manager
         .state
         .lock()
@@ -480,6 +551,14 @@ async fn authenticated_api(
         .grant
         .clone()
         .ok_or_else(|| AuthError::new("UNAUTHORIZED"))?;
+    if operation == "create-order" {
+        if let Some(Value::Object(object)) = payload.as_mut() {
+            object.insert(
+                "return_url".into(),
+                json!(format!("{}/payment/result", grant.server_url)),
+            );
+        }
+    }
     let response = request_method(
         &grant.server_url,
         &path,
@@ -594,16 +673,54 @@ fn extract_gateway_key(value: &Value) -> Option<String> {
 }
 
 fn account_has_keys(value: &Value) -> bool {
+    !key_items(value).is_empty()
+}
+
+fn key_items(value: &Value) -> &[Value] {
     if let Some(items) = value.as_array() {
-        return !items.is_empty();
+        return items;
     }
     if let Some(items) = value.get("items").and_then(Value::as_array) {
-        return !items.is_empty();
+        return items;
     }
     if let Some(data) = value.get("data") {
-        return account_has_keys(data);
+        return key_items(data);
     }
-    false
+    &[]
+}
+
+fn json_u64(value: Option<&Value>) -> Option<u64> {
+    match value {
+        Some(Value::Number(number)) => number.as_u64().filter(|id| *id > 0),
+        Some(Value::String(text)) => text.trim().parse::<u64>().ok().filter(|id| *id > 0),
+        _ => None,
+    }
+}
+
+fn json_count(value: Option<&Value>) -> Option<u64> {
+    match value {
+        Some(Value::Number(number)) => number.as_u64(),
+        Some(Value::String(text)) => text.trim().parse().ok(),
+        _ => None,
+    }
+}
+
+/// Group assigned to the key. Accepts the flat field and a nested group object.
+fn key_group_id(item: &Value) -> Option<u64> {
+    json_u64(item.get("group_id"))
+        .or_else(|| json_u64(item.get("group").and_then(|group| group.get("id"))))
+}
+
+fn listed_key_secret(item: &Value) -> Option<String> {
+    // List responses sometimes mask the secret. A masked value cannot be used
+    // as the gateway credential and must not replace a secret saved earlier.
+    extract_gateway_key(item).filter(|key| !key.contains('*'))
+}
+
+fn find_registration_group_key(items: &[Value], group_id: u64) -> Option<&Value> {
+    items
+        .iter()
+        .find(|item| key_group_id(item) == Some(group_id))
 }
 
 fn usable_gateway_key(value: &str) -> Option<String> {
@@ -638,8 +755,81 @@ async fn stored_gateway_key(user_id: u64) -> Result<Option<String>> {
     .map_err(|_| AuthError::new("STORE_ERROR"))?
 }
 
-/// Reuse the first registration secret. A new key is created only when this
-/// account has none on the server and the caller is a first-time register.
+const KEY_PAGE_SIZE: u64 = 100;
+const KEY_PAGE_LIMIT: u64 = 10;
+
+async fn list_account_keys(manager: &Sub2apiAccount) -> Result<Vec<Value>> {
+    let mut collected = Vec::new();
+    let mut page = 1u64;
+    loop {
+        let listed = authenticated_api(
+            manager,
+            "keys",
+            Some(json!({"page": page, "page_size": KEY_PAGE_SIZE})),
+        )
+        .await?;
+        let items = key_items(&listed);
+        let count = items.len();
+        let first_id = items.first().and_then(|item| json_u64(item.get("id")));
+        let repeated_page = page > 1
+            && first_id.is_some()
+            && collected
+                .first()
+                .and_then(|item: &Value| json_u64(item.get("id")))
+                == first_id;
+        if count == 0 || repeated_page {
+            break;
+        }
+        collected.extend(items.iter().cloned());
+        let total = json_count(listed.get("total"));
+        let reported_page_size = json_count(listed.get("page_size")).filter(|size| *size > 0);
+        let more = match total {
+            Some(total) => (collected.len() as u64) < total,
+            None => (count as u64) >= reported_page_size.unwrap_or(KEY_PAGE_SIZE),
+        };
+        if !more || page >= KEY_PAGE_LIMIT {
+            break;
+        }
+        page += 1;
+    }
+    Ok(collected)
+}
+
+/// Login and registration both require a key in the packaged default group,
+/// the same group assigned when registration creates `LSAGENT`. Keys in other
+/// groups do not satisfy this, and a stored secret is not used until the
+/// server list has been checked.
+async fn ensure_registration_group_key(manager: &Sub2apiAccount) -> Result<String> {
+    let group_id = packaged_defaults()?.default_group_id;
+    let items = list_account_keys(manager).await?;
+    if let Some(existing) = find_registration_group_key(&items, group_id) {
+        if let Some(secret) = listed_key_secret(existing) {
+            return remember_gateway_key(manager, secret).await;
+        }
+        let grant = manager
+            .state
+            .lock()
+            .await
+            .grant
+            .clone()
+            .ok_or_else(|| AuthError::new("UNAUTHORIZED"))?;
+        if let Some(stored) = usable_gateway_key(&grant.api_key) {
+            return remember_gateway_key(manager, stored).await;
+        }
+        if let Some(stored) = stored_gateway_key(grant.user.id).await? {
+            return remember_gateway_key(manager, stored).await;
+        }
+        return Err(AuthError::new("GATEWAY_KEY_MISSING"));
+    }
+    let created =
+        authenticated_api(manager, "create-key", Some(json!({"name": "LSAGENT"}))).await?;
+    let api_key =
+        extract_gateway_key(&created).ok_or_else(|| AuthError::new("INVALID_RESPONSE"))?;
+    remember_gateway_key(manager, api_key).await
+}
+
+/// Reuse a stored gateway secret. Callers that must not create a key use this
+/// path. Login and registration use `ensure_registration_group_key` instead.
 async fn provision_gateway_key(manager: &Sub2apiAccount, allow_create: bool) -> Result<String> {
     let grant = manager
         .state
@@ -661,8 +851,10 @@ async fn provision_gateway_key(manager: &Sub2apiAccount, allow_create: bool) -> 
     if !allow_create {
         return Err(AuthError::new("GATEWAY_KEY_MISSING"));
     }
-    let created = authenticated_api(manager, "create-key", Some(json!({"name": "MyAgents"}))).await?;
-    let api_key = extract_gateway_key(&created).ok_or_else(|| AuthError::new("INVALID_RESPONSE"))?;
+    let created =
+        authenticated_api(manager, "create-key", Some(json!({"name": "LSAGENT"}))).await?;
+    let api_key =
+        extract_gateway_key(&created).ok_or_else(|| AuthError::new("INVALID_RESPONSE"))?;
     remember_gateway_key(manager, api_key).await
 }
 
@@ -805,7 +997,9 @@ pub async fn cmd_sub2api_authenticate(
     };
     let payload = json!({
         "email": input.email.trim(), "password": input.password,
-        "verify_code": input.verify_code, "invitation_code": input.invitation_code,
+        "verify_code": input.verify_code,
+        "invitation_code": input.invitation_code,
+        "aff_code": input.aff_code,
         "turnstile_token": proof,
     });
     let response = request(
@@ -849,12 +1043,10 @@ pub async fn cmd_sub2api_authenticate(
     }
     save_grant(Some(grant.clone())).await?;
     manager.state.lock().await.grant = Some(grant);
-    let allow_create = register && reused_key.is_none();
-    if let Err(error) = provision_gateway_key(&manager, allow_create).await {
-        crate::ulog_warn!(
-            "[sub2api] gateway key provision failed code={}",
-            error.code
-        );
+    // Login and registration both check the packaged default group. A missing
+    // key is created even when the account already has keys in other groups.
+    if let Err(error) = ensure_registration_group_key(&manager).await {
+        crate::ulog_warn!("[sub2api] gateway key provision failed code={}", error.code);
     }
     notify(&app);
     Ok(manager.snapshot().await)
@@ -881,6 +1073,57 @@ pub async fn cmd_sub2api_gateway(
         base_url: gateway_base_url(&server_url),
         api_key,
     })
+}
+
+#[derive(Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CodexAppStatus {
+    pub installed: bool,
+    pub name: Option<String>,
+}
+
+/// Detect the Codex desktop app without writing credentials or starting it.
+#[tauri::command]
+pub async fn cmd_sub2api_codex_app_status(window: WebviewWindow) -> Result<CodexAppStatus> {
+    require_main(&window)?;
+    let name = tokio::task::spawn_blocking(codex_launch::installed_app_name)
+        .await
+        .map_err(|_| AuthError::new("LAUNCH_FAILED"))?;
+    Ok(CodexAppStatus {
+        installed: name.is_some(),
+        name,
+    })
+}
+
+/// Open the Codex desktop app as a separate instance wired to the gateway.
+/// Returns `true` when the instance was already running.
+#[tauri::command]
+pub async fn cmd_sub2api_launch_codex(
+    window: WebviewWindow,
+    manager: State<'_, Sub2apiAccount>,
+) -> Result<bool> {
+    require_main(&window)?;
+    let (base_url, api_key) = {
+        let _operation = manager.operation.lock().await;
+        manager.initialize().await?;
+        let api_key = provision_gateway_key(&manager, false).await?;
+        let server_url = manager
+            .state
+            .lock()
+            .await
+            .grant
+            .as_ref()
+            .map(|grant| grant.server_url.clone())
+            .ok_or_else(|| AuthError::new("UNAUTHORIZED"))?;
+        (gateway_base_url(&server_url), api_key)
+    };
+    let outcome = tokio::task::spawn_blocking(move || codex_launch::launch(&base_url, &api_key))
+        .await
+        .map_err(|_| AuthError::new("LAUNCH_FAILED"))??;
+    Ok(matches!(
+        outcome,
+        codex_launch::LaunchOutcome::AlreadyRunning
+    ))
 }
 
 #[tauri::command]

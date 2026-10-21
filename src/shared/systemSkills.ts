@@ -2,7 +2,7 @@
 export const SYSTEM_SKILLS_VERSION = '61';
 
 /**
- * Canonical Skill names that are part of MyAgents' always-available runtime
+ * Canonical Skill names that are part of LSAGENT' always-available runtime
  * contract.
  *
  * The effective project/global winner for these names cannot be disabled as

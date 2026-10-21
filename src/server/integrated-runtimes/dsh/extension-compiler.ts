@@ -450,7 +450,7 @@ function remoteMcpComponent(
   };
 }
 
-/** Legacy MyAgents/Claude Agent selectors name the terminal capability; Runtime visibility selects its platform Shell. */
+/** Legacy LSAGENT/Claude Agent selectors name the terminal capability; Runtime visibility selects its platform Shell. */
 const dshAgentToolSelectors = (tools: readonly string[]): string[] => [...new Set(tools.flatMap(tool =>
   tool === 'Bash' ? ['bash', 'pwsh'] : tool === 'PowerShell' ? ['pwsh'] : [tool],
 ))];

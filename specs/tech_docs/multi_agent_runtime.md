@@ -83,7 +83,7 @@ Session identity、恢复与配置 snapshot 见 [`session_architecture.md`](sess
 | Source | Authority |
 |---|---|
 | `system-cli` | 用户安装、登录并配置的本机 CLI |
-| `managed-provider` | MyAgents 管理二进制、安装、登录与可投影扩展 |
+| `managed-provider` | LSAGENT 管理二进制、安装、登录与可投影扩展 |
 
 同为 Codex，两个 source 也不能复用进程或混用配置。Rust 在一次 Sidecar ensure attempt 开始时解析完整 `RuntimeIdentity(runtime + source)`；复用校验与 spawn 使用同一快照，不能在中间重新读取 Agent 配置。
 
@@ -122,7 +122,7 @@ stdin user message
 -> process exit
 ```
 
-MyAgents 把 native stream 归一化为 UnifiedEvent，并通过 SessionStart hook 获取可靠的 session id。权限模式使用 CLI 当前支持的 native vocabulary；产品权限只在 Runtime boundary 做可证明的映射。
+LSAGENT 把 native stream 归一化为 UnifiedEvent，并通过 SessionStart hook 获取可靠的 session id。权限模式使用 CLI 当前支持的 native vocabulary；产品权限只在 Runtime boundary 做可证明的映射。
 
 系统 Claude Code CLI 的权限菜单与快捷键轮换只提供 Accept Edits、Bypass Permissions、Don't Ask。Manual、Auto、Plan 仍属于支持的运行参数，已有会话保留原权限并显示实际模式；隐藏菜单项不修改持久化权限。
 
@@ -153,7 +153,7 @@ Managed Codex 的推理档位以实际 app-server `model/list` 返回的 `suppor
 
 system 菜单只提供上述三项；历史 suggest 仍按只读恢复，并保留真实只读显示。auto_review 是原生审批 reviewer，不等于 never 或直接开放网络。start/resume 与每轮 turn/start 均显式传 reviewer，避免切回人工审批时沿用旧 reviewer；原生响应未启用请求的 auto_review 时明确报不支持，不能静默降级。
 
-现有 Process 保存该 generation 的 workspace sandbox：从原生 config/read 读取 network/额外 writable roots/tmp exclusions，再以 thread/start/resume 返回的 workspaceWrite 有效策略校准；从 Full Access 切回时仍使用该配置。只读规划保持旧网络限制。不得用 thread/resume 配置尚无 rollout 的预热 thread，也不得逐轮硬编码 networkAccess=false 覆盖原生配置。未获批 command/exec 代理探针受网络限制只表示需要审批，不能据此显示整个 Codex 不可用。MyAgents Host Tool 自有审批仍属于客户端 dispatcher，不因原生 auto_review 绕过。
+现有 Process 保存该 generation 的 workspace sandbox：从原生 config/read 读取 network/额外 writable roots/tmp exclusions，再以 thread/start/resume 返回的 workspaceWrite 有效策略校准；从 Full Access 切回时仍使用该配置。只读规划保持旧网络限制。不得用 thread/resume 配置尚无 rollout 的预热 thread，也不得逐轮硬编码 networkAccess=false 覆盖原生配置。未获批 command/exec 代理探针受网络限制只表示需要审批，不能据此显示整个 Codex 不可用。LSAGENT Host Tool 自有审批仍属于客户端 dispatcher，不因原生 auto_review 绕过。
 
 一个 Session Sidecar 最终只绑定一个 root thread。RPC response 和 notification 可乱序到达，turn owner 必须按 thread、turn 与 caller message identity 关联，不能仅凭“收到 completed”提交错误 turn。
 
@@ -254,7 +254,7 @@ pre-warm 建立真实、可由后续首条消息复用的 process/thread，但�
 
 ## 7. Managed Codex 扩展
 
-Managed Codex 由 MyAgents 拥有 app-server launch config，所以可以把 Product capability 投影进去；system-cli Codex 继续由用户配置拥有，不接管。
+Managed Codex 由 LSAGENT 拥有 app-server launch config，所以可以把 Product capability 投影进去；system-cli Codex 继续由用户配置拥有，不接管。
 
 `external-session/extensions.ts` 从当前权威配置编译 immutable snapshot，并用 desired/effective revision 管理 process generation：无进程等待下次启动，active turn 延后到 idle，idle 时安全 replacement。旧 generation 的结果不能回写新 revision。
 
@@ -297,7 +297,7 @@ slash menu 按真实 Runtime capability投影：
 
 | proxy policy | 语义 |
 |---|---|
-| `myagents` | 使用 Sidecar 启动时由 MyAgents 注入的 proxy 环境 |
+| `myagents` | 使用 Sidecar 启动时由 LSAGENT 注入的 proxy 环境 |
 | `terminal` | 使用 shell warmup 捕获的交互式终端 proxy 变量 |
 
 未知或旧字面量回落到安全默认，不能通过类型断言绕过 resolver。诊断 snapshot 只暴露有效 proxy presence、PATH 前缀、cwd、shell 和结构化 RPC 状态，不记录 secret 或完整环境。
@@ -365,4 +365,4 @@ native compact 是 capability，不是所有 Runtime 的共同功能。builtin �
 
 Runtime selector/SessionEngine 路由不变；Builtin queue item 和 External lifecycle 是本轮渠道配置快照 owner。固定 system 能力与逐输入 CHANNEL_CONTEXT 共用 shared 模板，实时输入复用该轮 mode，排队/拒绝 steer 后的下一轮重新捕获。成功 terminal 携带 frozen mode 给 Heartbeat/Goal owner；普通镜像使用同一策略，不读最新 Channel 配置覆盖旧结果。
 
-统一发送通过现有 MyAgents CLI，handler 与上下文规则见 [自定义工具指南](sdk_custom_tools_guide.md#统一渠道消息工具)。Builtin、Managed Codex 新旧 thread、DSH、Claude Code 和系统 Codex 均运行 `myagents im send-message`；不额外注册 MCP/host tool，不修改 Session runtime/MCP authority，也不要求 /new。
+统一发送通过现有 LSAGENT CLI，handler 与上下文规则见 [自定义工具指南](sdk_custom_tools_guide.md#统一渠道消息工具)。Builtin、Managed Codex 新旧 thread、DSH、Claude Code 和系统 Codex 均运行 `myagents im send-message`；不额外注册 MCP/host tool，不修改 Session runtime/MCP authority，也不要求 /new。

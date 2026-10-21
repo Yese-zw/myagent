@@ -1631,7 +1631,7 @@ async fn deliver_space_deliveries(
         message_id: message_id.clone(),
         from_session_id: Some("myagents-space".to_string()),
         source_kind: crate::inbox::InboxSourceKind::InternalSession,
-        from_label: "MyAgents Space".to_string(),
+        from_label: "LSAGENT Space".to_string(),
         to_session_id: session_id.to_string(),
         text: prompt.clone(),
         reply_back: false,
@@ -1644,7 +1644,7 @@ async fn deliver_space_deliveries(
             "type": "space.issue_delivery",
             "eventId": message_id,
             "sourceSessionId": "myagents-space",
-            "sourceLabel": "MyAgents Space",
+            "sourceLabel": "LSAGENT Space",
             "targetSessionId": session_id,
             "createdAt": created_at,
             "deliveryId": first.delivery_id,
@@ -1874,7 +1874,7 @@ fn build_space_issue_prompt_header(
         ),
         String::new(),
         "<registered-agent-context>".to_string(),
-        "You are operating as one exact Registered Agent in MyAgents Space.".to_string(),
+        "You are operating as one exact Registered Agent in LSAGENT Space.".to_string(),
         String::new(),
         format!(
             "<space\n  id=\"{}\"\n  name=\"{}\"\n  slug=\"{}\" />",
@@ -1951,7 +1951,7 @@ Valid outcomes include:
 
 A comment or Issue update does not claim the Issue. A claim establishes responsibility but does not automatically change workflow state. Create an Attached Task only when durable local execution tracking is useful.
 
-MyAgents acknowledges Delivery automatically after injecting it into this Session. There is no Delivery ignore, dismiss, handled, or acknowledgement action for you to perform.
+LSAGENT acknowledges Delivery automatically after injecting it into this Session. There is no Delivery ignore, dismiss, handled, or acknowledgement action for you to perform.
 
 The current Issue is authoritative. Delivery metadata only explains why this Agent was awakened and may already be stale.
 
@@ -2068,7 +2068,7 @@ fn build_space_issue_block(delivery: &PendingSpaceDelivery) -> String {
             .get("actor")
             .filter(|value| value.is_object())
             .map(identity_summary)
-            .unwrap_or_else(|| "system | unavailable | MyAgents Space".to_string())
+            .unwrap_or_else(|| "system | unavailable | LSAGENT Space".to_string())
     ));
     if let Some(comment_id) = optional_value_string(&delivery.source_update, "commentId") {
         lines.push(format!(
@@ -2135,14 +2135,14 @@ fn space_issue_visible_text(
     delivery_count: usize,
 ) -> String {
     match (locale, kind, delivery_count) {
-        (crate::i18n::SupportedLocale::EnUs, SpaceIssueDeliveryKind::Subscription, 1) => "MyAgents Space delivered an Issue notification. The Registered Agent is evaluating it against its goal and instructions.".to_string(),
-        (crate::i18n::SupportedLocale::EnUs, SpaceIssueDeliveryKind::Subscription, count) => format!("MyAgents Space delivered {} Issue notifications. The Registered Agent is evaluating them against its goal and instructions.", count),
-        (crate::i18n::SupportedLocale::EnUs, SpaceIssueDeliveryKind::Assignment, _) => "MyAgents Space delivered an explicitly assigned Issue. The Registered Agent is reading its current state and proceeding.".to_string(),
-        (crate::i18n::SupportedLocale::EnUs, SpaceIssueDeliveryKind::ClaimFollowup, _) => "MyAgents Space delivered a follow-up update for an owned Issue. The Registered Agent is deciding whether further action is needed.".to_string(),
-        (crate::i18n::SupportedLocale::ZhCn, SpaceIssueDeliveryKind::Subscription, 1) => "MyAgents Space 已投递一个 Issue 通知，Registered Agent 正在根据其目标与指令进行评估。".to_string(),
-        (crate::i18n::SupportedLocale::ZhCn, SpaceIssueDeliveryKind::Subscription, count) => format!("MyAgents Space 已投递 {} 个 Issue 通知，Registered Agent 正在根据其目标与指令逐项评估。", count),
-        (crate::i18n::SupportedLocale::ZhCn, SpaceIssueDeliveryKind::Assignment, _) => "MyAgents Space 已投递一个明确指派的 Issue，Registered Agent 正在读取当前状态并处理。".to_string(),
-        (crate::i18n::SupportedLocale::ZhCn, SpaceIssueDeliveryKind::ClaimFollowup, _) => "MyAgents Space 已投递一个已承接 Issue 的后续更新，Registered Agent 正在判断是否需要继续行动。".to_string(),
+        (crate::i18n::SupportedLocale::EnUs, SpaceIssueDeliveryKind::Subscription, 1) => "LSAGENT Space delivered an Issue notification. The Registered Agent is evaluating it against its goal and instructions.".to_string(),
+        (crate::i18n::SupportedLocale::EnUs, SpaceIssueDeliveryKind::Subscription, count) => format!("LSAGENT Space delivered {} Issue notifications. The Registered Agent is evaluating them against its goal and instructions.", count),
+        (crate::i18n::SupportedLocale::EnUs, SpaceIssueDeliveryKind::Assignment, _) => "LSAGENT Space delivered an explicitly assigned Issue. The Registered Agent is reading its current state and proceeding.".to_string(),
+        (crate::i18n::SupportedLocale::EnUs, SpaceIssueDeliveryKind::ClaimFollowup, _) => "LSAGENT Space delivered a follow-up update for an owned Issue. The Registered Agent is deciding whether further action is needed.".to_string(),
+        (crate::i18n::SupportedLocale::ZhCn, SpaceIssueDeliveryKind::Subscription, 1) => "LSAGENT Space 已投递一个 Issue 通知，Registered Agent 正在根据其目标与指令进行评估。".to_string(),
+        (crate::i18n::SupportedLocale::ZhCn, SpaceIssueDeliveryKind::Subscription, count) => format!("LSAGENT Space 已投递 {} 个 Issue 通知，Registered Agent 正在根据其目标与指令逐项评估。", count),
+        (crate::i18n::SupportedLocale::ZhCn, SpaceIssueDeliveryKind::Assignment, _) => "LSAGENT Space 已投递一个明确指派的 Issue，Registered Agent 正在读取当前状态并处理。".to_string(),
+        (crate::i18n::SupportedLocale::ZhCn, SpaceIssueDeliveryKind::ClaimFollowup, _) => "LSAGENT Space 已投递一个已承接 Issue 的后续更新，Registered Agent 正在判断是否需要继续行动。".to_string(),
     }
 }
 
@@ -2965,7 +2965,7 @@ mod tests {
         assert!(prompt.contains("- Issue #: #113"));
         assert!(prompt.contains("<source-update\n  id=\"upd_delivery_1\""));
         assert!(prompt.ends_with(
-            "MyAgents Space 已投递一个 Issue 通知，Registered Agent 正在根据其目标与指令进行评估。"
+            "LSAGENT Space 已投递一个 Issue 通知，Registered Agent 正在根据其目标与指令进行评估。"
         ));
     }
 
@@ -3077,7 +3077,7 @@ mod tests {
             prompt.contains("Claiming in this situation confirms or establishes execution context")
         );
         assert!(prompt.ends_with(
-            "MyAgents Space delivered an explicitly assigned Issue. The Registered Agent is reading its current state and proceeding."
+            "LSAGENT Space delivered an explicitly assigned Issue. The Registered Agent is reading its current state and proceeding."
         ));
     }
 
@@ -3174,7 +3174,7 @@ mod tests {
         assert!(!prompt.contains("myagents space issue claim issue_1"));
         assert!(!prompt.contains("myagents space issue claim issue_2"));
         assert!(prompt.ends_with(
-            "MyAgents Space delivered 2 Issue notifications. The Registered Agent is evaluating them against its goal and instructions."
+            "LSAGENT Space delivered 2 Issue notifications. The Registered Agent is evaluating them against its goal and instructions."
         ));
     }
 
@@ -3215,7 +3215,7 @@ mod tests {
         assert!(!prompt.contains("- Claim ID: claim_1"));
         assert!(prompt.contains("Issue #: #115"));
         assert!(prompt.ends_with(
-            "MyAgents Space delivered a follow-up update for an owned Issue. The Registered Agent is deciding whether further action is needed."
+            "LSAGENT Space delivered a follow-up update for an owned Issue. The Registered Agent is deciding whether further action is needed."
         ));
     }
 

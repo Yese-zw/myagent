@@ -147,7 +147,7 @@ fn build_client() -> Result<reqwest::Client, String> {
     #[allow(clippy::disallowed_methods)]
     let builder = reqwest::Client::builder()
         .timeout(Duration::from_secs(HTTP_TIMEOUT_SECS))
-        .user_agent(concat!("MyAgents/", env!("CARGO_PKG_VERSION")));
+        .user_agent(concat!("LSAGENT/", env!("CARGO_PKG_VERSION")));
     crate::proxy_config::build_client_with_proxy(builder)
 }
 

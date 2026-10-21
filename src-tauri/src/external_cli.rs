@@ -85,7 +85,7 @@ fn constant_time_eq(left: &[u8], right: &[u8]) -> bool {
 fn config_path() -> Result<PathBuf, String> {
     crate::app_dirs::myagents_data_dir()
         .map(|dir| dir.join("config.json"))
-        .ok_or_else(|| "MyAgents data directory is unavailable".to_string())
+        .ok_or_else(|| "LSAGENT data directory is unavailable".to_string())
 }
 
 fn launcher_path() -> String {
@@ -121,7 +121,7 @@ fn external_cli_skill_path() -> String {
 /// handoff document referenced by Settings, not an installed/injected skill.
 pub(crate) fn ensure_external_cli_skill() -> Result<bool, String> {
     let data_dir = crate::app_dirs::myagents_data_dir()
-        .ok_or_else(|| "MyAgents data directory is unavailable".to_string())?;
+        .ok_or_else(|| "LSAGENT data directory is unavailable".to_string())?;
     let _guard = EXTERNAL_CLI_SKILL_SYNC_LOCK
         .get_or_init(|| Mutex::new(()))
         .lock()

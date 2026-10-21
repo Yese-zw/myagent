@@ -5246,7 +5246,7 @@ pub async fn cmd_task_prepare_discussion(
 ) -> Result<PreparedTaskDiscussion, String> {
     validate_safe_id(&discussion_id, "discussionId")?;
     let root = crate::app_dirs::myagents_data_dir()
-        .ok_or_else(|| "cannot resolve MyAgents data dir".to_string())?
+        .ok_or_else(|| "cannot resolve LSAGENT data dir".to_string())?
         .join("task-discussions");
     if fs::symlink_metadata(&root)
         .ok()
@@ -5402,7 +5402,7 @@ pub async fn cmd_task_save_discussion_input(
     input: TaskDiscussionInput,
 ) -> Result<(), String> {
     let root = crate::app_dirs::myagents_data_dir()
-        .ok_or("cannot resolve MyAgents data dir")?
+        .ok_or("cannot resolve LSAGENT data dir")?
         .join("task-discussions");
     tauri::async_runtime::spawn_blocking(move || {
         save_discussion_input_under(&root, &discussion_id, &input)
@@ -5416,7 +5416,7 @@ pub async fn cmd_task_read_discussion_input(
     discussion_id: String,
 ) -> Result<Option<TaskDiscussionInput>, String> {
     let root = crate::app_dirs::myagents_data_dir()
-        .ok_or("cannot resolve MyAgents data dir")?
+        .ok_or("cannot resolve LSAGENT data dir")?
         .join("task-discussions");
     tauri::async_runtime::spawn_blocking(move || {
         read_discussion_input_under(&root, &discussion_id)
@@ -5434,7 +5434,7 @@ const TASK_DISCUSSION_CANDIDATE_MAX_BYTES: u64 = 1024 * 1024;
 /// closed instead of trusting the CLI's earlier snapshot.
 pub fn read_owned_discussion_candidate(raw_path: &str) -> Result<Option<String>, String> {
     let root = crate::app_dirs::myagents_data_dir()
-        .ok_or_else(|| "cannot resolve MyAgents data dir".to_string())?
+        .ok_or_else(|| "cannot resolve LSAGENT data dir".to_string())?
         .join("task-discussions");
     read_owned_discussion_candidate_under(&root, raw_path)
 }
@@ -5787,7 +5787,7 @@ mod tests {
             mcp_enabled_servers: None,
             managed_kind: None,
             source_record_id: Some("record-1".to_string()),
-            tags: vec!["MyAgents".to_string()],
+            tags: vec!["LSAGENT".to_string()],
             notification: None,
         }
     }
@@ -6712,7 +6712,7 @@ mod tests {
                 TaskCreateAttachedInput {
                     name: "Space Issue #123".to_string(),
                     executor: TaskExecutor::Agent,
-                    description: Some("MyAgents Space Issue iss_123".to_string()),
+                    description: Some("LSAGENT Space Issue iss_123".to_string()),
                     workspace_id: "ws-myagents".to_string(),
                     workspace_path: ws.to_string_lossy().into_owned(),
                     task_md_content: "处理 Space Issue".to_string(),

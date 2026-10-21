@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="specs/assets/readme/myagents-slogan-zh.png" alt="MyAgents — brand wordmark and slogan in Chinese" width="960" />
+<img src="specs/assets/readme/myagents-slogan-zh.png" alt="LSAGENT — brand wordmark and slogan in Chinese" width="960" />
 
 **A free, open-source, local-first Agent workbench and task system**
 
@@ -12,15 +12,15 @@
 
 </div>
 
-## What is MyAgents?
+## What is LSAGENT?
 
-MyAgents is a free, open-source, local-first **Agent workbench and task system**, built to help everyone become a more capable individual—with the ambition of amplifying your intent a hundredfold.
+LSAGENT is a free, open-source, local-first **Agent workbench and task system**, built to help everyone become a more capable individual—with the ambition of amplifying your intent a hundredfold.
 
 It is both a workbench for working directly with Agents and a way to turn your computers into execution nodes that Agents can call on. Connect your computers to **AgentNet**, choose which Agents to make available, and build your own Agent task network.
 
 Work with an Agent on your everyday computer: **you keep setting direction, Agents advance work in parallel, and you make the key decisions.** When work needs another device's files or environment, let your Agent hand it off across devices. Give ongoing work to Agents on computers you keep running.
 
-MyAgents gives both people and Agents a way to operate the system: you use the GUI, while Agents use the CLI to create tasks and call other Agents, turning your requests into ongoing work. Other Agents you install can also access MyAgents capabilities through its CLI.
+LSAGENT gives both people and Agents a way to operate the system: you use the GUI, while Agents use the CLI to create tasks and call other Agents, turning your requests into ongoing work. Other Agents you install can also access LSAGENT capabilities through its CLI.
 
 - **Multiple Agent runtimes**: Claude Agent SDK, DeepSeek Harness, and Codex, with supported AI subscription sign-ins and model API configuration. Each Agent can use its own workspace, model, Skills, and tools.
 - **Task system**: scheduled tasks and scripts that wake an Agent when a condition is met. Turn recurring work into tasks that keep your methods in use.
@@ -30,9 +30,9 @@ MyAgents gives both people and Agents a way to operate the system: you use the G
 
 No server of your own is needed. Connect the computers you already have, with your local data, environments, and Agent execution under your control.
 
-**Install MyAgents. Give your computer intelligence.**
+**Install LSAGENT. Give your computer intelligence.**
 
-![MyAgents 0.5.0 home screen and Agent workspace sidebar, shown in Chinese](specs/assets/readme/v050-launcher-zh.png)
+![LSAGENT 0.5.0 home screen and Agent workspace sidebar, shown in Chinese](specs/assets/readme/v050-launcher-zh.png)
 
 *Start a conversation in an Agent workspace, with access to Records, automated Tasks, Skills, and tools. Screenshots below show the Chinese interface.*
 
@@ -74,30 +74,9 @@ An example request:
 
 Tasks determine when work is triggered. For ongoing research, execution, and verification within the current session, use **Goal Mode**. See the [task and automation guide](bundled-skills/myagents-docs/references/automation.md).
 
-### Use AgentNet to reach the right device
-
-Your everyday computer can remain your main point of interaction, while other computers contribute their files and execution environments. Develop on a MacBook, hand Windows checks to an Agent on a Windows computer, and place recurring work on a device you keep running.
-
-This example shows devices under the same account. The lines represent task handoffs and results:
-
-```mermaid
-flowchart TB
-    person["You · direction and key decisions"] <--> daily["Agent on your everyday laptop<br/>Conversation, delegation, results"]
-    daily <-->|AgentNet| dev["Agent on your development MacBook<br/>Project files and development environment"]
-    daily <-->|AgentNet| win["Agent on your Windows computer<br/>Verification in Windows"]
-```
-
-You choose which Agents are available to the network. A remote Agent executes with the workspace, model, and tools on its own device. Tasks run through MyAgents on the device where they are created: computers you keep running can handle ongoing work, while portable devices join as needed.
-
-![AgentNet device overview showing online status and Agents available to the network](specs/assets/readme/v050-agentnet-zh.png)
-
-*View devices and available Agents under the same account. This screenshot shows two online devices and one device that has not joined the network. Cross-device calls require the target to be online.*
-
-See the [AgentNet guide](bundled-skills/myagents-docs/references/agent-network.md) for setup and operating requirements.
-
 ### People use the GUI; Agents arrange work through the CLI
 
-Manage Agents, Tasks, and records in the interface. Agents running inside MyAgents can use the `myagents` CLI to create tasks, call other Agents, read status, and write back results. Requests in conversation can become actual work arrangements.
+Manage Agents, Tasks, and records in the interface. Agents running inside LSAGENT can use the `myagents` CLI to create tasks, call other Agents, read status, and write back results. Requests in conversation can become actual work arrangements.
 
 Other Agents you install can connect too. Enable External Access in Settings and authorize access with a token to use the public CLI capabilities. See the [external Agent integration guide](bundled-guides/external-myagents-cli/SKILL.md).
 
@@ -137,7 +116,7 @@ The detailed usage guides linked here are currently maintained in Chinese.
 
 ### Does my computer need to stay on?
 
-Open the app when you need interactive work. Scheduled tasks and condition checks require **the device running them to stay powered on and awake, with MyAgents running**. They continue with the window minimized or the app in the background, but do not execute while the app is fully closed or the system is asleep. Put ongoing tasks on a device you keep running.
+Open the app when you need interactive work. Scheduled tasks and condition checks require **the device running them to stay powered on and awake, with LSAGENT running**. They continue with the window minimized or the app in the background, but do not execute while the app is fully closed or the system is asleep. Put ongoing tasks on a device you keep running.
 
 For AgentNet calls, the target device must be online, signed in to the same account, and joined to the network, with the target Agent made available. There is currently no offline-device message queue or delivery after reconnection.
 
@@ -158,7 +137,7 @@ AgentNet connects **your own devices under the same account**. Space shares goal
 
 ### What is free and open source?
 
-The MyAgents client is free and open source. Model subscriptions, APIs, and external tools follow the pricing of the services you choose. See the app for AgentNet and Space service availability and quotas, and the license section below for client licensing.
+The LSAGENT client is free and open source. Model subscriptions, APIs, and external tools follow the pricing of the services you choose. See the app for AgentNet and Space service availability and quotas, and the license section below for client licensing.
 
 ### Can external Agents use every capability?
 
@@ -175,7 +154,7 @@ Contributions, documentation improvements, and issue reports are welcome.
 
 ## License
 
-MyAgents is available under the
+LSAGENT is available under the
 [GNU Affero General Public License v3.0](LICENSE) (`AGPL-3.0-only`).
 Individuals and companies may use it for free, including commercially, when
 they comply with the AGPL. A separate commercial license is required for

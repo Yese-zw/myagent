@@ -974,7 +974,7 @@ fn release_manifest_url(pack_revision: &str) -> String {
 #[allow(clippy::disallowed_methods)]
 fn speech_model_http_client_builder() -> reqwest::ClientBuilder {
     reqwest::Client::builder()
-        .user_agent(format!("MyAgents/{}", env!("CARGO_PKG_VERSION")))
+        .user_agent(format!("LSAGENT/{}", env!("CARGO_PKG_VERSION")))
         .redirect(reqwest::redirect::Policy::none())
         .connect_timeout(Duration::from_secs(30))
         .timeout(Duration::from_secs(30 * 60))

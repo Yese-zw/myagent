@@ -891,7 +891,7 @@ fn build_external_http_client(timeout_secs: u64) -> Result<reqwest::Client, Stri
                 attempt.error("Petdex redirect target is not allowed")
             }
         }))
-        .user_agent(format!("MyAgents/{}", env!("CARGO_PKG_VERSION")));
+        .user_agent(format!("LSAGENT/{}", env!("CARGO_PKG_VERSION")));
     crate::proxy_config::build_client_with_proxy(builder)
 }
 

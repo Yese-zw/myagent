@@ -1,7 +1,7 @@
-// MyAgents Tauri Application
+// LSAGENT Tauri Application
 // Main entry point with sidecar lifecycle management
 
-mod agent_network;
+mod agent_discovery;
 pub mod app_dirs;
 pub mod app_route;
 pub mod attachment_protocol;
@@ -305,7 +305,6 @@ pub fn run() {
 
     // Create managed sidecar state (now supports multiple instances)
     let sidecar_state = create_sidecar_state();
-    let agent_network_state = agent_network::registry::NetworkRegistry::new();
 
     // Create IM Bot managed state
     let im_bot_state = im::create_im_bot_state();
@@ -445,7 +444,6 @@ pub fn run() {
     let app = builder
         .manage(sidecar_state)
         .manage(sub2api::Sub2apiAccount::default())
-        .manage(agent_network_state)
         .manage(sse_proxy_state)
         .manage(main_renderer::MainRendererState::default())
         .manage(proxy_spill_state)
@@ -534,6 +532,8 @@ pub fn run() {
             sub2api::cmd_sub2api_public_settings,
             sub2api::cmd_sub2api_authenticate,
             sub2api::cmd_sub2api_gateway,
+            sub2api::cmd_sub2api_codex_app_status,
+            sub2api::cmd_sub2api_launch_codex,
             sub2api::cmd_sub2api_send_code,
             sub2api::cmd_sub2api_logout,
             sub2api::cmd_sub2api_cancel,
@@ -850,14 +850,8 @@ pub fn run() {
             task::cmd_task_write_doc,
             task::cmd_task_open_docs_dir,
             task::cmd_task_get_run_stats,
-            agent_network::commands::cmd_agent_network_snapshot,
-            agent_network::commands::cmd_agent_network_connections,
-            agent_network::commands::cmd_agent_network_select,
-            agent_network::commands::cmd_agent_network_join,
-            agent_network::commands::cmd_agent_network_remove,
-            agent_network::commands::cmd_agent_discovery,
-            agent_network::commands::cmd_agent_network_request,
-            // MyAgents Cloud Space
+            agent_discovery::cmd_agent_discovery,
+            // LSAGENT Cloud Space
             space_cloud::cmd_space_get_capability,
             space_cloud::cmd_space_get_session,
             space_cloud::cmd_space_set_active_space,
@@ -1070,11 +1064,6 @@ pub fn run() {
             crash_artifact_retention::start_crash_artifact_retention_owner();
             tauri::async_runtime::spawn(grok_auth::reconcile_provider_projection());
             let space_sidecar_state = app.state::<sidecar::ManagedSidecarManager>().inner().clone();
-            agent_network::registry::start(
-                app.handle().clone(),
-                app.state::<agent_network::actor::ManagedAgentNetwork>().inner().clone(),
-                space_sidecar_state.clone(),
-            );
             space_cloud::delivery::start_space_connector(
                 app.handle().clone(),
                 space_sidecar_state,
@@ -1118,7 +1107,7 @@ pub fn run() {
                 WebviewUrl::default(),
             )
             .scroll_bar_style(crate::webview_policy::scroll_bar_style())
-            .title("MyAgents")
+            .title("LSAGENT")
             .inner_size(1200.0, 800.0)
             .min_inner_size(800.0, 600.0)
             .resizable(true)
@@ -1881,7 +1870,6 @@ pub fn run() {
                 // Only cleanup once (Relaxed is sufficient for simple flag)
                 use std::sync::atomic::Ordering::Relaxed;
                 if !cleanup_done_for_exit.swap(true, Relaxed) {
-                    _app_handle.state::<agent_network::actor::ManagedAgentNetwork>().stop();
                     let shutdown_reason = if code == Some(tauri::RESTART_EXIT_CODE) {
                         "app-restart"
                     } else {

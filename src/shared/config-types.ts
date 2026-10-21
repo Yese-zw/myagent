@@ -549,7 +549,7 @@ export interface Project {
   /** PRD 0.2.17 — Claude plugins enabled for this workspace (subset of globally
    *  visible plugins). Mirrors mcpEnabledServers semantics exactly. */
   enabledPluginIds?: string[];
-  /** MyAgents official CLI tools enabled for this workspace. Separate from MCP ids. */
+  /** LSAGENT official CLI tools enabled for this workspace. Separate from MCP ids. */
   enabledOfficialToolIds?: OfficialToolId[];
   /** Internal projects (e.g. ~/.myagents diagnostic workspace) hidden from Launcher */
   internal?: boolean;
@@ -864,7 +864,7 @@ export type ProxyScopeMode = 'all' | 'custom';
 export interface ProxyScopeSettings {
   mode: ProxyScopeMode;
   /**
-   * Whether non-provider-owned network requests use the MyAgents app proxy.
+   * Whether non-provider-owned network requests use the LSAGENT app proxy.
    * Missing on legacy custom scopes means `true` for backward compatibility.
    */
   generalRequests?: boolean;
@@ -984,8 +984,6 @@ export interface AppConfig {
   cliToolRegistryEnabled?: boolean;
   /** 隐藏开发者开关：桌面宠物功能门控。默认开；普通用户不可见。 */
   floatingBallDevGate?: boolean;
-  /** 开发者：AgentNet 多网络/自部署。默认关闭；关闭保留配置与凭据并暂停自部署连接。 */
-  agentNetworkSelfhostDevGate?: boolean;
   /** 开发者：Cloud Space 服务环境。release 构建没有 Dev origin 时会被 Rust 忽略。 */
   spaceEnvironment?: SpaceEnvironment;
   /** 悬浮球本体显隐开关；由桌面宠物设置页顶部开关控制。默认关。 */
@@ -1091,7 +1089,7 @@ export interface AppConfig {
   cliToolEnv?: Record<string, Record<string, string>>;
 
   // ===== Official CLI Tools =====
-  // Global visibility gate for MyAgents-owned CLI tools (not user registry tools).
+  // Global visibility gate for LSAGENT-owned CLI tools (not user registry tools).
   enabledOfficialToolIds?: OfficialToolId[];
   officialToolSettings?: OfficialToolSettings;
 
@@ -2710,7 +2708,7 @@ export const PRESET_MCP_SERVERS: McpServerDefinition[] = [
   {
     id: MANAGED_BROWSER_MCP_ID,
     name: '浏览器',
-    description: 'MyAgents 托管的 Chromium，支持多对话隔离与登录状态复用',
+    description: 'LSAGENT 托管的 Chromium，支持多对话隔离与登录状态复用',
     type: 'stdio',
     // Product-owned sentinel. Runtime adapters project only this preset to the
     // authenticated application Browser Host; it is never spawned as stdio.
@@ -2856,7 +2854,6 @@ export const DEFAULT_CONFIG: AppConfig = {
   showDevTools: false,
   showChatHistoryEntry: false,
   cliToolRegistryEnabled: false, // 默认关闭用户注册 CLI 工具注册表（实验室）
-  agentNetworkSelfhostDevGate: false,
   spaceEnvironment: 'production',
   managedCodexProviderDevGate: true, // 默认开放 Codex 订阅 Provider；只有显式 true 才启用
   floatingBallDevGate: true,

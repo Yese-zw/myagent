@@ -59,7 +59,7 @@ export async function prepareDesktopQuery(
       agentMentionSnapshotSchema.parse(snapshot),
     ),
   );
-  const { getAgentDiscovery } = await import("../agent-network/discovery");
+  const { getAgentDiscovery } = await import("../agent-discovery");
   // A network/discovery outage must not reject an otherwise valid user query.
   const response = await getAgentDiscovery().catch(() => null);
   const discovery = agentDiscoverySchema.safeParse(response);
@@ -81,17 +81,7 @@ export async function prepareDesktopQuery(
       continue;
     }
     const snapshot = saved.get(selector);
-    const scope =
-      snapshot && current ? discoveryContext(current, snapshot.agent) : null;
-    if (
-      snapshot &&
-      !snapshot.agent.isLocal &&
-      scope &&
-      snapshot.authGeneration === scope.authGeneration &&
-      snapshot.principalId === scope.principalId &&
-      snapshot.networkId === scope.networkId &&
-      snapshot.agent.source?.networkId === scope.networkId
-    ) {
+    if (snapshot?.agent.isLocal && current) {
       mentions.push({
         agent: validateMentionAgent(snapshot.agent),
         availability: "unavailable",
@@ -107,7 +97,7 @@ export async function prepareDesktopQuery(
         visibleText: request.text,
         requiredSystemSkill,
         agentMentions: mentions.map(({ agent }) => {
-          const scope = discoveryContext(current!, agent)!;
+          const scope = discoveryContext(current!);
           return {
             agent,
             authGeneration: scope.authGeneration,

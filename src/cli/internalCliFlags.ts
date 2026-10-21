@@ -96,7 +96,6 @@ export const INTERNAL_CLI_FLAGS: Readonly<Record<string, readonly string[]>> = {
   "session/state": ["sessionId"],
   "session/watches": [],
   "session/unwatch": ["all"],
-  "agent/network-diagnose": ["cursor","limit"],
   "session/watch": ["to","targetSessionId"],
   "reload": ["workspacePath"]
 };

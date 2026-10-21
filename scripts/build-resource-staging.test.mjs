@@ -676,7 +676,7 @@ test('document processing locks all release targets and publishes only verified 
   assert.match(documentResourceCache, /mkdirSync\(lockPath\)/);
   assert.match(documentResourceCache, /lockedEntryDigest\(entry\)/);
   assert.doesNotMatch(packageJson.scripts.clean, /document-processing-cache/);
-  assert.match(documentResourceScript, /`MyAgents\/\$\{appVersion\}`/);
+  assert.match(documentResourceScript, /`LSAGENT\/\$\{appVersion\}`/);
   assert.match(documentResourceScript, /WINDOWS_SIGNTOOL_PATH/);
   assert.match(documentResourceScript, /WINDOWS_CERTIFICATE_SHA1/);
   assert.match(documentResourceScript, /'authenticode'/);

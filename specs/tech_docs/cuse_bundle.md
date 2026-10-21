@@ -1,6 +1,6 @@
 # Cuse 内置 Skill+CLI
 
-Cuse 的独立仓库负责桌面操作、CLI/help/Skill 内容及版本发布；MyAgents 消费完整 Skill 包。它是全局 **可关闭的 system-owned Skill**：首次默认启用，内容由客户端更新覆盖，关闭状态由现有 `skills-config.json.disabled` 保留。它不在 `REQUIRED_SYSTEM_SKILLS` 中，也不注册内置 MCP。
+Cuse 的独立仓库负责桌面操作、CLI/help/Skill 内容及版本发布；LSAGENT 消费完整 Skill 包。它是全局 **可关闭的 system-owned Skill**：首次默认启用，内容由客户端更新覆盖，关闭状态由现有 `skills-config.json.disabled` 保留。它不在 `REQUIRED_SYSTEM_SKILLS` 中，也不注册内置 MCP。
 
 ## 构建 owner 与交付结构
 
@@ -20,7 +20,7 @@ Mac 和 Windows 的正式/开发构建脚本调用 `scripts/prepare-cuse-bundle.
 
 ## Mac 签名与启动同步
 
-Cuse 上游包采用 ad-hoc 签名。MyAgents Mac 发布构建在下载验证后，用 `APPLE_SIGNING_IDENTITY` 对资源中的 Cuse CLI 执行 Developer ID / hardened runtime / timestamp 签名，再由 Tauri 封装 App。开发构建配置同一身份时也签名。Tauri 不自动签任意 Resources 下的可执行文件，这个显式步骤与 Node/Claude 的现有签名路径一致。
+Cuse 上游包采用 ad-hoc 签名。LSAGENT Mac 发布构建在下载验证后，用 `APPLE_SIGNING_IDENTITY` 对资源中的 Cuse CLI 执行 Developer ID / hardened runtime / timestamp 签名，再由 Tauri 封装 App。开发构建配置同一身份时也签名。Tauri 不自动签任意 Resources 下的可执行文件，这个显式步骤与 Node/Claude 的现有签名路径一致。
 
 `package.json` 保留上游交付 metadata；签名改变 CLI 字节，所以上游二进制哈希只用于**签名前构建下载验证**。下次构建会将签名后的 staging 判为需要恢复，从已验证的原始 ZIP 重新解包；双架构共用 universal ZIP，签名不会污染缓存。历史 checkout 第一次补齐 ZIP 缓存需要下载一次。启动时以**当前 App bundle 中实际文件**为权威比较、复制，不能拿上游 hash 拒绝正确签名的 App。
 
@@ -32,7 +32,7 @@ Rust `cmd_sync_system_skills` 在原有同步锁内管理安装到 `~/.myagents/
 
 所有 Runtime 继续走现有全局 inventory 和 capability selection。Builtin / Claude Code 工作区链接以及 Codex 的临时 Skill roots 链接整个目录，保留相对 `scripts/` 与 `references/`。Agent 从实际加载的 Skill 根目录读取 `package.json.entrypoint` 并解析成绝对路径，再按需使用 `--help` 和 `readme`，不依赖系统 PATH。更新由下次启动同步、既有 Runtime admission/idle replacement 生效。
 
-Mac 提供 Cuse 的后台窗口定向输入；前台输入仍共享用户鼠标/焦点。Windows 支持前台操作，后台计划返回 unsupported；Linux 不提供这份 Skill。权限和操作契约由随包 Skill 与 CLI help/readme 渐进披露，MyAgents 不在全局提示词镜像这些细节。首次实际操作可能仍需系统辅助功能/屏幕录制权限。
+Mac 提供 Cuse 的后台窗口定向输入；前台输入仍共享用户鼠标/焦点。Windows 支持前台操作，后台计划返回 unsupported；Linux 不提供这份 Skill。权限和操作契约由随包 Skill 与 CLI help/readme 渐进披露，LSAGENT 不在全局提示词镜像这些细节。首次实际操作可能仍需系统辅助功能/屏幕录制权限。
 
 关闭 Skill 控制能力发现与后续投影；它不是撤销操作系统权限、禁止已知绝对路径执行或强行取消当前 Agent 操作的安全开关。
 

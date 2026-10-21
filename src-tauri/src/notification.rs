@@ -663,7 +663,7 @@ fn show_linux_toast<R: Runtime>(
 
     let mut notification = Notification::new();
     notification
-        .appname("MyAgents")
+        .appname("LSAGENT")
         .summary(title)
         .body(body)
         .timeout(Timeout::Milliseconds(10_000))
@@ -743,7 +743,7 @@ fn read_notification_prefs() -> NotificationPrefs {
 /// shortcut AUMID); on failure (portable EXE, custom install, missing
 /// shortcut) retry with PowerShell's well-known AUMID. The retry preserves
 /// `on_activated`, so click activation still works — the only visible
-/// difference is the toast attribution ("PowerShell" instead of "MyAgents").
+/// difference is the toast attribution ("PowerShell" instead of "LSAGENT").
 /// This beats falling back to plugin-notification, which would render a toast
 /// with *no* click handler at all.
 #[cfg(target_os = "windows")]
@@ -823,7 +823,7 @@ fn build_and_show_toast<R: Runtime>(
 ///
 /// In production: `app.config().identifier` matches the AUMID NSIS sets on
 /// the Start Menu shortcut via `SetLnkAppUserModelId` — required for WinRT
-/// to render a toast attributed to MyAgents.
+/// to render a toast attributed to LSAGENT.
 ///
 /// In dev (`cargo run`, `tauri dev`): `tauri::is_dev()` is true and we use
 /// PowerShell's AUMID — toast still shows but attributed to PowerShell.

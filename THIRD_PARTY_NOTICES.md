@@ -2,10 +2,10 @@
 
 ## English
 
-MyAgents includes, distributes, or integrates with third-party software, SDKs,
+LSAGENT includes, distributes, or integrates with third-party software, SDKs,
 runtimes, Skills, plugins, assets, and online services. The adoption of
-`AGPL-3.0-only` for MyAgents-owned components does not alter the licenses or
-terms applicable to those third-party materials, and a MyAgents commercial
+`AGPL-3.0-only` for LSAGENT-owned components does not alter the licenses or
+terms applicable to those third-party materials, and a LSAGENT commercial
 license does not automatically license them.
 
 ### Principal separately licensed components
@@ -35,8 +35,8 @@ where required. License and notice files accompanying bundled Node.js, npm,
 sharp runtime, SDKs, Skills, Plugin Bridge shims, or other resources must also
 be retained in redistributed builds as required by their respective terms.
 
-MyAgents may connect to Anthropic, OpenAI, Google, Lark/Feishu, DingTalk,
-Telegram, WeCom, and other third-party platforms. The MyAgents license does not
+LSAGENT may connect to Anthropic, OpenAI, Google, Lark/Feishu, DingTalk,
+Telegram, WeCom, and other third-party platforms. The LSAGENT license does not
 grant accounts, API rights, model access, data rights, service rights, or
 trademark rights in those platforms.
 
@@ -54,8 +54,8 @@ law. The original third-party license or terms prevail in all cases.
 
 ## 中文
 
-MyAgents 包含、分发或集成第三方软件、SDK、运行时、Skills、插件、素材和在线服务。MyAgents 自有
-组件采用 `AGPL-3.0-only` 不会改变适用于这些第三方材料的许可或条款，MyAgents 商业许可
+LSAGENT 包含、分发或集成第三方软件、SDK、运行时、Skills、插件、素材和在线服务。LSAGENT 自有
+组件采用 `AGPL-3.0-only` 不会改变适用于这些第三方材料的许可或条款，LSAGENT 商业许可
 也不会自动授权这些材料。
 
 ### 主要独立授权组件
@@ -83,8 +83,8 @@ MyAgents 包含、分发或集成第三方软件、SDK、运行时、Skills、�
 并应在相关条款要求的范围内予以保留。随内置 Node.js、npm、sharp runtime、SDK、Skills、Plugin Bridge shim
 或其他资源提供的许可和声明文件，也必须按其各自条款在再分发构建中保留。
 
-MyAgents 可能连接 Anthropic、OpenAI、Google、飞书/Lark、钉钉、Telegram、企业微信及其他第三方平台。
-MyAgents 许可不授予这些平台的账号、API、模型、数据、服务或商标权利。
+LSAGENT 可能连接 Anthropic、OpenAI、Google、飞书/Lark、钉钉、Telegram、企业微信及其他第三方平台。
+LSAGENT 许可不授予这些平台的账号、API、模型、数据、服务或商标权利。
 
 本文件用于说明主要许可边界，并非穷尽的软件物料清单，也不替代针对具体发行版本的许可审查。
 分发者应审查每次发行的 lockfile、目标平台软件包、构建输入和最终产物，并在适当情况下生成和保留

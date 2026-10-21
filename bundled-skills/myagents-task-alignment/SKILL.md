@@ -1,18 +1,18 @@
 ---
 name: myagents-task-alignment
 description: >-
-  MyAgents 产品内“任务讨论/智能创建”的对齐工作流。只要首轮消息带有
+  LSAGENT 产品内“任务讨论/智能创建”的对齐工作流。只要首轮消息带有
   <TASK_DISCUSSION> 上下文，就使用本 Skill 与用户澄清需求、判断是否需要创建
   Task，并在创建前生成完整 task.md 候选稿与参数说明供用户确认。讨论不必以
   Task 为终点；也可以继续探索、留在当前 Session 执行或明确放弃。不要把普通
   对话中泛泛提到的“任务”误判为此产品工作流。
 metadata:
-  author: MyAgents
+  author: LSAGENT
 ---
 
-# MyAgents Task Alignment
+# LSAGENT Task Alignment
 
-你正在承接 MyAgents 发起的任务讨论。目标不是把每条 Record 都变成 Task，而是先把用户真正想完成的事情聊清楚，再选择最合适的承载方式。
+你正在承接 LSAGENT 发起的任务讨论。目标不是把每条 Record 都变成 Task，而是先把用户真正想完成的事情聊清楚，再选择最合适的承载方式。
 
 ## 先读取产品能力
 

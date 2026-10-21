@@ -14,44 +14,29 @@ const local: MentionAgentInfo = {
   description: null,
   source: null,
 };
-const remote: MentionAgentInfo = {
+const other: MentionAgentInfo = {
   ...local,
-  selector:
-    "ma-agent:1:00000000-0000-0000-0000-000000000001:00000000-0000-0000-0000-000000000002:00000000-0000-0000-0000-000000000003",
+  selector: "alpha",
   name: "Alpha",
-  isLocal: false,
-  deviceId: "remote-device",
   description: "ＰＲ review",
-  source: {
-    serviceId: "00000000-0000-0000-0000-000000000001",
-    networkId: "00000000-0000-0000-0000-000000000002",
-  },
 };
 describe("mention discovery policy", () => {
-  it("orders local first and searches normalized name/device/description only", () => {
+  it("searches normalized name/device/description only", () => {
     expect(
-      filterMentionAgents([remote, local], "").map((item) => item.selector),
-    ).toEqual([local.selector, remote.selector]);
-    expect(filterMentionAgents([remote, local], "pr REVIEW")).toEqual([remote]);
-    expect(filterMentionAgents([remote, local], "我的电脑")).toHaveLength(2);
+      filterMentionAgents([other, local], "").map((item) => item.selector),
+    ).toEqual([other.selector, local.selector]);
+    expect(filterMentionAgents([other, local], "pr REVIEW")).toEqual([other]);
+    expect(filterMentionAgents([other, local], "我的电脑")).toHaveLength(2);
   });
-  it("accepts legacy discovery without icons and bounds optional display metadata", () => {
-    expect(validateMentionAgent(remote)).toEqual(remote);
-    expect(validateMentionAgent({ ...remote, icon: "lightning" })).toMatchObject({ icon: "lightning" });
-    expect(validateMentionAgent({ ...remote, icon: null })).toMatchObject({ icon: null });
-    expect(() => validateMentionAgent({ ...remote, icon: "x".repeat(257) })).toThrow();
+  it("accepts local discovery without icons and bounds optional display metadata", () => {
+    expect(validateMentionAgent(local)).toEqual(local);
+    expect(validateMentionAgent({ ...local, icon: "lightning" })).toMatchObject({ icon: "lightning" });
+    expect(validateMentionAgent({ ...local, icon: null })).toMatchObject({ icon: null });
+    expect(() => validateMentionAgent({ ...local, icon: "x".repeat(257) })).toThrow();
   });
-  it("rejects a network selector attributed to another network or local scope", () => {
-    expect(() => validateMentionAgent({ ...remote, isLocal: true })).toThrow();
+  it("rejects a network selector attributed to local scope", () => {
     expect(() =>
-      validateMentionAgent({
-        ...remote,
-        source: {
-          ...remote.source,
-          networkId: "00000000-0000-0000-0000-000000000004",
-        },
-      }),
+      validateMentionAgent({ ...local, selector: "ma-agent:1:x" }),
     ).toThrow();
-    expect(validateMentionAgent(remote)).toEqual(remote);
   });
 });

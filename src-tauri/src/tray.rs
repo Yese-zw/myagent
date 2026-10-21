@@ -1,4 +1,4 @@
-// System tray implementation for MyAgents
+// System tray implementation for LSAGENT
 // Provides minimize-to-tray functionality and right-click menu
 
 use serde::{Deserialize, Serialize};
@@ -131,7 +131,7 @@ pub fn setup_tray(app: &tauri::App<Wry>) -> Result<(), Box<dyn std::error::Error
     let tray_builder = TrayIconBuilder::new()
         .icon(base_icon.clone())
         .menu(&menu)
-        .tooltip("MyAgents")
+        .tooltip("LSAGENT")
         .show_menu_on_left_click(false);
 
     // On macOS, mark as template image so system can adjust colors for light/dark mode

@@ -53,7 +53,7 @@ pub struct CleanupReport {
     /// Processes still alive after the termination deadline.
     pub residual: usize,
     /// PIDs still alive after the termination deadline. Includes descendant
-    /// processes that may not match MyAgents command-line/root patterns
+    /// processes that may not match LSAGENT command-line/root patterns
     /// themselves, so update shutdown can keep verifying them explicitly.
     pub residual_pids: Vec<u32>,
     /// Total wall-clock time spent in this call.
@@ -187,7 +187,7 @@ pub fn kill_stale_processes(patterns: &[ProcessPattern]) -> CleanupReport {
 /// line patterns or running from/with argv references to one of `protected_roots`.
 ///
 /// The roots path is used by the Windows updater shutdown path: anything still
-/// executing from the current MyAgents install/resource directory can hold
+/// executing from the current LSAGENT install/resource directory can hold
 /// files that NSIS needs to overwrite, even if its argv no longer includes a
 /// legacy marker.
 pub fn kill_stale_processes_with_roots(
@@ -429,11 +429,11 @@ pub fn find_live_processes_by_pid(pids: &[u32]) -> Vec<ProcessMatch> {
         .collect()
 }
 
-/// Query whether a specific PID corresponds to a MyAgents process.
+/// Query whether a specific PID corresponds to a LSAGENT process.
 /// Uses the executable path (`GetModuleFileNameExW` underneath), so it is
 /// reliable whether the process was spawned via shortcut, installer, or
 /// direct path. Case-insensitive substring match to absorb Windows
-/// filesystem case quirks (`MyAgents` vs `myagents`).
+/// filesystem case quirks (`LSAGENT` vs `myagents`).
 pub fn is_myagents_pid(pid: u32) -> bool {
     let mut system = System::new();
     let only: [Pid; 1] = [Pid::from_u32(pid)];
@@ -463,7 +463,7 @@ mod tests {
     #[test]
     fn root_match_accepts_windows_separator_variants() {
         let roots = normalized_roots(&[PathBuf::from(
-            r"C:\Users\alice\AppData\Local\MyAgents\resources",
+            r"C:\Users\alice\AppData\Local\LSAGENT\resources",
         )]);
         assert_eq!(
             process_match_reason(
@@ -480,7 +480,7 @@ mod tests {
     #[test]
     fn root_match_strips_extended_length_prefix() {
         let roots = normalized_roots(&[PathBuf::from(
-            r"\\?\C:\Users\alice\AppData\Local\MyAgents\resources",
+            r"\\?\C:\Users\alice\AppData\Local\LSAGENT\resources",
         )]);
         assert!(process_match_reason(
             "node c:/users/alice/appdata/local/myagents/resources/plugin-bridge-dist.mjs",
@@ -494,7 +494,7 @@ mod tests {
     #[test]
     fn root_match_does_not_match_prefix_siblings_by_exe() {
         let roots = normalized_roots(&[PathBuf::from(
-            r"C:\Users\alice\AppData\Local\MyAgents\resources",
+            r"C:\Users\alice\AppData\Local\LSAGENT\resources",
         )]);
         assert!(process_match_reason(
             "",
@@ -508,7 +508,7 @@ mod tests {
     #[test]
     fn root_match_does_not_match_prefix_siblings_by_cmd() {
         let roots = normalized_roots(&[PathBuf::from(
-            r"C:\Users\alice\AppData\Local\MyAgents\resources",
+            r"C:\Users\alice\AppData\Local\LSAGENT\resources",
         )]);
         assert!(process_match_reason(
             "node c:/users/alice/appdata/local/myagents/resources-old/server-dist.js",
@@ -522,7 +522,7 @@ mod tests {
     #[test]
     fn root_match_does_not_require_command_line_when_exe_matches() {
         let roots = normalized_roots(&[PathBuf::from(
-            r"C:\Users\alice\AppData\Local\MyAgents\resources",
+            r"C:\Users\alice\AppData\Local\LSAGENT\resources",
         )]);
         assert!(process_match_reason(
             "",
@@ -536,7 +536,7 @@ mod tests {
     #[test]
     fn root_match_accepts_file_url_command_arguments() {
         let roots = normalized_roots(&[PathBuf::from(
-            r"C:\Users\alice\AppData\Local\MyAgents\resources",
+            r"C:\Users\alice\AppData\Local\LSAGENT\resources",
         )]);
         assert!(process_match_reason(
             "node --import=file:///c:/users/alice/appdata/local/myagents/resources/tsx-runtime/loader.mjs",

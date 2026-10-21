@@ -106,7 +106,7 @@ interface FileActionProviderProps {
   /** Menu surface. Default keeps the full Chat menu; floatingBall uses the
    *  companion-specific four-action menu requested for the mini window. */
   menuProfile?: 'default' | 'floatingBall';
-  /** Floating-ball only: raise MyAgents, focus the session tab, and open the
+  /** Floating-ball only: raise LSAGENT, focus the session tab, and open the
    *  given workspace-relative file in the main preview surface. */
   onOpenMyAgentsPreview?: (
     path: string,

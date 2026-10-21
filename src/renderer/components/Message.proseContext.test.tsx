@@ -163,7 +163,7 @@ describe('chat Markdown fenced code horizontal scroll ownership', () => {
 
 describe('Space issue system-reminder user bubble', () => {
     it('hides the operational payload and renders the Space issue badge with visible text', () => {
-        const visibleText = 'MyAgents Space 已投递一个 Issue 通知，Registered Agent 开始处理。';
+        const visibleText = 'LSAGENT Space 已投递一个 Issue 通知，Registered Agent 开始处理。';
         const content = [
             '<system-reminder>',
             `<${SPACE_ISSUE_CONTEXT_TAG}>`,
@@ -243,7 +243,7 @@ describe('Goal system-reminder user bubble', () => {
         expect(container.querySelector('[data-role="user"]')).not.toBeNull();
         expect(container).toHaveTextContent(/Goal Mode|目标模式/);
         expect(container).toHaveTextContent(objective);
-        expect(container).not.toHaveTextContent('Continue working toward the active MyAgents Goal');
+        expect(container).not.toHaveTextContent('Continue working toward the active LSAGENT Goal');
     });
 
     it('does not render pure hidden Goal reminders as user bubbles', () => {

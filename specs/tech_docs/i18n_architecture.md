@@ -1,6 +1,6 @@
 # UI Internationalization Architecture
 
-本文档描述 MyAgents 产品界面国际化框架。它只覆盖产品 UI 文案与 native chrome（托盘菜单等）；AI 输出内容、用户工作区文件内容、日志原文不在本框架内翻译。
+本文档描述 LSAGENT 产品界面国际化框架。它只覆盖产品 UI 文案与 native chrome（托盘菜单等）；AI 输出内容、用户工作区文件内容、日志原文不在本框架内翻译。
 
 ## 核心模型
 

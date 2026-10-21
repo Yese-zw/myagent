@@ -518,13 +518,13 @@ fn inject_terminal_env(cmd: &mut CommandBuilder, app: &AppHandle, sidecar_port: 
     //    causing broken delete key, missing colors, and broken cursor movement.
     cmd.env("TERM", "xterm-256color");
     cmd.env("COLORTERM", "truecolor");
-    cmd.env("TERM_PROGRAM", "MyAgents");
+    cmd.env("TERM_PROGRAM", "LSAGENT");
 
     // 6. Locale — preserve system locale or default to UTF-8
     if std::env::var("LANG").is_err() {
         cmd.env("LANG", "en_US.UTF-8");
     }
 
-    // 7. Terminal indicator (so scripts can detect they're in MyAgents terminal)
+    // 7. Terminal indicator (so scripts can detect they're in LSAGENT terminal)
     cmd.env("MYAGENTS_TERMINAL", "1");
 }

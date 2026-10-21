@@ -1,31 +1,31 @@
 ---
 name: external-myagents-cli
 description: >-
-  为不了解 MyAgents 的本机外部 AI 补充产品背景、能力模型和公开 CLI 使用方式。
-  收到 MyAgents 设置页的交接 Prompt 后读取；使用其中给出的绝对 CLI 路径和
+  为不了解 LSAGENT 的本机外部 AI 补充产品背景、能力模型和公开 CLI 使用方式。
+  收到 LSAGENT 设置页的交接 Prompt 后读取；使用其中给出的绝对 CLI 路径和
   MYAGENTS_API_TOKEN 发现本地与同账号跨设备 Agent、委托和读取 Session，
   以及操作本机 Task、Record 与 Runtime 发现。
 metadata:
-  author: MyAgents
+  author: LSAGENT
 ---
 
-# MyAgents 外部调用指南
+# LSAGENT 外部调用指南
 
-## 1. MyAgents 是什么
+## 1. LSAGENT 是什么
 
-MyAgents 是一个在用户电脑上运行的桌面 Agent 产品。它把本地目录、AI 执行环境和长期工作状态组织成几个可以组合的产品实体：
+LSAGENT 是一个在用户电脑上运行的桌面 Agent 产品。它把本地目录、AI 执行环境和长期工作状态组织成几个可以组合的产品实体：
 
 - **Workspace Agent**：绑定一个已有本地目录的长期 Agent 身份。它是工作区、默认 Runtime 和后续 Session 的稳定地址。
 - **Session**：某个 Agent 下相互隔离的对话与执行上下文。可以新建干净上下文，也可以向已知 Session 继续发送任务并读取文本历史。
 - **Task**：可持久化、可执行、可调度的工作项。适合待办、一次性执行、定时执行和满足条件后激活的自动化。
 - **Record**：轻量的信息收集入口，用来保存文字记录，之后可以再整理或转成 Task。
-- **Runtime**：真正执行 Agent 的运行环境。MyAgents 可以发现本机已支持的 Runtime，以及它们各自可用的模型和权限模式。
+- **Runtime**：真正执行 Agent 的运行环境。LSAGENT 可以发现本机已支持的 Runtime，以及它们各自可用的模型和权限模式。
 
-MyAgents App 是这些状态和执行生命周期的本机 Host；CLI 只是调用入口。你是运行在 MyAgents 之外的 AI，能够通过公开 CLI 委托和观察工作，但不会因此获得 MyAgents 内部 Session 身份、全部管理能力或隐藏 API 权限。
+LSAGENT App 是这些状态和执行生命周期的本机 Host；CLI 只是调用入口。你是运行在 LSAGENT 之外的 AI，能够通过公开 CLI 委托和观察工作，但不会因此获得 LSAGENT 内部 Session 身份、全部管理能力或隐藏 API 权限。
 
-MyAgents 产品内部还可以管理模型 Provider、MCP/工具、Skill/Plugin、IM Channel、Cloud Space、Goal、文档与语音等能力；它们帮助 Agent 接入模型、工具、外部沟通渠道和更丰富的工作流。但当前外部 token 契约只开放本文后面介绍的 Agent、Runtime discovery、Session、Task、Record 和状态查询。知道某项产品能力存在，不等于可以从外部 CLI 调用它。
+LSAGENT 产品内部还可以管理模型 Provider、MCP/工具、Skill/Plugin、IM Channel、Cloud Space、Goal、文档与语音等能力；它们帮助 Agent 接入模型、工具、外部沟通渠道和更丰富的工作流。但当前外部 token 契约只开放本文后面介绍的 Agent、Runtime discovery、Session、Task、Record 和状态查询。知道某项产品能力存在，不等于可以从外部 CLI 调用它。
 
-## 2. MyAgents 能解决什么任务
+## 2. LSAGENT 能解决什么任务
 
 把这些能力组合起来，可以完成几类典型工作：
 
@@ -33,8 +33,8 @@ MyAgents 产品内部还可以管理模型 Provider、MCP/工具、Skill/Plugin�
 | --- | --- | --- |
 | 让一个本地项目拥有可持续对话的 AI | 注册目录为 Workspace Agent → 新建 Session → 后续 send/get | 获得稳定 Agent ID 和可继续的独立上下文 |
 | 把一件工作交给另一个 Agent 完成 | 找到目标 Agent → start 新 Session → 保存 Session ID → get 结果 | 当前 AI 不需要自己进入目标工作区 |
-| 委托同账号另一台设备上的 Agent | agent list 发现在线目标 → 使用完整跨设备 ID → start/send/get | 由目标设备的 MyAgents 执行，并可主动读取结果 |
-| 创建待办、定时任务或条件自动化 | 明确 Workspace → 创建 Task → 配置/启动 → get/runs 查看状态 | 工作进入 MyAgents 的持久 Task 生命周期 |
+| 委托同账号另一台设备上的 Agent | agent list 发现在线目标 → 使用完整跨设备 ID → start/send/get | 由目标设备的 LSAGENT 执行，并可主动读取结果 |
+| 创建待办、定时任务或条件自动化 | 明确 Workspace → 创建 Task → 配置/启动 → get/runs 查看状态 | 工作进入 LSAGENT 的持久 Task 生命周期 |
 | 先记下来，稍后再处理 | 创建 Record → 后续查看并整理为 Task | 信息不会只停留在当前对话里 |
 | 在创建 Task 前选择执行环境 | runtime list/describe → 使用返回的合法值 | 避免猜测 Runtime、模型或权限模式 |
 
@@ -48,8 +48,8 @@ Task 和 Record 可以在这条链路之外保存更长期的工作意图；Runt
 
 ### 开始调用前
 
-1. MyAgents App 必须保持运行。
-2. 用户在 MyAgents 的「设置 → 外部调用」中开启 **MyAgents CLI 外部调用**。
+1. LSAGENT App 必须保持运行。
+2. 用户在 LSAGENT 的「设置 → 外部调用」中开启 **LSAGENT CLI 外部调用**。
 3. 设置页复制的交接 Prompt 可能已经携带当前 `MYAGENTS_API_TOKEN` 设置命令。只用它配置调用进程环境；你不能通过 CLI 读取 token，也不要在后续回复、命令输出或文件中复述、记录它。
 4. 始终使用交接 Prompt 给出的 **CLI 绝对路径**。普通终端和外部 Agent 的 PATH 不保证能发现 `myagents`。
 
@@ -87,7 +87,7 @@ $env:MYAGENTS_API_TOKEN = "<token>"
 
 ### App 状态与版本
 
-适合在工作开始前确认 MyAgents Host 是否可用，以及记录当前 App 版本。
+适合在工作开始前确认 LSAGENT Host 是否可用，以及记录当前 App 版本。
 
 ```text
 <CLI> status --json
@@ -202,7 +202,7 @@ Agent 的注册、Task、Record 与 Runtime discovery 仍操作本机 Host；跨
 <CLI> task runs <taskId> --limit 5 --json
 ```
 
-- 外部进程没有“当前 MyAgents Workspace/Session”上下文。`task list` 和 `task create-direct` 至少显式提供 `--workspaceId` 或 `--workspacePath` 之一；MyAgents 会补齐并核对这对 identity。不要用 shell cwd 猜目标。
+- 外部进程没有“当前 LSAGENT Workspace/Session”上下文。`task list` 和 `task create-direct` 至少显式提供 `--workspaceId` 或 `--workspacePath` 之一；LSAGENT 会补齐并核对这对 identity。不要用 shell cwd 猜目标。
 - `task get/start/stop/runs/run/rerun/run-now/update/archive/delete` 等精确 Task ID 操作以该 ID 为 selector，不要求附带当前 workspace；`task remove` 是 `task delete` 的显式兼容别名。Cron 命令不是外部公开面。
 - `task readme` 解释 Task/自动化模型；`task --help` 列出当前公开动作；选定动作后再读该 leaf help。
 - 调度、trigger、checkpoint、运行控制、状态更新、归档和删除等细节都按需发现，不需要预先注入整张命令表。
@@ -211,7 +211,7 @@ Agent 的注册、Task、Record 与 Runtime discovery 仍操作本机 Host；跨
 
 ### Record：轻量记录
 
-适合把想法、材料或待整理的信息先存进 MyAgents，而不是只留在当前聊天里。
+适合把想法、材料或待整理的信息先存进 LSAGENT，而不是只留在当前聊天里。
 
 ```text
 <CLI> record --help
@@ -234,8 +234,8 @@ Agent 的注册、Task、Record 与 Runtime discovery 仍操作本机 Host；跨
 - 访问 token 只从 `MYAGENTS_API_TOKEN` 读取。交接 Prompt 是一次性的凭据传递入口；不要在后续 prompt、回复、命令参数、日志、文件或 transcript 中再次传播它。
 - 只使用顶层外部帮助展示的命令。token 不会解锁内部命令、内部 Session 身份或隐藏 API；不要探测端口、伪造来源或直连 localhost 管理路由。
 - ID 只能来自成功响应或公开 discovery 命令。不要猜 ID，也不要把 Workspace path、显示名称或投递 messageId 当作其它资源的 selector。
-- App 不可用时请用户启动 MyAgents；CLI 不会自动启动或聚焦 App。
+- App 不可用时请用户启动 LSAGENT；CLI 不会自动启动或聚焦 App。
 - 开关关闭或 token 失效时，请用户在「设置 → 外部调用」重新开启或注入当前 token，不要尝试绕过。
 - 参数、路径或 lifecycle 冲突时，根据 JSON `code`、错误说明和 suggestion 修正输入。mutation 响应丢失时先用只读命令核实，不自动重放。
 
-外部 token 只用于本机 CLI 访问本机 Host；CLI 可借助 MyAgents Agent 网络委托同账号其它设备上的已开放 Agent。这不提供远程直连 Host 的 HTTP/OpenAPI/SDK/MCP 接口。当前公开面不提供自动结果回调、exactly-once、Provider/MCP/Plugin/Skill/Tool/Channel/Space/Goal/Speech 管理，也不自动创建目录、初始化 Workspace 模板或 Git。目标超出公开帮助时，明确告诉用户需要在 MyAgents App 或 MyAgents 内部 Agent 中完成。
+外部 token 只用于本机 CLI 访问本机 Host；CLI 可借助 LSAGENT Agent 网络委托同账号其它设备上的已开放 Agent。这不提供远程直连 Host 的 HTTP/OpenAPI/SDK/MCP 接口。当前公开面不提供自动结果回调、exactly-once、Provider/MCP/Plugin/Skill/Tool/Channel/Space/Goal/Speech 管理，也不自动创建目录、初始化 Workspace 模板或 Git。目标超出公开帮助时，明确告诉用户需要在 LSAGENT App 或 LSAGENT 内部 Agent 中完成。

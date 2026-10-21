@@ -143,7 +143,7 @@ describe('Theme architecture guardrails', () => {
     }
   });
 
-  it('keeps MyAgents Light equal to Claude except its light primary button pair', () => {
+  it('keeps LSAGENT Light equal to Claude except its light primary button pair', () => {
     const claudeStylesheet = parseThemeStylesheet(
       source('src/renderer/theme/themes/absolutely.css'),
     );
@@ -159,7 +159,7 @@ describe('Theme architecture guardrails', () => {
       stylesheet.topLevelBlocks,
       selector,
       [[selector]],
-      `MyAgents Light equality selector ${selector}`,
+      `LSAGENT Light equality selector ${selector}`,
     ));
 
     expect(collect(lightStylesheet, lightRoot)).toEqual(collect(claudeStylesheet, claudeRoot));

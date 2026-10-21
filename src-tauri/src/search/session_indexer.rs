@@ -1177,7 +1177,7 @@ fn index_single_session(
 
 /// Extract text content from a session message JSON.
 ///
-/// MyAgents persists messages in one of three shapes:
+/// LSAGENT persists messages in one of three shapes:
 /// - user messages: `content` is a plain string
 /// - assistant messages: `content` is a string that is itself a JSON-encoded
 ///   `ContentBlock[]` array (e.g., `"[{\"type\":\"text\",\"text\":\"...\"}]"`)

@@ -228,6 +228,6 @@ xcrun notarytool log <submission-id> --keychain-profile "notarytool-profile"
 - [ ] 创建 App Store Connect API 密钥
 - [ ] 配置环境变量
 - [ ] 运行带签名的构建
-- [ ] 用 `codesign -d --entitlements :- MyAgents.app` 确认录音 entitlement 已进入签名产物
+- [ ] 用 `codesign -d --entitlements :- LSAGENT.app` 确认录音 entitlement 已进入签名产物
 - [ ] 验证签名和公证
 - [ ] 测试在新 Mac 上安装

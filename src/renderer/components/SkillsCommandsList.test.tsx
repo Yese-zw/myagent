@@ -59,7 +59,7 @@ const globalCommand: CommandItem = {
   enabled: false,
   capabilityId: 'global:command:ship',
   origin: 'global',
-  author: 'MyAgents',
+  author: 'LSAGENT',
 };
 
 describe('SkillsCommandsList project capability controls', () => {

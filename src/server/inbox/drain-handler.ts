@@ -2,7 +2,7 @@
 //
 // 由 Rust 端 `cmd_inbox_deliver` 在 push pending_inbox_messages 后调用,把同样
 // 的 message payload 直接 POST 过来。Drain handler 取出 messages → 包裹
-// MyAgents Session Event Protocol v1 prompt → 调用 enqueueUserMessage /
+// LSAGENT Session Event Protocol v1 prompt → 调用 enqueueUserMessage /
 // sendExternalMessage 注入。Space issue delivery is the exception: Rust
 // already renders the final <system-reminder> prompt so the UI can hide the
 // operational payload and show a Space issue badge.
@@ -24,7 +24,6 @@ import type { InteractionScenario } from '../system-prompt';
 import type { DispatchGuard } from '../session-core/turn-queue';
 import type { InboxAdmissionResult } from '../session-engine/types';
 import { buildTaskCommentReminder } from '../../shared/systemReminder';
-import { parseNetworkReturnReference } from '../../shared/agentNetworkReturn';
 
 function nowIsoFromMessage(msg: PendingInboxMessage): string {
   return new Date(msg.timestampMs || Date.now()).toISOString();
@@ -105,8 +104,7 @@ export function buildSessionEventPrompt(msg: PendingInboxMessage): string {
 /// Build per-turn InboxTurnMeta to bind on the dequeued message. Only present
 /// for Request kind with replyBack=true — Reply kind never triggers further reply.
 export function buildTurnMeta(msg: PendingInboxMessage): InboxTurnMeta | undefined {
-  const networkReturn = msg.networkReturn == null ? undefined : parseNetworkReturnReference(msg.networkReturn);
-  if (networkReturn === null || networkReturn && msg.sourceKind === 'external-cli') {
+  if (msg.networkReturn != null) {
     throw new Error('invalid network return context');
   }
   if (msg.kind === 'reply') return undefined;
@@ -121,7 +119,6 @@ export function buildTurnMeta(msg: PendingInboxMessage): InboxTurnMeta | undefin
     replyBack: true,
     originalMessageId: msg.messageId,
     originalSnippet: buildInReplyToSnippet(msg.text),
-    ...(networkReturn ? { networkReturn } : {}),
   };
 }
 

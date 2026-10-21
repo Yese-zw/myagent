@@ -1,8 +1,7 @@
 import { deriveSessionLabel } from '../inbox/derive-label';
 import { getSessionEngine } from '../session-engine';
 import { getSessionData, getSessionMetadata, isHistoryVisibleSession } from '../SessionStore';
-import { pendingSessionWatchCount, registerPendingSessionWatch, removeNetworkSessionWatch, manageLocalSessionWatches } from '../inbox/watch-registry';
-import { parseNetworkReturnReference } from '../../shared/agentNetworkReturn';
+import { pendingSessionWatchCount, registerPendingSessionWatch, manageLocalSessionWatches } from '../inbox/watch-registry';
 import { hasValidInternalCliCredential } from '../external-cli-admission';
 import {
   shrinkSessionMessageForClient,
@@ -87,9 +86,8 @@ async function handleSessionWatchRegister(request: Request): Promise<Response> {
   if (!body?.watchId || !body.watcherSessionId || !body.targetSessionId) {
     return jsonResponse({ accepted: false, reason: 'invalid body' }, 400);
   }
-  const networkReturn = body.networkReturn == null ? undefined : parseNetworkReturnReference(body.networkReturn);
-  if (networkReturn === null || networkReturn && (!body.observerScope || !hasValidInternalCliCredential(request))) {
-    return jsonResponse({ accepted: false, reason: 'invalid network return context' }, 401);
+  if (body.networkReturn != null) {
+    return jsonResponse({ accepted: false, reason: 'invalid network return context' }, 400);
   }
 
   const engine = getSessionEngine();
@@ -232,11 +230,7 @@ export async function handleSessionReadRoute(
   }
   if (pathname === '/api/session-watch/network-remove' && request.method === 'POST') {
     if (!hasValidInternalCliCredential(request)) return jsonResponse({ accepted: false }, 401);
-    const body = await request.json().catch(() => null) as { watchId?: unknown; targetSessionId?: unknown; networkReturn?: unknown } | null;
-    const reference = parseNetworkReturnReference(body?.networkReturn);
-    if (!reference || typeof body?.watchId !== 'string'
-      || body.targetSessionId !== getSessionEngine().getRuntimeIdentity().sessionId) return jsonResponse({ accepted: false }, 400);
-    return jsonResponse({ accepted: true, removed: removeNetworkSessionWatch(body.watchId, reference) });
+    return jsonResponse({ accepted: false }, 400);
   }
 
   const sessionPathMatch = pathname.match(/^\/sessions\/([^/]+)$/);

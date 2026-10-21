@@ -21,6 +21,17 @@ export interface AnnouncementNotificationItem {
   target: NotificationTarget;
 }
 
+export interface Sub2apiAnnouncementNotificationItem {
+  id: string;
+  kind: 'sub2api_announcement';
+  announcementId: number;
+  createdAt: string;
+  isRead: boolean;
+  title: string;
+  content: string;
+  excerpt: string;
+}
+
 export interface TaskAgentCommentNotificationItem {
   id: string;
   kind: 'task_agent_comment';
@@ -40,6 +51,7 @@ export interface TaskAgentCommentNotificationItem {
 
 export type NotificationItem =
   | AnnouncementNotificationItem
+  | Sub2apiAnnouncementNotificationItem
   | TaskAgentCommentNotificationItem;
 
 export type NotificationLoadState = 'idle' | 'loading' | 'ready' | 'error' | 'unavailable';

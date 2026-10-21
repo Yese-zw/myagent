@@ -169,7 +169,7 @@ Feature usage:
 - `task_center_open`
 - `bug_report_submit`
 
-MyAgents 账号:
+LSAGENT 账号:
 
 - `account_auth_start`
 - `account_auth_complete`

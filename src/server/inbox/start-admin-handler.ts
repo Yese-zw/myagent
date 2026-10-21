@@ -73,7 +73,7 @@ export async function handleAdminSessionStart(
         accepted: false,
         error: {
           code: 'caller_session_required',
-          message: 'session start must run from an initialized MyAgents Session',
+          message: 'session start must run from an initialized LSAGENT Session',
         },
       },
     };

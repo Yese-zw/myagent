@@ -577,7 +577,7 @@ fn resolve_executable<R: Runtime>(
     let lower = trimmed.to_ascii_lowercase();
     if lower == "node" || lower == "node.exe" {
         return crate::sidecar::find_node_executable_pub(app_handle)
-            .ok_or_else(|| "MyAgents bundled Node.js v24 was not found".to_string());
+            .ok_or_else(|| "LSAGENT bundled Node.js v24 was not found".to_string());
     }
     let path = PathBuf::from(trimmed);
     if path.is_absolute() {
@@ -832,7 +832,7 @@ fn run_command_blocking(
 
 /// Build the deliberately small Detector environment. Detector scripts run as
 /// the desktop user, but they are not Provider/Session subprocesses and must
-/// never inherit API keys, MyAgents control ports, or arbitrary launch-shell
+/// never inherit API keys, LSAGENT control ports, or arbitrary launch-shell
 /// variables. Generic proxy/certificate variables remain part of the local
 /// command baseline; the canonical proxy helper applies the configured policy
 /// after this allowlist is installed.

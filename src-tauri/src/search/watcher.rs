@@ -3,7 +3,7 @@
 //!
 //! # Why a watcher instead of call-site notifications
 //!
-//! MyAgents session files are written by the Bun Sidecar while the search
+//! LSAGENT session files are written by the Bun Sidecar while the search
 //! index lives in Rust. The obvious alternative — have Bun POST to Rust on
 //! every save — has two problems:
 //!

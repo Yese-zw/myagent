@@ -1,6 +1,6 @@
 import { channelMessageSchema } from '../shared/channelMessage';
 /**
- * myagents — Self-Configuration CLI for MyAgents
+ * myagents — Self-Configuration CLI for LSAGENT
  *
  * Parses local CLI concerns and forwards stateful work to the Sidecar Admin
  * API. This source is bundled into the app; HOME launchers contain no copy of
@@ -8,7 +8,7 @@ import { channelMessageSchema } from '../shared/channelMessage';
  *
  * Environment:
  *   MYAGENTS_PORT — Sidecar port (injected by buildClaudeSessionEnv)
- *   MYAGENTS_SESSION_ID — current MyAgents session id for attached-session tasks
+ *   MYAGENTS_SESSION_ID — current LSAGENT session id for attached-session tasks
  *   MYAGENTS_API_TOKEN — token for public calls from an ordinary local process
  *
  * No shebang here. `npm run build:cli` (esbuild) injects `#!/usr/bin/env node`
@@ -23,8 +23,6 @@ import {
   EXTERNAL_CLI_PUBLIC_COMMANDS,
   findExternalCliPublicCapability,
 } from '../shared/externalCliCapabilities';
-import { networkAddress } from '../shared/agentNetworkRouting';
-import { REMOTE_DEADLINES } from '@myagents/agent-network-protocol';
 import { INTERNAL_CLI_FLAGS } from './internalCliFlags';
 
 // ---------------------------------------------------------------------------
@@ -405,7 +403,7 @@ function requirePositional(
 // Help text
 // ---------------------------------------------------------------------------
 
-export const TOP_HELP = `myagents — MyAgents product capabilities CLI
+export const TOP_HELP = `myagents — LSAGENT product capabilities CLI
 
 Usage: myagents <command> [options]
 
@@ -449,8 +447,6 @@ Choose by intent:
   Durable work, scheduling and run tracking: task readme
   Work together now: agent list → session start (fresh) or send (reuse)
   Read or observe without assigning work: session get / state / watch
-  agent list includes callable Agents on other devices across all active networks; use --network NAME_OR_CONNECTION_ID to filter;
-  copy the complete qualified ID and use the same Session commands.
 
 Examples:
   myagents mcp list
@@ -483,7 +479,6 @@ Examples:
   myagents agent create --workspacePath /absolute/path --json
   myagents agent current --json               # compact current context diagnostic
   myagents agent show <agentId>                # identity + effective defaults
-  myagents agent network-diagnose --json      # protocol/devices/connection state
   myagents session list --agent <agentId>      # recent reusable contexts
   myagents session start --agent <agentId> -p "review this" # fresh context
   myagents session get <sessionId> --limit 5 --json
@@ -505,7 +500,7 @@ Examples:
   myagents task rerun <taskId>
   myagents task trigger validate --spec-file trigger.json
   myagents task trigger test <taskId> --expect quiet|activate
-    # Test does not commit MyAgents checkpoint/Activation state, but the local
+    # Test does not commit LSAGENT checkpoint/Activation state, but the local
     # command really runs and its own external side effects are not rolled back.
   myagents task check-now <taskId>
   myagents task reset-checkpoint <taskId>
@@ -549,7 +544,7 @@ Run 'myagents <command> --help' for details on a specific command.`;
 export function publicCliHelp(positional: string[]): string | undefined {
   const group = positional[0];
   if (!group) {
-    return `myagents — MyAgents local external CLI\n\nUsage: myagents <public-command> [options]\n\nPublic commands:\n${EXTERNAL_CLI_PUBLIC_COMMANDS.map((command) => `  myagents ${command}`).join('\n')}\n\nExternal use requires the MyAgents app to be running, External Calls enabled in Settings, and MYAGENTS_API_TOKEN set.`;
+    return `myagents — LSAGENT local external CLI\n\nUsage: myagents <public-command> [options]\n\nPublic commands:\n${EXTERNAL_CLI_PUBLIC_COMMANDS.map((command) => `  myagents ${command}`).join('\n')}\n\nExternal use requires the LSAGENT app to be running, External Calls enabled in Settings, and MYAGENTS_API_TOKEN set.`;
   }
   const publicGroups = new Set([
     'status',
@@ -577,7 +572,7 @@ export function publicCliHelp(positional: string[]): string | undefined {
     const matching = EXTERNAL_CLI_PUBLIC_COMMANDS.filter(
       (command) => command === group || command.startsWith(`${group} `),
     );
-    return `${group} — public external CLI commands\n\n${matching.map((command) => `  myagents ${command}`).join('\n')}\n\nExternal use requires the MyAgents app to be running, External Calls enabled in Settings, and MYAGENTS_API_TOKEN set.`;
+    return `${group} — public external CLI commands\n\n${matching.map((command) => `  myagents ${command}`).join('\n')}\n\nExternal use requires the LSAGENT app to be running, External Calls enabled in Settings, and MYAGENTS_API_TOKEN set.`;
   }
   return undefined;
 }
@@ -593,7 +588,7 @@ async function canShowInternalTopHelp(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-MyAgents-Internal-Cli-Token': token,
+        'X-LSAGENT-Internal-Cli-Token': token,
       },
       body: '{}',
       signal: AbortSignal.timeout(3_000),
@@ -626,7 +621,7 @@ export async function callApi(
       headers: {
         'Content-Type': 'application/json',
         ...(internalToken
-          ? { 'X-MyAgents-Internal-Cli-Token': internalToken }
+          ? { 'X-LSAGENT-Internal-Cli-Token': internalToken }
           : externalToken
             ? { Authorization: `Bearer ${externalToken}` }
             : {}),
@@ -646,7 +641,7 @@ export async function callApi(
       const text = await resp.text();
       if (resp.ok && isSessionMutationRoute(route)) {
         return sessionAdmissionUnconfirmedResult(
-          `MyAgents returned an unreadable admission acknowledgement (HTTP ${resp.status}).`,
+          `LSAGENT returned an unreadable admission acknowledgement (HTTP ${resp.status}).`,
         );
       }
       return adminHttpErrorResult(
@@ -675,7 +670,7 @@ export async function callApi(
     if (!transportFailure && !responseDecodeFailure) throw err;
     if (!preConnectFailure && isSessionMutationRoute(route)) {
       return sessionAdmissionUnconfirmedResult(
-        'The request may have reached MyAgents, but its admission acknowledgement was not received.',
+        'The request may have reached LSAGENT, but its admission acknowledgement was not received.',
       );
     }
     if (!preConnectFailure) {
@@ -685,16 +680,16 @@ export async function callApi(
         error: timedOut
           ? route === 'model/verify'
             ? 'Provider verification did not return within the request deadline.'
-            : 'MyAgents did not return a response within the request deadline.'
-          : 'The MyAgents request failed before a readable response was received.',
-        suggestion: 'Check MyAgents status and the operation result before retrying; the request may still have completed.',
+            : 'LSAGENT did not return a response within the request deadline.'
+          : 'The LSAGENT request failed before a readable response was received.',
+        suggestion: 'Check LSAGENT status and the operation result before retrying; the request may still have completed.',
       };
     }
     return {
       success: false,
       code: 'MYAGENTS_UNAVAILABLE',
-      error: 'Cannot connect to the MyAgents app.',
-      suggestion: 'Start MyAgents and retry the same command.',
+      error: 'Cannot connect to the LSAGENT app.',
+      suggestion: 'Start LSAGENT and retry the same command.',
     };
   }
 }
@@ -728,7 +723,7 @@ export function validateSessionMutationAcknowledgement(
     return typeof result.code === 'string' && typeof result.error === 'string'
       ? result
       : sessionAdmissionUnconfirmedResult(
-        'MyAgents returned an incomplete admission failure acknowledgement.',
+        'LSAGENT returned an incomplete admission failure acknowledgement.',
         sessionMutationReceipt(result),
       );
   }
@@ -745,7 +740,7 @@ export function validateSessionMutationAcknowledgement(
   return valid
     ? result
     : sessionAdmissionUnconfirmedResult(
-      'MyAgents returned an incomplete admission success acknowledgement.',
+      'LSAGENT returned an incomplete admission success acknowledgement.',
       sessionMutationReceipt(result),
     );
 }
@@ -758,15 +753,12 @@ function sessionMutationReceipt(result: Record<string, unknown>): Record<string,
   );
 }
 
-export function cliRequestTimeoutMs(route: string, body: Record<string, unknown> = {}): number {
-  const address = networkAddress(route, body);
-  if (address) return REMOTE_DEADLINES[address.method].cli;
+export function cliRequestTimeoutMs(route: string, _body: Record<string, unknown> = {}): number {
   if (route === 'session/start') return 195_000;
   if (route === 'session/send') return 40_000;
   if (route === 'session/get') return 20_000;
   if (route === 'session/state') return 22_000;
   if (route === 'session/watches' || route === 'session/unwatch') return 24_000;
-  if (route === 'agent/network-diagnose') return 40_000;
   if (route === 'session/watch') return 40_000;
   if (route === 'mcp/test') return 20_000;
   // Verification may run a 15s OpenAI pre-probe followed by a 30s SDK
@@ -793,7 +785,7 @@ export function adminHttpErrorResult(
       success: false,
       code: 'SESSION_SIDECAR_REQUIRED',
       error: 'Reload requires a Session Sidecar; the current Global Sidecar does not own session runtime state.',
-      suggestion: 'Run the command from an active MyAgents chat session, or open its help for details.',
+      suggestion: 'Run the command from an active LSAGENT chat session, or open its help for details.',
       suggestedCommand: 'myagents reload --help',
     };
   }
@@ -964,7 +956,6 @@ export function printResult(
   }
   if (group === 'agent' && action === 'list') {
     printAgentList(result.data as Array<Record<string, unknown>>);
-    if(result.complete===false)console.error('Some network directories are incomplete. Healthy results are shown; inspect agent network-diagnose --json.');
     if (Array.isArray(result.diagnostics)) {
       for (const diagnostic of result.diagnostics as Array<Record<string, unknown>>) {
         console.error(`\n[${String(diagnostic.code)}] ${String(diagnostic.message)}`);
@@ -1274,9 +1265,9 @@ export function printResult(
     console.log(`  message: ${String(result.messageId ?? '(unknown)')}`);
     console.log('  state:   accepted; target is running asynchronously');
     if (result.replyBack === false) {
-      console.log('  result:  one-way; MyAgents will not push the target turn result back here.');
+      console.log('  result:  one-way; LSAGENT will not push the target turn result back here.');
     } else {
-      console.log('  result:  MyAgents will push the target turn result back as a <myagents-session-event type="send.result"> block.');
+      console.log('  result:  LSAGENT will push the target turn result back as a <myagents-session-event type="send.result"> block.');
     }
     console.log(`  follow-up: myagents session send ${String(result.sessionId ?? '<sessionId>')} -p "<prompt>"`);
     console.log('  observation: start/send already return the result automatically; use watch for separately observed work.');
@@ -1317,9 +1308,9 @@ export function printResult(
     const messageId = result.messageId ? ` ${result.messageId}` : '';
     console.log(`\u2713 session send delivered${messageId}`);
     if (result.replyBack === false) {
-      console.log('  notification: one-way; MyAgents will not push the target turn result back here.');
+      console.log('  notification: one-way; LSAGENT will not push the target turn result back here.');
     } else {
-      console.log('  notification: MyAgents will push the target turn result back as a <myagents-session-event type="send.result"> block.');
+      console.log('  notification: LSAGENT will push the target turn result back as a <myagents-session-event type="send.result"> block.');
     }
     return;
   }
@@ -1346,7 +1337,7 @@ export function printResult(
     console.log(`\u2713 session watch ${result.coalesced ? 'already registered' : 'registered'} ${result.watchId ?? ''}`.trim());
     console.log(`  target: ${result.targetSessionId ?? '(unknown)'}`);
     console.log(`  state:  ${result.targetStateAtRegistration ?? 'unknown'}`);
-    console.log('  result: MyAgents will push a <myagents-session-event type="watch.completed"> block when the target finishes.');
+    console.log('  result: LSAGENT will push a <myagents-session-event type="watch.completed"> block when the target finishes.');
     return;
   }
   if (group === 'help') {
@@ -1420,7 +1411,7 @@ export function printResult(
     const reason = (tested.reason as Record<string, unknown> | undefined) ?? {};
     const event = (tested.event as Record<string, unknown> | undefined) ?? null;
     const handoff = (tested.handoff as Record<string, unknown> | undefined) ?? null;
-    console.log('\u2713 Detector test completed (MyAgents state was not committed)');
+    console.log('\u2713 Detector test completed (LSAGENT state was not committed)');
     console.log(`  decision: ${String(tested.decision ?? 'unknown')}`);
     console.log(`  reason:   ${String(reason.code ?? 'unknown')} · ${String(reason.message ?? '')}`);
     if (event) {
@@ -2125,19 +2116,17 @@ export function printAgentList(agents: Array<Record<string, unknown>>): void {
     const current = a.isCurrent ? '* ' : '  ';
     const id = String(a.agentId);
     const separateId = id.length > idWidth - 2;
-    const remote = a.isLocal === false;
-    const lifecycle = !remote && typeof a.archived === 'boolean' ? (a.archived ? 'archived' : 'active') : 'unknown';
-    const proactive = !remote && typeof a.enabled === 'boolean' ? (a.enabled ? 'enabled' : 'disabled') : 'unknown';
+    const lifecycle = typeof a.archived === 'boolean' ? (a.archived ? 'archived' : 'active') : 'unknown';
+    const proactive = typeof a.enabled === 'boolean' ? (a.enabled ? 'enabled' : 'disabled') : 'unknown';
     console.log(
       pad(current, 3)
       + pad(separateId ? '(see Agent ID below)' : id, idWidth)
       + pad(lifecycle, 11)
       + pad(proactive, 11)
-      + pad(!remote && typeof a.channelCount === 'number' ? String(a.channelCount) : 'unknown', 10)
+      + pad(typeof a.channelCount === 'number' ? String(a.channelCount) : 'unknown', 10)
       + String(a.name),
     );
     if (separateId) console.log(`  Agent ID: ${id}`);
-    if (remote) console.log(`  Remote: ${String(a.networkName ?? 'unknown network')} / ${String(a.deviceName ?? 'unknown device')}`);
   }
   if (agents.some(agent => agent.isCurrent === true)) {
     console.log('\n* current Agent for this CLI caller');
@@ -3206,11 +3195,11 @@ async function main(): Promise<void> {
     if (jsonMode) {
       return exitAgentCliError(flags, {
         code: routeError,
-        error: 'The MyAgents CLI Session route is missing or invalid.',
-        suggestion: 'Run this command from an active MyAgents Session or start the app and retry.',
+        error: 'The LSAGENT CLI Session route is missing or invalid.',
+        suggestion: 'Run this command from an active LSAGENT Session or start the app and retry.',
       }, 3);
     }
-    console.error(`Error: ${routeError}. Retry from the active MyAgents Session or start the app.`);
+    console.error(`Error: ${routeError}. Retry from the active LSAGENT Session or start the app.`);
     process.exit(3);
   }
   BASE = `http://127.0.0.1:${PORT}/api/admin`;
@@ -3473,7 +3462,7 @@ const PUBLISHED_ADMIN_ROUTES = new Set([
   'space/issue-list', 'space/issue-get', 'space/issue-comment', 'space/issue-comments', 'space/issue-comment-get',
   'space/issue-status', 'space/issue-claim', 'space/issue-close', 'space/issue-complete', 'space/issue-cancel-claim',
   'space/claim-local-task', 'space/attachment-download', 'space/attachment-add', 'space/attachment-inspect',
-  'session/list', 'session/get', 'session/start', 'session/send', 'session/watch', 'session/state', 'session/watches', 'session/unwatch', 'agent/network-diagnose',
+  'session/list', 'session/get', 'session/start', 'session/send', 'session/watch', 'session/state', 'session/watches', 'session/unwatch',
 ]);
 
 const PUBLISHED_COMMAND_GROUPS = new Set([
@@ -3495,7 +3484,7 @@ export function validateCliCommand(
       error: `Unknown command group: ${group}`,
       suggestion: isRetiredDocumentDraft
         ? 'Use the published local document conversion command group.'
-        : 'List the commands supported by this MyAgents build.',
+        : 'List the commands supported by this LSAGENT build.',
       suggestedCommand: isRetiredDocumentDraft ? 'myagents anydoc --help' : 'myagents --help',
     };
   }
@@ -4299,8 +4288,8 @@ async function claimSpaceIssueWithAttachedTask(
     return exitSpaceInputError(
       flags,
       'SESSION_REQUIRED',
-      'space issue claim --create-attached requires an active MyAgents Session.',
-      'Run this command inside the MyAgents AI Session that will own the attached Task.',
+      'space issue claim --create-attached requires an active LSAGENT Session.',
+      'Run this command inside the LSAGENT AI Session that will own the attached Task.',
     );
   }
 
@@ -5606,15 +5595,6 @@ export function buildRequestBody(
 
   // Agent commands
   if (group === 'agent') {
-    if (action === 'network-diagnose') {
-      if (rest.length) return exitAgentCliError(flags, { code: 'ARGUMENT_INVALID', error: 'network-diagnose accepts no positional arguments.' });
-      const limit = flags.limit === undefined ? 100 : Number(flags.limit);
-      if (typeof flags.limit === 'boolean' || !Number.isInteger(limit) || limit < 1 || limit > 100
-        || (flags.cursor !== undefined && (typeof flags.cursor !== 'string' || !flags.cursor.trim()))) {
-        return exitAgentCliError(flags, { code: 'ARGUMENT_INVALID', error: 'network-diagnose requires --limit 1..100 and an optional non-empty --cursor value.' });
-      }
-      return { cursor: flags.cursor, limit, network:typeof flags.network === 'string' ? flags.network : undefined };
-    }
     if (action === 'create') {
       const workspacePath =
         typeof flags.workspacePath === 'string'
@@ -5636,7 +5616,6 @@ export function buildRequestBody(
       }
       return {
         lifecycle: flags.archived ? 'archived' : 'active',
-        network: typeof flags.network === 'string' ? flags.network : undefined,
       };
     }
     if (action === 'enable' || action === 'disable' || action === 'archive' || action === 'unarchive') return { id: rest[0] || flags.id };
@@ -6114,7 +6093,7 @@ export function buildRequestBody(
           ? flags.currentSessionId.trim()
           : process.env.MYAGENTS_SESSION_ID;
       if (!currentSessionId) {
-        console.error('Error: task create-attached requires MYAGENTS_SESSION_ID. Run it from inside a MyAgents AI session.');
+        console.error('Error: task create-attached requires MYAGENTS_SESSION_ID. Run it from inside a LSAGENT AI session.');
         process.exit(2);
       }
       const source = (flags.source as string | undefined) ?? 'space-issue';
@@ -6740,7 +6719,7 @@ function resolvePreselectedSessionId(
     return exitAgentCliError(flags, {
       code: 'TASK_SESSION_REQUIRED',
       error: '--preselectedSessionId requires current or a Session id.',
-      suggestion: 'Pass `--preselectedSessionId current` inside a MyAgents Session, or use an id from `myagents session list --agent <agentId> --json`.',
+      suggestion: 'Pass `--preselectedSessionId current` inside a LSAGENT Session, or use an id from `myagents session list --agent <agentId> --json`.',
       suggestedCommand: 'myagents session list --agent <agentId> --json',
     });
   }
@@ -6751,7 +6730,7 @@ function resolvePreselectedSessionId(
   return exitAgentCliError(flags, {
     code: 'CURRENT_SESSION_UNAVAILABLE',
     error: '--preselectedSessionId current requires MYAGENTS_SESSION_ID.',
-    suggestion: 'Run this command inside a MyAgents Session, or pass an explicit id from `myagents session list --agent <agentId> --json`.',
+    suggestion: 'Run this command inside a LSAGENT Session, or pass an explicit id from `myagents session list --agent <agentId> --json`.',
     suggestedCommand: 'myagents session list --agent <agentId> --json',
   });
 }
@@ -6773,7 +6752,7 @@ function validateTaskSessionBinding(
     exitAgentCliError(flags, {
       code: 'TASK_SESSION_REQUIRED',
       error: '--runMode single-session requires --preselectedSessionId current|<session-id>.',
-      suggestion: 'Use `current` inside MyAgents, or choose a materialized id from `myagents session list --agent <agentId> --json`.',
+      suggestion: 'Use `current` inside LSAGENT, or choose a materialized id from `myagents session list --agent <agentId> --json`.',
       suggestedCommand: 'myagents session list --agent <agentId> --json',
     });
   }

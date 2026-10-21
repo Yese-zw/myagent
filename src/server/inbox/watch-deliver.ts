@@ -5,7 +5,6 @@ import { managementRequestHeaders } from '../utils/management-api-client';
 import { buildReplyBody, deliverInboxReply, type ReplyPayload } from './reply-deliver';
 import { ackPendingSessionWatch, listPendingSessionWatches } from './watch-registry';
 import type { PendingInboxMessage, DeliverOutcome, InboxTurnMeta } from './types';
-import { deliverNetworkReturn } from '../agent-network/return';
 
 export async function deliverSessionWatchEvents(
   currentSessionId: string,
@@ -82,10 +81,7 @@ export async function deliverSessionWatchEvents(
     };
 
     if (watch.networkReturn) {
-      // Remote watches are one-shot even when the original source disappears.
-      // Keeping them pending would replay a result after a later reconnection.
-      try { await deliverNetworkReturn(watch.networkReturn, message.sessionEvent!); }
-      finally { ackPendingSessionWatch(watch.watchId); }
+      ackPendingSessionWatch(watch.watchId);
       return;
     }
 

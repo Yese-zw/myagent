@@ -561,7 +561,7 @@ const SUPPRESS_PER_TOKEN_LOG_BROADCAST = true;
 export const SDK_RESERVED_MCP_NAMES = ['claude-in-chrome', 'computer-use'];
 
 /**
- * MyAgents-reserved MCP server ids — names used by context-injected builtins
+ * LSAGENT-reserved MCP server ids — names used by context-injected builtins
  * that are managed by the sidecar, not user-toggleable. User MCPs configured
  * with these ids are silently dropped at SDK build time so they cannot
  * (a) overwrite the legitimate builtin in `result[server.id]`, or
@@ -3115,7 +3115,7 @@ export function getSessionEnabledPluginIds(): readonly string[] | null {
 }
 
 /**
- * Per-Tab override for MyAgents official CLI tools. This only changes the
+ * Per-Tab override for LSAGENT official CLI tools. This only changes the
  * next session/pre-warm system prompt; the current SDK subprocess cannot have
  * its system prompt mutated in place.
  */
@@ -3140,7 +3140,7 @@ export function getSessionEnabledOfficialToolIds(): readonly OfficialToolId[] | 
 
 /**
  * Hot-reload proxy configuration into the current process environment and
- * restart the builtin SDK only when the current provider's effective MyAgents
+ * restart the builtin SDK only when the current provider's effective LSAGENT
  * proxy state changed. Scope-only edits can matter even when the proxy URL is
  * unchanged; unrelated provider scope edits should not churn this session.
  */
@@ -3951,7 +3951,7 @@ export function getAgents(): Record<string, AgentDefinition> | null {
 }
 
 /**
- * Predicate for each MyAgents-reserved context-injected builtin MCP id.
+ * Predicate for each LSAGENT-reserved context-injected builtin MCP id.
  * Returns true when the corresponding sidecar context is set, mirroring the
  * inclusion conditions in `buildSdkMcpServers()` Pattern 1.
  *
@@ -4071,7 +4071,7 @@ function checkMcpToolPermission(toolName: string, server?: McpServerProvenance):
  * - 'project': <cwd>/.claude/ (project-level config)
  *
  * We use 'project' only:
- * - Enabled MyAgents global Skills are projected into <cwd>/.claude/skills/ at Query birth
+ * - Enabled LSAGENT global Skills are projected into <cwd>/.claude/skills/ at Query birth
  * - Avoids setting CLAUDE_CONFIG_DIR which would break Keychain credential lookup
  * - Project-level: SDK reads project's .claude/skills/, .claude/commands/, CLAUDE.md
  *
@@ -4135,11 +4135,11 @@ async function buildSdkMcpServers(
       console.warn(`[agent] MCP "${s.id}" skipped: conflicts with SDK reserved name. Rename to avoid this.`);
       return false;
     }
-    // Reserve MyAgents context-injected builtin ids: a user MCP with the same id
+    // Reserve LSAGENT context-injected builtin ids: a user MCP with the same id
     // would otherwise overwrite the builtin in result[id] and inherit its
     // auto-trust in canUseTool — see issue #148.
     if ((MYAGENTS_CONTEXT_INJECTED_MCP_IDS as readonly string[]).includes(normalized)) {
-      console.warn(`[agent] MCP "${s.id}" skipped: id is reserved by MyAgents (context-injected builtin). Rename to avoid this.`);
+      console.warn(`[agent] MCP "${s.id}" skipped: id is reserved by LSAGENT (context-injected builtin). Rename to avoid this.`);
       return false;
     }
     return true;
@@ -6049,7 +6049,7 @@ function sealCcAuthEnv(env: NodeJS.ProcessEnv): void {
 const WINDOWS_UTF8_BASH_ENV_SENTINEL = 'MYAGENTS_WINDOWS_UTF8';
 const WINDOWS_UTF8_BASH_ENV_FILENAME = 'windows-utf8-bash-env.sh';
 const WINDOWS_UTF8_BASH_ENV_CONTENT = [
-  '# MyAgents-managed Bash prelude for Windows SDK tool output.',
+  '# LSAGENT-managed Bash prelude for Windows SDK tool output.',
   `if [ -n "\${MYAGENTS_ORIGINAL_BASH_ENV:-}" ] && [ "\${MYAGENTS_ORIGINAL_BASH_ENV}" != "\${BASH_ENV:-}" ] && [ -r "\${MYAGENTS_ORIGINAL_BASH_ENV}" ]; then`,
   '  . "${MYAGENTS_ORIGINAL_BASH_ENV}"',
   'fi',
@@ -6181,7 +6181,7 @@ export function buildClaudeSessionEnv(
   // (effective window - 13K), which is 967K for a 1M model and can exceed a
   // provider's safe input limit once its completion budget is included (#508).
   // Pinning the value also prevents a shell/project launch environment from
-  // silently changing MyAgents' session policy.
+  // silently changing LSAGENT' session policy.
   env.CLAUDE_AUTOCOMPACT_PCT_OVERRIDE = String(BUILTIN_AUTO_COMPACT_PERCENT);
 
   // Expose the managed npm prefix for command-local use only. Do NOT set
@@ -6198,16 +6198,16 @@ export function buildClaudeSessionEnv(
     scrubMyAgentsNpmPrefixEnv(env, myAgentsNpmGlobalPrefix);
   }
   // Disable SDK nonessential traffic (Statsig telemetry, Sentry error reporting, surveys).
-  // MyAgents manages its own telemetry; these external connections add startup latency
+  // LSAGENT manages its own telemetry; these external connections add startup latency
   // and can timeout in restricted network environments (e.g. China).
   env.CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC = '1';
   // Disable SDK built-in cron tools (CronCreate/CronDelete/CronList).
-  // MyAgents has its own persistent scheduled Task system (im-cron compatibility
+  // LSAGENT has its own persistent scheduled Task system (im-cron compatibility
   // tool → Rust TaskStore/TaskSchedulerController) with IM delivery and wall-clock scheduling.
   // The SDK's cron is session-scoped/in-memory, would conflict and confuse users.
   env.CLAUDE_CODE_DISABLE_CRON = '1';
   // Disable SDK auto-loading of claude.ai proxy MCP servers.
-  // MyAgents manages MCP servers through its own UI (buildSdkMcpServers).
+  // LSAGENT manages MCP servers through its own UI (buildSdkMcpServers).
   // SDK auto-loaded servers use "claude.ai <DisplayName>" format (sanitized to "claude_ai_<Name>"),
   // which mismatches our config IDs → checkMcpToolPermission blocks the tools.
   // See: https://github.com/hAcKlyc/MyAgents/issues/73
@@ -6262,7 +6262,7 @@ export function buildClaudeSessionEnv(
     env.ANTHROPIC_CUSTOM_HEADERS = headers.join('\n');
   }
 
-  // Declare MyAgents as the inference-routing host for non-subscription
+  // Declare LSAGENT as the inference-routing host for non-subscription
   // providers. This tells CC's `managedEnv` layer (see claude-code
   // src/utils/managedEnv.ts withoutHostManagedProviderVars) to strip the
   // provider-routing vars (ANTHROPIC_BASE_URL / ANTHROPIC_API_KEY /
@@ -6270,7 +6270,7 @@ export function buildClaudeSessionEnv(
   // etc.) out of settings-sourced env before they're applied.
   //
   // Effect: external tools like cc-switch / Claude Code Router that write those
-  // vars into user settings cannot silently redirect MyAgents requests to a
+  // vars into user settings cannot silently redirect LSAGENT requests to a
   // third-party endpoint. `settingSources: ['project']` already excludes
   // settings.json from the merged-settings path, but getGlobalConfig().env
   // (~/.claude.json) is merged unconditionally — this flag closes that hole.
@@ -6344,7 +6344,7 @@ export function buildClaudeSessionEnv(
   });
 
   if (!effectiveProviderId) {
-    console.warn('[env] Provider-owned SDK env missing providerId; MyAgents proxy will not be injected for this subprocess');
+    console.warn('[env] Provider-owned SDK env missing providerId; LSAGENT proxy will not be injected for this subprocess');
   }
   applyProviderProxyPolicyToEnv(env, effectiveProviderId);
 
@@ -8213,7 +8213,7 @@ export async function initializeAgent(
     await activateSessionTranscript(initialSessionId);
 
     // Metadata alone is not enough to resume the Claude Agent SDK. POST /sessions
-    // creates MyAgents metadata before the SDK has ever persisted a transcript,
+    // creates LSAGENT metadata before the SDK has ever persisted a transcript,
     // so `query({ resume })` would fail with "No conversation found". If
     // sdkSessionId is missing, only recover the rare crash-before-metadata-update
     // case when the SDK transcript probe finds real persisted transcriptState.messages.
@@ -10798,7 +10798,7 @@ async function resolveBuiltinForkSource(source: SessionMetadata, visited = new S
 }
 
 /**
- * Exact MyAgents Record CLI forms that may bypass a second desktop approval.
+ * Exact LSAGENT Record CLI forms that may bypass a second desktop approval.
  * This stays Record-specific: it is a safety policy for one bounded product
  * surface, not a general shell parser or command allowlist framework.
  */
@@ -11390,24 +11390,24 @@ async function startStreamingSession(preWarm = false): Promise<void> {
       skills: [...new Set(enabledSkillAllowlist)].sort(),
       settings: {
         cleanupPeriodDays: claudeTranscriptCleanupPeriodDays,
-        // MyAgents does not expose Anthropic feedback submission. Keep the
+        // LSAGENT does not expose Anthropic feedback submission. Keep the
         // upstream draft feature off explicitly instead of inheriting a CLI
         // default that may change in a patch release.
         feedbackDrafts: 'off' as const,
         plansDirectory: getSessionPlansDirectorySetting(sessionId),
-        // MyAgents owns provider routing and outbound-network policy. Without
+        // LSAGENT owns provider routing and outbound-network policy. Without
         // this, Claude Code's WebFetch tool sends the target hostname to
         // api.anthropic.com for a domain-safety preflight even when inference
         // is routed through a user-selected third-party provider.
         skipWebFetchPreflight: true,
         // The Artifact tool (SDK 0.3.16x+) publishes HTML/MD to claude.ai —
-        // an outward data flow MyAgents has not product-decided to expose.
+        // an outward data flow LSAGENT has not product-decided to expose.
         // Keep the tool surface frozen; revisit as its own feature if wanted.
         disableArtifact: true,
         // Claude Code's native bundled skills can duplicate identities owned by
-        // MyAgents' effective Skill inventory (for example skill-creator).
+        // LSAGENT' effective Skill inventory (for example skill-creator).
         // Disabling them removes duplicate listings and per-turn context cost;
-        // MyAgents-owned Skills still load through <cwd>/.claude/skills, which
+        // LSAGENT-owned Skills still load through <cwd>/.claude/skills, which
         // this flag does not touch. Built-in slash commands remain typable
         // (programmatic /compact is unaffected); they are only hidden from the model.
         disableBundledSkills: true,
@@ -11440,7 +11440,7 @@ async function startStreamingSession(preWarm = false): Promise<void> {
         // `[claude-code:unrecognized_model]` is an informational client-side
         // signal: the CLI's local registry doesn't know the model name, so it
         // warns that its auto-compact fallback window applies. Expected for
-        // every third-party provider model (glm/deepseek/...); MyAgents owns
+        // every third-party provider model (glm/deepseek/...); LSAGENT owns
         // the real ceiling via CLAUDE_CODE_AUTO_COMPACT_WINDOW + the [1m]
         // launch suffix (#335/#516), and the paired tengu_api_unrecognized_model
         // telemetry event is already dropped locally by
@@ -11493,7 +11493,7 @@ async function startStreamingSession(preWarm = false): Promise<void> {
       // `plugins: [{ type: 'local', path }]`; it then scans each path for
       // .claude-plugin/plugin.json and wires up the contained
       // skills / agents / hooks / .mcp.json / .lsp.json automatically.
-      // MyAgents only hands it the enabled set — getEnabledPluginSdkConfigs
+      // LSAGENT only hands it the enabled set — getEnabledPluginSdkConfigs
       // already filters to entries that exist on disk as valid plugin roots.
       // Field omitted entirely when no plugins are enabled so empty-array
       // noise doesn't show up in SDK debug output.
@@ -11571,7 +11571,7 @@ async function startStreamingSession(preWarm = false): Promise<void> {
 
         // Trust SDK provenance for active context-injected MCPs: skip user confirmation
         // entirely. These MCPs are injected by sidecar context (cron task / IM
-        // bot / bridge plugin) and are MyAgents-managed, not third-party. In IM
+        // bot / bridge plugin) and are LSAGENT-managed, not third-party. In IM
         // sessions there is no UI to confirm against anyway, so blocking on
         // confirmation would deadlock the call. The reserved id list in
         // MYAGENTS_CONTEXT_INJECTED_MCP_IDS guarantees no user MCP can take
@@ -11586,7 +11586,7 @@ async function startStreamingSession(preWarm = false): Promise<void> {
         }
 
         // Auto-allow read-only `myagents` CLI Bash invocations. After the v0.2.11
-        // cron / im-cron / im-media → CLI migration, the AI reaches MyAgents'
+        // cron / im-cron / im-media → CLI migration, the AI reaches LSAGENT'
         // own scheduling / IM / widget surface through `myagents <group> …`
         // instead of MCP tools. Read-only forms (no quoted arg, no shell-injection
         // surface) are auto-allowed so the AI doesn't burn a permission prompt
@@ -12103,7 +12103,7 @@ async function startStreamingSession(preWarm = false): Promise<void> {
     // in `this.initialization
     // = this.initialize()` — calling `initializationResult()` here just awaits
     // the existing promise. Verified empirically with DEBUG_CLAUDE_AGENT_SDK=1:
-    // resolved at +337ms in a clean repro; in MyAgents production with project
+    // resolved at +337ms in a clean repro; in LSAGENT production with project
     // settings + playwright MCP the same handshake completes in ~3-5s.
     //
     // We use `lifecycleState.sdkControlReady` as the gate for the "AI 启动中" UI hint
@@ -12208,7 +12208,7 @@ async function startStreamingSession(preWarm = false): Promise<void> {
     let streamEventTokenTotal = 0;
     // Same aggregation for `system subtype=thinking_tokens` (SDK 0.3.220+):
     // a live estimate frame per streamed thinking chunk (SDKThinkingTokensMessage,
-    // meant for spinner UIs — MyAgents renders thinking via chat:thinking-chunk
+    // meant for spinner UIs — LSAGENT renders thinking via chat:thinking-chunk
     // from stream_event instead, so these frames have no functional consumer).
     // Unsynchronized they were ~37k unified-log lines/day + one full-JSON
     // appendLogLine (session file + chat:log SSE) per frame.

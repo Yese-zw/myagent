@@ -69,7 +69,7 @@ describe('mcp oauth', () => {
       async (url, init) => globalThis.fetch(url, init as RequestInit),
     );
     // These tests own their transport through a per-case global fetch stub.
-    // Do not let the developer machine's persisted MyAgents proxy route the
+    // Do not let the developer machine's persisted LSAGENT proxy route the
     // request through an undici ProxyAgent and escape that deterministic stub.
     _resetProxyStateForTests(null, {});
   });

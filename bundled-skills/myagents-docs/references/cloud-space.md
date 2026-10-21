@@ -2,17 +2,17 @@
 
 ## 定位与入口
 
-协作空间是 MyAgents 的云端团队协作能力，从侧栏「更多 → 协作空间」进入，登录并选择 Space。包含 Space 能力的构建默认开放，隐藏开发者设置可显式关闭，不再要求旧实验室开关。它让团队围绕 Goal、Issue、成员、Registered Agent、附件和共享 Skill/Tool 协作。
+协作空间是 LSAGENT 的云端团队协作能力，从侧栏「更多 → 协作空间」进入，登录并选择 Space。包含 Space 能力的构建默认开放，隐藏开发者设置可显式关闭，不再要求旧实验室开关。它让团队围绕 Goal、Issue、成员、Registered Agent、附件和共享 Skill/Tool 协作。
 
-Space 不是 AI Runtime，也不会替代本地 Workspace、Session 或 Task Center。云端负责协作状态，本地 MyAgents 负责在用户设备上执行 Agent 工作。
+Space 不是 AI Runtime，也不会替代本地 Workspace、Session 或 Task Center。云端负责协作状态，本地 LSAGENT 负责在用户设备上执行 Agent 工作。
 
-MyAgents 账号入口位于展开的全局侧栏最底部左侧，右侧是通知图标。未登录或登录失效时，点击「登录 MyAgents」会打开/聚焦 Space Tab，走原有登录提示；Space 和 AgentNet 页面也保留各自现有的登录流程。已登录时点击头像/名称打开账号菜单，再点击菜单顶部账号信息编辑昵称与头像，邮箱只读；菜单保留账号套餐与「退出登录」，不再有「设置」项。资料编辑无需打开 Space，Space 内原账号入口已移除。侧栏收起后最底部只保留通知，需展开侧栏才能访问账号入口。普通断网或套餐到期不代表账号已退出。
+LSAGENT 账号入口位于展开的全局侧栏最底部左侧，右侧是通知图标。未登录或登录失效时，点击「登录 LSAGENT」会打开/聚焦 Space Tab，走原有登录提示；Space 和 AgentNet 页面也保留各自现有的登录流程。已登录时点击头像/名称打开账号菜单，再点击菜单顶部账号信息编辑昵称与头像，邮箱只读；菜单保留账号套餐与「退出登录」，不再有「设置」项。资料编辑无需打开 Space，Space 内原账号入口已移除。侧栏收起后最底部只保留通知，需展开侧栏才能访问账号入口。普通断网或套餐到期不代表账号已退出。
 
 同账号设备间即时调用走 Agent 网络；Space Issue 负责团队责任与持久跟踪。共享登录不代表两者拥有同一套任务/消息队列。
 
 ## 官方社区反馈与对话入口
 
-从 0.5.0 起，官方 MyAgents 社区可以接收 Bug 和功能建议。小助理先检测本机 `gh`，有则优先推荐 GitHub `hAcKlyc/MyAgents`；没有则检查 Space 登录，已登录推荐官方社区，未登录引导登录。用户可以明确选择渠道，最终脱敏报告与目标经确认后再提交，详细流程由小助理 `/support` 负责。
+从 0.5.0 起，官方 LSAGENT 社区可以接收 Bug 和功能建议。小助理先检测本机 `gh`，有则优先推荐 GitHub `hAcKlyc/MyAgents`；没有则检查 Space 登录，已登录推荐官方社区，未登录引导登录。用户可以明确选择渠道，最终脱敏报告与目标经确认后再提交，详细流程由小助理 `/support` 负责。
 
 对话中的 `[打开 Space 协作空间](myagents://open/v1/spaces)` 等同左侧入口，打开/聚焦同一个 Tab，保留当前页面。`[官方社区反馈](myagents://open/v1/spaces/official/issues)` 进入社区 Issue 列表；具体反馈使用 `myagents://open/v1/spaces/<slug或id>/issues/<真实issueId>`，其中 Issue ID 来自服务端，不能用 `#12` 等编号代替。未登录时先显示登录入口，登录后继续目标导航。
 

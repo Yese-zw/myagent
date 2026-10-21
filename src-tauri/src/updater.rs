@@ -1,4 +1,4 @@
-// MyAgents Auto-Updater Module
+// LSAGENT Auto-Updater Module
 // Provides silent background update checking, downloading, and installation
 //
 // Flow:
@@ -1217,7 +1217,7 @@ pub async fn test_update_connectivity(app: AppHandle) -> Result<String, String> 
     let current_version = app.package_info().version.to_string();
     #[allow(clippy::disallowed_methods)]
     let builder = reqwest::Client::builder()
-        .user_agent(format!("MyAgents-Updater/{}", current_version))
+        .user_agent(format!("LSAGENT-Updater/{}", current_version))
         .timeout(std::time::Duration::from_secs(30));
 
     let client = proxy_config::build_client_with_proxy(builder)
@@ -1315,47 +1315,47 @@ mod tests {
     #[test]
     fn parses_windows_updater_temp_dir_names() {
         assert_eq!(
-            parse_windows_updater_temp_dir_version("MyAgents-0.2.27-updater-abcd", "MyAgents"),
+            parse_windows_updater_temp_dir_version("LSAGENT-0.2.27-updater-abcd", "LSAGENT"),
             Some("0.2.27")
         );
         assert_eq!(
             parse_windows_updater_temp_dir_version(
-                "MyAgents-1.2.3-beta.1+build.7-updater-random",
-                "MyAgents"
+                "LSAGENT-1.2.3-beta.1+build.7-updater-random",
+                "LSAGENT"
             ),
             Some("1.2.3-beta.1+build.7")
         );
 
         assert_eq!(
-            parse_windows_updater_temp_dir_version("Other-0.2.27-updater-abcd", "MyAgents"),
+            parse_windows_updater_temp_dir_version("Other-0.2.27-updater-abcd", "LSAGENT"),
             None
         );
         assert_eq!(
-            parse_windows_updater_temp_dir_version("MyAgents-0.2-updater-abcd", "MyAgents"),
+            parse_windows_updater_temp_dir_version("LSAGENT-0.2-updater-abcd", "LSAGENT"),
             None
         );
         assert_eq!(
-            parse_windows_updater_temp_dir_version("MyAgents-01.2.3-updater-abcd", "MyAgents"),
+            parse_windows_updater_temp_dir_version("LSAGENT-01.2.3-updater-abcd", "LSAGENT"),
             None
         );
         assert_eq!(
-            parse_windows_updater_temp_dir_version("MyAgents-0.2.27-updater-", "MyAgents"),
+            parse_windows_updater_temp_dir_version("LSAGENT-0.2.27-updater-", "LSAGENT"),
             None
         );
         assert_eq!(
-            parse_windows_updater_temp_dir_version("MyAgents-1.2.3--updater-abcd", "MyAgents"),
+            parse_windows_updater_temp_dir_version("LSAGENT-1.2.3--updater-abcd", "LSAGENT"),
             None
         );
         assert_eq!(
-            parse_windows_updater_temp_dir_version("MyAgents-1.2.3+-updater-abcd", "MyAgents"),
+            parse_windows_updater_temp_dir_version("LSAGENT-1.2.3+-updater-abcd", "LSAGENT"),
             None
         );
         assert_eq!(
-            parse_windows_updater_temp_dir_version("MyAgents-1.2.3-01-updater-abcd", "MyAgents"),
+            parse_windows_updater_temp_dir_version("LSAGENT-1.2.3-01-updater-abcd", "LSAGENT"),
             None
         );
         assert_eq!(
-            parse_windows_updater_temp_dir_version("MyAgents-0.2.27", "MyAgents"),
+            parse_windows_updater_temp_dir_version("LSAGENT-0.2.27", "LSAGENT"),
             None
         );
     }
@@ -1363,8 +1363,8 @@ mod tests {
     #[test]
     fn cleanup_removes_only_stale_owned_updater_dirs() {
         let root = tempfile::tempdir().unwrap();
-        let owned_dir = root.path().join("MyAgents-0.2.9-updater-old");
-        let owned_file = root.path().join("MyAgents-0.2.10-updater-file");
+        let owned_dir = root.path().join("LSAGENT-0.2.9-updater-old");
+        let owned_file = root.path().join("LSAGENT-0.2.10-updater-file");
         let other_dir = root.path().join("Other-0.2.9-updater-old");
         std::fs::create_dir(&owned_dir).unwrap();
         std::fs::write(&owned_file, b"not a dir").unwrap();
@@ -1372,7 +1372,7 @@ mod tests {
 
         let stats = cleanup_stale_windows_updater_temp_dirs_in(
             root.path(),
-            "MyAgents",
+            "LSAGENT",
             SystemTime::now() + Duration::from_secs(25 * 60 * 60),
             WINDOWS_UPDATER_TEMP_DIR_GRACE,
         )
@@ -1389,12 +1389,12 @@ mod tests {
     #[test]
     fn cleanup_keeps_fresh_owned_updater_dirs() {
         let root = tempfile::tempdir().unwrap();
-        let fresh_dir = root.path().join("MyAgents-0.2.9-updater-fresh");
+        let fresh_dir = root.path().join("LSAGENT-0.2.9-updater-fresh");
         std::fs::create_dir(&fresh_dir).unwrap();
 
         let stats = cleanup_stale_windows_updater_temp_dirs_in(
             root.path(),
-            "MyAgents",
+            "LSAGENT",
             SystemTime::now(),
             WINDOWS_UPDATER_TEMP_DIR_GRACE,
         )
@@ -1411,13 +1411,13 @@ mod tests {
     fn cleanup_skips_symlinked_updater_dirs() {
         let root = tempfile::tempdir().unwrap();
         let target = root.path().join("target");
-        let link = root.path().join("MyAgents-0.2.9-updater-link");
+        let link = root.path().join("LSAGENT-0.2.9-updater-link");
         std::fs::create_dir(&target).unwrap();
         std::os::unix::fs::symlink(&target, &link).unwrap();
 
         let stats = cleanup_stale_windows_updater_temp_dirs_in(
             root.path(),
-            "MyAgents",
+            "LSAGENT",
             SystemTime::now() + Duration::from_secs(25 * 60 * 60),
             WINDOWS_UPDATER_TEMP_DIR_GRACE,
         )

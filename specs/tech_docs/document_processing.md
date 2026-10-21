@@ -68,7 +68,7 @@ queued/running/cancelling --App restart/shutdown--> interrupted
 
 `succeeded_with_warnings` 是带可用 artifact 的成功。`status/list` 查询成功时退出 0，即使所查 job 已失败；`wait` 对 failed/cancelled/interrupted 退出 1。Ctrl-C wait 退出 130，job 继续运行。
 
-持久 metadata 位于 MyAgents data root 的 `document-processing/jobs/<job-id>/job.json`，可包含 source/output path、格式、大小/hash、timestamps、warning/error、metrics 和 pipeline provenance；不得包含密码、正文、资产、解密数据或 OCR crop。同目录的 `publish-intent.json` 只是 Manager-owned 两阶段发布恢复记录，不是第二份 job 状态源：它只保存 job/path/token identity；任何 metadata write 的未知结果都保留 intent，直到 terminal authority 与 artifact 结果明确且相关目录 mutation 已 sync 才删除。非终态记录在下次启动统一转 `interrupted`，不自动重放；已 durable 的终态不可逆。终态 metadata 可见期 30 天；过期清理 metadata，不删除已经发布到用户输出根的 artifact。
+持久 metadata 位于 LSAGENT data root 的 `document-processing/jobs/<job-id>/job.json`，可包含 source/output path、格式、大小/hash、timestamps、warning/error、metrics 和 pipeline provenance；不得包含密码、正文、资产、解密数据或 OCR crop。同目录的 `publish-intent.json` 只是 Manager-owned 两阶段发布恢复记录，不是第二份 job 状态源：它只保存 job/path/token identity；任何 metadata write 的未知结果都保留 intent，直到 terminal authority 与 artifact 结果明确且相关目录 mutation 已 sync 才删除。非终态记录在下次启动统一转 `interrupted`，不自动重放；已 durable 的终态不可逆。终态 metadata 可见期 30 天；过期清理 metadata，不删除已经发布到用户输出根的 artifact。
 
 ## Queue 与 Worker lifecycle
 
@@ -94,11 +94,11 @@ Manager 与 Worker 使用 4-byte big-endian payload length + UTF-8 JSON；单 fr
 
 ### 结构化文档 fast path
 
-AnyDoc 使用资源锁固定的 vendored 上游源码；MyAgents patch 只增加 typed recovery diagnostic 与 opt-in asset serialization。parser 生成 `Document` 后，由 caller 给安全 asset 分配相对路径，renderer 才写 `![alt](assets/...)`。Worker 对资产做 MIME + magic sniff，只发布 PNG/JPEG/WebP passive raster；SVG、HTML、OLE、executable、外部 payload、未引用资产均不写出并产生 warning。被省略的内嵌资产会在原文位置留下 `**[Embedded asset omitted]**`，同时在顶部 warning summary 汇总。
+AnyDoc 使用资源锁固定的 vendored 上游源码；LSAGENT patch 只增加 typed recovery diagnostic 与 opt-in asset serialization。parser 生成 `Document` 后，由 caller 给安全 asset 分配相对路径，renderer 才写 `![alt](assets/...)`。Worker 对资产做 MIME + magic sniff，只发布 PNG/JPEG/WebP passive raster；SVG、HTML、OLE、executable、外部 payload、未引用资产均不写出并产生 warning。被省略的内嵌资产会在原文位置留下 `**[Embedded asset omitted]**`，同时在顶部 warning summary 汇总。
 
 AnyDoc 的 recoverable 分支直接产生 typed `{code, message, location}` diagnostic；日志只供本地排查，不作为产品 warning 数据源。能定位的恢复项还必须占据原内容位置，例如不可读 PPTX slide 在对应 slide 顺序插入可见 warning placeholder；Worker 再于文首汇总同一 typed diagnostics。CSV 等结构化格式不加载 OCR native runtime。
 
-加密 OOXML/legacy Office 由资源锁固定的 `office-crypto` 在 Worker 内解密；MyAgents 的窄 patch 只把 legacy DOC verifier 的密码校验失败提升为独立 `InvalidPassword`，其余 `InvalidStructure` 继续映射 `DOCUMENT_MALFORMED`。解密 bytes 只存在内存；缺密码、错误密码和不支持 scheme 分别返回稳定错误，损坏文件不得默认映射成密码错误。
+加密 OOXML/legacy Office 由资源锁固定的 `office-crypto` 在 Worker 内解密；LSAGENT 的窄 patch 只把 legacy DOC verifier 的密码校验失败提升为独立 `InvalidPassword`，其余 `InvalidStructure` 继续映射 `DOCUMENT_MALFORMED`。解密 bytes 只存在内存；缺密码、错误密码和不支持 scheme 分别返回稳定错误，损坏文件不得默认映射成密码错误。
 
 ### PDF 逐页 routing
 
@@ -167,11 +167,11 @@ prepare owner 把生命周期分成三层：
 - `x86_64-unknown-linux-gnu`
 - `aarch64-unknown-linux-gnu`
 
-ONNX Runtime 官方 1.28 macOS arm64 archive 的最低系统版本是 macOS 14，且没有 macOS x64 binary；MyAgents 最低支持 macOS 13，因此两个 macOS target 都从精确 commit `da9b5e364c465de65c49d91e696cd6485270757f`、固定 recipe 与 deployment target 13.0 构建 shared library，其余 target 使用锁定官方 archive。该源码路径由 prepare owner 在 cache miss 后、任何资源网络/源码 mutation 前统一检查 Git、Python 3.10+、CMake 3.28+ 与 Apple Clang；Python 下限来自锁定 recipe 的 mandatory driver syntax 与 shared-library CMake `find_package`，不能沿用其执行顺序之后才运行的陈旧 3.8 自检。setup 与各平台 build 都在固定 Rust toolchain 就绪后、各自首个耗时下载/安装/清理/编译动作前调用同一 `--check-prerequisites` 只读预检，不复制工具规则。preflight 只以 exact target prepared cache 决定是否需要工具，不读取当前投影；已有对应 fingerprint 的有效 prepared bundle 时不要求源码工具，prepare owner 也不自动安装原生构建工具。PDFium 全部使用 `chromium/7999` 锁定 archive。安装资源同时包含 AnyDoc/Paddle/ORT/PDFium license 与 PDFium 第三方 license tree；顶层 `THIRD_PARTY_NOTICES.md` 保留组件分类。speech 使用锁定 sherpa-onnx/codec 源码及其 legal tree，构建时只从上游 archive 展开根 `CMakeLists.txt`、`LICENSE`、`cmake/` 与 `sherpa-onnx/`，显式关闭 CoreML 和 C API examples，并通过要求 CMake 3.28+ 的 App-owned native adapter 链接上述同一 CPU ORT。
+ONNX Runtime 官方 1.28 macOS arm64 archive 的最低系统版本是 macOS 14，且没有 macOS x64 binary；LSAGENT 最低支持 macOS 13，因此两个 macOS target 都从精确 commit `da9b5e364c465de65c49d91e696cd6485270757f`、固定 recipe 与 deployment target 13.0 构建 shared library，其余 target 使用锁定官方 archive。该源码路径由 prepare owner 在 cache miss 后、任何资源网络/源码 mutation 前统一检查 Git、Python 3.10+、CMake 3.28+ 与 Apple Clang；Python 下限来自锁定 recipe 的 mandatory driver syntax 与 shared-library CMake `find_package`，不能沿用其执行顺序之后才运行的陈旧 3.8 自检。setup 与各平台 build 都在固定 Rust toolchain 就绪后、各自首个耗时下载/安装/清理/编译动作前调用同一 `--check-prerequisites` 只读预检，不复制工具规则。preflight 只以 exact target prepared cache 决定是否需要工具，不读取当前投影；已有对应 fingerprint 的有效 prepared bundle 时不要求源码工具，prepare owner 也不自动安装原生构建工具。PDFium 全部使用 `chromium/7999` 锁定 archive。安装资源同时包含 AnyDoc/Paddle/ORT/PDFium license 与 PDFium 第三方 license tree；顶层 `THIRD_PARTY_NOTICES.md` 保留组件分类。speech 使用锁定 sherpa-onnx/codec 源码及其 legal tree，构建时只从上游 archive 展开根 `CMakeLists.txt`、`LICENSE`、`cmake/` 与 `sherpa-onnx/`，显式关闭 CoreML 和 C API examples，并通过要求 CMake 3.28+ 的 App-owned native adapter 链接上述同一 CPU ORT。
 
 macOS ORT source cache 是可中断状态机：仅存在 `.git` 不代表已有可用 checkout。prepare owner 必须校准锁定 repository 的 `origin`，把 unborn/missing/wrong `HEAD` 视为 cache miss 并 fetch + detached checkout 锁定 commit；只有验证到该 commit 的 `HEAD` 才能直接复用。该恢复只适用于 App 管理的 derived source cache，不得推广到用户仓库。
 
-App 启动同步路径只解析 manifest，并校验 target/pipeline、路径、regular-file、size 与 Worker 可执行位，不读取 ORT、PDFium、OCR 模型或字典的完整正文。App ready 后先等 10 秒安静窗口，再由最低优先级 `BackgroundResourceValidation` lease 分块校验：共享 ORT 只由 `LocalInferenceRuntimeRegistry` 校验一次，Document Manager 校验 Worker/PDFium/OCR 模型/字典；Record live 到来时 chunk-level yield，稍后重新等待安静窗口再试。后台失败会阻止新的对应 admission，但不阻止 MyAgents UI 启动；Worker 启动后仍再次完整校验它实际要加载的五个资源并 fail closed。运行时不得下载、访问 Hugging Face 或使用用户 cache。
+App 启动同步路径只解析 manifest，并校验 target/pipeline、路径、regular-file、size 与 Worker 可执行位，不读取 ORT、PDFium、OCR 模型或字典的完整正文。App ready 后先等 10 秒安静窗口，再由最低优先级 `BackgroundResourceValidation` lease 分块校验：共享 ORT 只由 `LocalInferenceRuntimeRegistry` 校验一次，Document Manager 校验 Worker/PDFium/OCR 模型/字典；Record live 到来时 chunk-level yield，稍后重新等待安静窗口再试。后台失败会阻止新的对应 admission，但不阻止 LSAGENT UI 启动；Worker 启动后仍再次完整校验它实际要加载的五个资源并 fail closed。运行时不得下载、访问 Hugging Face 或使用用户 cache。
 
 speech 的用户可移除模型权重不属于本节的 build cache，也不进入 Tauri resource projection。它们由 `SpeechModelPackManager` 在首次显式安装及后续已授权维护时写入 App data 下的版本目录；安装前仍复用本节同一 App-owned ORT identity，但下载/签名、模型最小加载、`active.json` 切换与 busy removal 由 speech domain owner 裁决。两者只共享受信任 runtime 和 compute lease，不共享 job store 或模型 activation authority。详见 [`recording_and_speech_recognition.md`](./recording_and_speech_recognition.md)。
 

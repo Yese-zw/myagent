@@ -286,7 +286,7 @@ fn shutdown_for_update_inner(
     loop {
         // Update path MUST verify our own sidecars (SIDECAR_MARKER) too —
         // NSIS can't overwrite `bun.exe` while it's in use, so we need
-        // confirmation that every MyAgents-related process is gone. Uses
+        // confirmation that every LSAGENT-related process is gone. Uses
         // STARTUP patterns (superset that includes the sidecar marker).
         let matches = crate::process_cleanup::find_matching_processes_with_roots(
             STARTUP_CLEANUP_PATTERNS,

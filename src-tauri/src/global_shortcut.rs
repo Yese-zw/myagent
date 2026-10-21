@@ -1,4 +1,4 @@
-// Global shortcut: summon-or-toggle MyAgents from anywhere on the OS.
+// Global shortcut: summon-or-toggle LSAGENT from anywhere on the OS.
 //
 // Behaviour:
 //   window visible + focused  →  hide to tray (Raycast-style toggle)
@@ -23,7 +23,7 @@ use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Modifiers, Shortcut,
 
 use crate::{ulog_error, ulog_info, ulog_warn};
 
-/// Canonical default; M = MyAgents, three-platform-safe.
+/// Canonical default; M = LSAGENT, three-platform-safe.
 pub const DEFAULT_ACCELERATOR: &str = "CmdOrCtrl+Shift+M";
 
 /// AppConfig.globalSummonShortcut shape — mirror of TS type in shared/config-types.

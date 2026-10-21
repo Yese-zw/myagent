@@ -1366,7 +1366,7 @@ function applySnapshotToExternalSendContext(
       snapshot.reasoningEffort === '' ? 'default' : snapshot.reasoningEffort,
   };
 }
-// Pre-warm can create a runtime thread before MyAgents has a durable
+// Pre-warm can create a runtime thread before LSAGENT has a durable
 // sessions.json entry. Keep that narrow "birth" state explicit so the first
 // real user turn may materialize metadata, while missing metadata for ordinary
 // resume/delete races still fails closed.
@@ -4597,7 +4597,7 @@ async function _doStartExternalSession(options: {
     options.envPolicy ?? (await resolveAgentEnvPolicy(options.workspacePath));
   activeExternalEnvPolicy = resolvedEnvPolicy;
 
-  // Build system prompt using MyAgents' three-layer architecture.
+  // Build system prompt using LSAGENT' three-layer architecture.
   // Pass the current runtime so L1 identity text reports the correct CLI
   // (e.g. "OpenAI Codex CLI" instead of the builtin default).
   //
@@ -5455,7 +5455,7 @@ async function _doStartExternalSession(options: {
  * Rationale:
  *   - Each external runtime has its own modality contract (Codex blocks
  *     images, CC CLI accepts images).
- *   - External runtime models aren't in MyAgents' PRESET_PROVIDERS registry,
+ *   - External runtime models aren't in LSAGENT' PRESET_PROVIDERS registry,
  *     so `lookupModelCapability` would return undefined → optimistic
  *     default-allow → effectively no filter, just runtime overhead.
  *   - The frontend toast in `SimpleChatInput` is gated behind
@@ -6080,7 +6080,7 @@ async function dispatchExternalMessageOperation(
   // Case 2: Previous process exited — resume (CC -p mode multi-turn)
   const activeProcess = getExternalActiveProcess();
   if (!activeProcess || activeProcess.exited) {
-    // CC supports custom session IDs (--session-id) — resume with our MyAgents session ID.
+    // CC supports custom session IDs (--session-id) — resume with our LSAGENT session ID.
     // Codex doesn't support custom IDs — resume with Codex's own threadId (lastRuntimeSessionId).
     const runtimeType = getCurrentRuntimeType();
     const lifecycleSessionId = getExternalLifecycleSessionId();

@@ -141,7 +141,7 @@ export function TaskAdvancedConfigEditor(props: Props) {
 
   // Resolve the workspace's Agent — source of truth for the runtime / model
   // / permission / MCP defaults that the task inherits when the user picks
-  // "跟随 Agent". DSH shares MyAgents Product provider/model/MCP
+  // "跟随 Agent". DSH shares LSAGENT Product provider/model/MCP
   // configuration; only user-managed CLIs own those fields themselves.
   const workspaceAgent = useMemo(() => {
     if (!workspacePath) return null;

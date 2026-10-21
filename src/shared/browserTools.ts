@@ -58,7 +58,7 @@ export function hasUserEditableMcpSettings(serverId: string): boolean {
 }
 
 /**
- * The two MyAgents-owned browser entries intentionally expose overlapping
+ * The two LSAGENT-owned browser entries intentionally expose overlapping
  * browser_* tools. Keep a single execution selection (Session, Agent default,
  * Launcher, or Task override) mutually exclusive for these exact preset IDs:
  * selecting one removes the other; deselecting one never changes its peer.

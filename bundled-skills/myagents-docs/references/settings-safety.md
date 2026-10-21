@@ -2,7 +2,7 @@
 
 ## 动态事实要现场查询
 
-MyAgents 的模型列表、Runtime 版本、Provider 验证状态、MCP/Skill 安装、Agent 在线状态和实验功能开关都会变化。本文说明规则，不替代当前实例状态。
+LSAGENT 的模型列表、Runtime 版本、Provider 验证状态、MCP/Skill 安装、Agent 在线状态和实验功能开关都会变化。本文说明规则，不替代当前实例状态。
 
 用户问“我现在有哪些/有没有开启/为什么看不到”时，优先查看设置页或使用对应的只读 CLI discovery；不要从版本印象猜。
 
@@ -24,7 +24,7 @@ Agent 运行环境选择已直接开放，不需要旧「更多 Agent Runtime」
 
 ### 外部调用
 
-设置 → 外部调用允许用户授权本机其他 AI 或终端调用公开 MyAgents CLI 能力，默认关闭。启用后通过受保护设置界面提供的连接指引配置 `MYAGENTS_API_TOKEN`；不要把 token 贴进对话或日志。旧外部脚本也需授权，只设置端口或伪造 Session 环境不能替代认证。
+设置 → 外部调用允许用户授权本机其他 AI 或终端调用公开 LSAGENT CLI 能力，默认关闭。启用后通过受保护设置界面提供的连接指引配置 `MYAGENTS_API_TOKEN`；不要把 token 贴进对话或日志。旧外部脚本也需授权，只设置端口或伪造 Session 环境不能替代认证。
 
 外部调用使用公开命令、单向 start/send，没有内部 Session 的自动回复或 watch。App 内 Agent 仍使用产品自动注入的调用身份。这个开关与 Agent 网络目标的入网/开放设置独立。
 
@@ -50,7 +50,7 @@ Agent 运行环境选择已直接开放，不需要旧「更多 Agent Runtime」
 
 ## 本地数据边界
 
-MyAgents 的用户数据主要位于 `~/.myagents/`，包括配置、Session、Task、日志、附件、Skill、插件和云端本地状态。这个目录是应用数据库，不是普通 Workspace。
+LSAGENT 的用户数据主要位于 `~/.myagents/`，包括配置、Session、Task、日志、附件、Skill、插件和云端本地状态。这个目录是应用数据库，不是普通 Workspace。
 
 安全原则：
 
@@ -65,11 +65,11 @@ MyAgents 的用户数据主要位于 `~/.myagents/`，包括配置、Session、T
 
 Permission mode 决定 Agent 在工具调用和文件修改时的自主程度，不同 Runtime 的枚举不同。桌面交互、无人值守 Task/Goal、IM Channel 可能有不同默认策略。
 
-更高权限不等于可以越过产品安全边界：路径保护、实验门控、凭据归属、Space identity 和用户确认仍由 MyAgents 执行。
+更高权限不等于可以越过产品安全边界：路径保护、实验门控、凭据归属、Space identity 和用户确认仍由 LSAGENT 执行。
 
 ## 网络代理
 
-MyAgents 支持系统/自定义代理和按 Provider 范围应用。Provider 请求、远程 MCP、Plugin 安装、外部 Runtime、Cloud Space 可能使用不同的代理路径，不应只凭一个“proxy=true”结论混为一谈。
+LSAGENT 支持系统/自定义代理和按 Provider 范围应用。Provider 请求、远程 MCP、Plugin 安装、外部 Runtime、Cloud Space 可能使用不同的代理路径，不应只凭一个“proxy=true”结论混为一谈。
 
 本地 Sidecar 通信会绕过代理。出现 localhost 502、终端能访问但 Runtime 不行、某个 Provider 不跟随代理时，应进入 support 按链路诊断。
 
@@ -77,7 +77,7 @@ MyAgents 支持系统/自定义代理和按 Provider 范围应用。Provider 请
 
 - UI 可以跟随系统语言或选择支持的 locale；主窗口、托盘和浮窗应保持一致。
 - macOS、Windows、Linux 的可用功能和系统集成可能不同；当前 UI 和版本说明是可用性的最终用户入口。
-- MyAgents 自带 Node.js 和必要 Runtime 资源，普通用户不应为了修 Sidecar 被要求安装系统 Node。
+- LSAGENT 自带 Node.js 和必要 Runtime 资源，普通用户不应为了修 Sidecar 被要求安装系统 Node。
 - 桌面 App 更新与 Managed Codex Runtime 更新是两个生命周期；后者下载时不会主动中断当前已验证 Session。
 
 ## 何时只是使用问题，何时进入 support

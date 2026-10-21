@@ -2,7 +2,7 @@
 
 ## 概述
 
-MyAgents 使用统一日志系统聚合来自三个来源的日志：
+LSAGENT 使用统一日志系统聚合来自三个来源的日志：
 - **React** - 前端 `console.log/error/warn/debug`
 - **NODE** - Node.js Sidecar 后端日志
 - **Rust** - Tauri 原生层日志

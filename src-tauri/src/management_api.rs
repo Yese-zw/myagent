@@ -87,7 +87,7 @@ async fn require_internal_cli_request(request: Request, next: Next) -> Response 
         Json(serde_json::json!({
             "ok": false,
             "code": "internal_caller_required",
-            "error": "Internal MyAgents caller identity is required",
+            "error": "Internal LSAGENT caller identity is required",
         })),
     )
         .into_response()
@@ -128,34 +128,6 @@ pub async fn start_management_api() -> Result<u16, String> {
         .route("/api/app/config-changed", post(app_config_changed_handler))
         .route("/api/external-cli/admit", post(external_cli_admit_handler))
         .route("/api/session/text-page", post(session_text_page_handler))
-        .route(
-            "/api/agent-network/discovery",
-            post(agent_network_discovery_handler),
-        )
-        .route(
-            "/api/agent-network/return",
-            post(agent_network_return_handler)
-                .layer(DefaultBodyLimit::max(
-                    myagents_agent_network_protocol::budget("objectBytes"),
-                ))
-                .layer(middleware::from_fn(agent_network_body_budget)),
-        )
-        .route(
-            "/api/agent-network/diagnose",
-            post(agent_network_diagnose_handler),
-        )
-        .route(
-            "/api/agent-network/watches",
-            post(agent_network_watches_handler),
-        )
-        .route(
-            "/api/agent-network/invoke",
-            post(agent_network_invoke_handler)
-                .layer(DefaultBodyLimit::max(
-                    myagents_agent_network_protocol::budget("objectBytes"),
-                ))
-                .layer(middleware::from_fn(agent_network_body_budget)),
-        )
         .route(
             "/api/runtime/sdk-child/admit",
             post(sdk_child_admit_handler),
@@ -812,305 +784,6 @@ fn sidecar_is_live(sidecar_id: &str, generation: u64) -> bool {
     get_sidecar_state()
         .and_then(|sidecars| sidecars.lock().ok())
         .is_some_and(|manager| manager.is_live_process(sidecar_id, generation))
-}
-
-/// Charge network request bytes before JSON extraction and retain the lease
-/// until the response body is consumed or dropped. This shares the connector's
-/// App budget; small requests reserve their actual size, never the object limit.
-async fn agent_network_body_budget(request: Request, next: Next) -> Response {
-    use futures_util::StreamExt;
-    use tauri::Manager;
-    let failure = |code: &str| {
-        no_store_json(serde_json::json!({"ok":false,"error":{"code":code}})).into_response()
-    };
-    let Some(app) = crate::logger::get_app_handle() else {
-        return failure("CONNECTOR_UNAVAILABLE");
-    };
-    let Some(owner) = app.try_state::<crate::agent_network::actor::ManagedAgentNetwork>() else {
-        return failure("CONNECTOR_UNAVAILABLE");
-    };
-    let memory = owner.memory_budget();
-    let Ok(mut allocation) = memory.reserve(0) else {
-        return failure("CONNECTOR_CAPACITY");
-    };
-    let (parts, body) = request.into_parts();
-    let mut stream = body.into_data_stream();
-    let mut bytes = Vec::new();
-    while let Some(chunk) = stream.next().await {
-        let Ok(chunk) = chunk else {
-            return failure("PROTOCOL_INVALID");
-        };
-        let Some(size) = bytes.len().checked_add(chunk.len()) else {
-            return failure("MESSAGE_TOO_LARGE");
-        };
-        if size > myagents_agent_network_protocol::budget("objectBytes") {
-            return failure("MESSAGE_TOO_LARGE");
-        }
-        if allocation.resize(size.saturating_mul(2)).is_err()
-            || bytes.try_reserve_exact(chunk.len()).is_err()
-        {
-            return failure("CONNECTOR_CAPACITY");
-        }
-        bytes.extend_from_slice(&chunk);
-    }
-    let response = next
-        .run(Request::from_parts(parts, axum::body::Body::from(bytes)))
-        .await;
-    let (parts, body) = response.into_parts();
-    // Json has serialized the response at this point. Account its exact bound
-    // while it is handed back to the authenticated local caller.
-    if let Some(size) = axum::body::HttpBody::size_hint(&body).exact() {
-        if allocation
-            .resize((size as usize).saturating_mul(2))
-            .is_err()
-        {
-            return failure("CONNECTOR_CAPACITY");
-        }
-    }
-    let stream = futures_util::stream::unfold(
-        (body.into_data_stream(), allocation),
-        |(mut stream, allocation)| async move {
-            stream
-                .next()
-                .await
-                .map(|chunk| (chunk, (stream, allocation)))
-        },
-    );
-    Response::from_parts(parts, axum::body::Body::from_stream(stream))
-}
-
-async fn agent_network_invoke_handler(
-    headers: HeaderMap,
-    Json(request): Json<crate::agent_network::source::InvokeRequest>,
-) -> (HeaderMap, Json<serde_json::Value>) {
-    use tauri::Manager;
-    let queued_at = std::time::Instant::now();
-    let request_id = request.request.request_id.clone();
-    let method = request.request.method();
-    let generation = match request_sidecar_generation(&headers) {
-        Ok(value) => value,
-        Err(Json(value)) => return no_store_json(value),
-    };
-    let failure = |error: crate::agent_network::NetworkError| {
-        no_store_json(serde_json::json!({"ok":false,"error":error}))
-    };
-    let Some(manager) = get_sidecar_state() else {
-        return failure(crate::agent_network::NetworkError::new(
-            "SOURCE_OWNER_UNAVAILABLE",
-        ));
-    };
-    let Some(app) = crate::logger::get_app_handle() else {
-        return failure(crate::agent_network::NetworkError::new(
-            "CONNECTOR_UNAVAILABLE",
-        ));
-    };
-    let Some(owner) = app.try_state::<crate::agent_network::actor::ManagedAgentNetwork>() else {
-        return failure(crate::agent_network::NetworkError::new(
-            "CONNECTOR_UNAVAILABLE",
-        ));
-    };
-    match crate::agent_network::source::invoke(&owner, manager, generation, request, queued_at)
-        .await
-    {
-        Ok(result) => no_store_json(
-            serde_json::json!({"ok":true,"outcome":result.outcome,"identity":result.identity}),
-        ),
-        Err(error) => {
-            ulog_warn!(
-                "[agent-network] stage=source-invoke requestId={} method={} code={}",
-                request_id,
-                method,
-                error.code
-            );
-            failure(error)
-        }
-    }
-}
-
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct NetworkDiscoveryRequest {
-    sidecar_id: String,
-    #[serde(default)]
-    local_only: bool,
-}
-async fn agent_network_discovery_handler(
-    headers: HeaderMap,
-    Json(request): Json<NetworkDiscoveryRequest>,
-) -> (HeaderMap, Json<serde_json::Value>) {
-    use tauri::Manager;
-    let generation = match request_sidecar_generation(&headers) {
-        Ok(generation) => generation,
-        Err(Json(value)) => return no_store_json(value),
-    };
-    let failure = |code| no_store_json(serde_json::json!({"ok":false,"error":{"code":code}}));
-    if !sidecar_is_live(&request.sidecar_id, generation) {
-        return failure("SOURCE_GENERATION_CHANGED");
-    }
-    let Some(app) = crate::logger::get_app_handle() else {
-        return failure("CONNECTOR_UNAVAILABLE");
-    };
-    let Some(owner) = app.try_state::<crate::agent_network::actor::ManagedAgentNetwork>() else {
-        return failure("CONNECTOR_UNAVAILABLE");
-    };
-    let result = crate::agent_network::discovery::remote(&owner, request.local_only).await;
-    if !sidecar_is_live(&request.sidecar_id, generation) {
-        return failure("SOURCE_GENERATION_CHANGED");
-    }
-    match result {
-        Ok(data) => no_store_json(serde_json::json!({"ok":true,"data":data})),
-        Err(error) => no_store_json(serde_json::json!({"ok":false,"error":error})),
-    }
-}
-
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-struct NetworkDiagnoseRequest {
-    sidecar_id: String,
-    network: Option<String>,
-    cursor: Option<String>,
-    limit: usize,
-}
-fn network_diagnostic_device(device: &serde_json::Value) -> serde_json::Value {
-    serde_json::json!({
-        "deviceId": device["deviceId"],
-        "deviceName": device["name"],
-        "platform": device["platform"],
-        "appVersion": device["appVersion"],
-        "connectionState": device["connectionState"],
-    })
-}
-
-async fn agent_network_diagnose_handler(
-    headers: HeaderMap,
-    Json(request): Json<NetworkDiagnoseRequest>,
-) -> (HeaderMap, Json<serde_json::Value>) {
-    use crate::agent_network::commands::MetadataRequest;
-    use tauri::Manager;
-    let generation = match request_sidecar_generation(&headers) {
-        Ok(value) => value,
-        Err(Json(value)) => return no_store_json(value),
-    };
-    let failure = |code| no_store_json(serde_json::json!({"ok":false,"error":{"code":code}}));
-    if !sidecar_is_live(&request.sidecar_id, generation) {
-        return failure("SOURCE_GENERATION_CHANGED");
-    }
-    if request.limit == 0 || request.limit > 100 {
-        return failure("NETWORK_ARGUMENT_INVALID");
-    }
-    let Some(app) = crate::logger::get_app_handle() else {
-        return failure("CONNECTOR_UNAVAILABLE");
-    };
-    let Some(owner) = app.try_state::<crate::agent_network::actor::ManagedAgentNetwork>() else {
-        return failure("CONNECTOR_UNAVAILABLE");
-    };
-    use futures_util::{stream::FuturesUnordered, StreamExt};
-    let mut views = owner.view().connections;
-    if let Some(filter) = &request.network {
-        views.retain(|v| {
-            v.id == *filter || v.name == *filter || v.snapshot.network_id.as_deref() == Some(filter)
-        });
-        if views.len() != 1 {
-            return failure("NETWORK_SCOPE_MISMATCH");
-        }
-    } else if request.cursor.is_some() {
-        return failure("NETWORK_ARGUMENT_INVALID");
-    }
-    let mut reads = FuturesUnordered::new();
-    for view in views {
-        let connection = owner.connection(&view.id);
-        let cursor = request.cursor.clone();
-        let limit = request.limit;
-        reads.push(async move{
-            let data=match connection{
-                Ok(connection)=>{
-                    let (network,devices)=tokio::join!(connection.request(MetadataRequest::Network),connection.request(MetadataRequest::Devices{cursor,limit}));
-                    match (network,devices){
-                        (Ok(network),Ok(devices))=>{let items:Vec<_>=devices["items"].as_array().into_iter().flatten().map(network_diagnostic_device).collect();
-                            serde_json::json!({"protocol":network["protocol"],"capabilities":network["capabilities"],"devices":items,"nextCursor":devices["nextCursor"],"complete":devices["complete"]})},
-                        _=>serde_json::json!({"complete":false,"error":{"code":"NETWORK_DIAGNOSTIC_UNAVAILABLE"}}),
-                    }
-                },Err(error)=>serde_json::json!({"complete":false,"error":error}),
-            };
-            serde_json::json!({"connectionId":view.id,"networkName":view.name,"state":view.snapshot.state,"data":data})
-        });
-    }
-    let mut networks = Vec::new();
-    while let Some(value) = reads.next().await {
-        networks.push(value);
-    }
-    if !sidecar_is_live(&request.sidecar_id, generation) {
-        return failure("SOURCE_GENERATION_CHANGED");
-    }
-    no_store_json(
-        serde_json::json!({"ok":true,"data":{"complete":networks.iter().all(|v|v["data"]["complete"]==true),"networks":networks}}),
-    )
-}
-
-async fn agent_network_watches_handler(
-    headers: HeaderMap,
-    Json(request): Json<crate::agent_network::source::WatchesRequest>,
-) -> (HeaderMap, Json<serde_json::Value>) {
-    use tauri::Manager;
-    let generation = match request_sidecar_generation(&headers) {
-        Ok(value) => value,
-        Err(Json(value)) => return no_store_json(value),
-    };
-    let failure = |error: crate::agent_network::NetworkError| {
-        no_store_json(serde_json::json!({"ok":false,"error":error}))
-    };
-    let Some(manager) = get_sidecar_state() else {
-        return failure(crate::agent_network::NetworkError::new(
-            "SOURCE_OWNER_UNAVAILABLE",
-        ));
-    };
-    let Some(app) = crate::logger::get_app_handle() else {
-        return failure(crate::agent_network::NetworkError::new(
-            "CONNECTOR_UNAVAILABLE",
-        ));
-    };
-    let Some(owner) = app.try_state::<crate::agent_network::actor::ManagedAgentNetwork>() else {
-        return failure(crate::agent_network::NetworkError::new(
-            "CONNECTOR_UNAVAILABLE",
-        ));
-    };
-    match crate::agent_network::source::watches(&owner, manager, generation, request).await {
-        Ok(result) => no_store_json(serde_json::json!({"ok":true,"result":result})),
-        Err(error) => failure(error),
-    }
-}
-
-async fn agent_network_return_handler(
-    headers: HeaderMap,
-    Json(request): Json<crate::agent_network::returns::CallbackRequest>,
-) -> (HeaderMap, Json<serde_json::Value>) {
-    use tauri::Manager;
-    let generation = match request_sidecar_generation(&headers) {
-        Ok(value) => value,
-        Err(Json(value)) => return no_store_json(value),
-    };
-    let failure = |error: crate::agent_network::NetworkError| {
-        no_store_json(serde_json::json!({"ok":false,"error":error}))
-    };
-    let Some(manager) = get_sidecar_state() else {
-        return failure(crate::agent_network::NetworkError::new(
-            "SOURCE_OWNER_UNAVAILABLE",
-        ));
-    };
-    let Some(app) = crate::logger::get_app_handle() else {
-        return failure(crate::agent_network::NetworkError::new(
-            "CONNECTOR_UNAVAILABLE",
-        ));
-    };
-    let Some(owner) = app.try_state::<crate::agent_network::actor::ManagedAgentNetwork>() else {
-        return failure(crate::agent_network::NetworkError::new(
-            "CONNECTOR_UNAVAILABLE",
-        ));
-    };
-    match crate::agent_network::source::return_event(&owner, manager, generation, request).await {
-        Ok(settlement) => no_store_json(serde_json::json!({"ok":true,"settlement":settlement})),
-        Err(error) => failure(error),
-    }
 }
 
 async fn mcp_startup_acquire_handler(
@@ -5405,8 +5078,15 @@ struct InboxDeliverRequest {
 async fn inbox_deliver_handler(Json(req): Json<InboxDeliverRequest>) -> Json<serde_json::Value> {
     // Channel identities are minted only by the Channel owner. The generic
     // Session messaging API cannot assert a Channel handoff on a caller's behalf.
-    if req.message.session_event.as_ref().is_some_and(|event| event.get("channelHandoff").is_some()) {
-        return Json(serde_json::json!({"ok":false,"error":"Channel handoffs must use myagents im send-message"}));
+    if req
+        .message
+        .session_event
+        .as_ref()
+        .is_some_and(|event| event.get("channelHandoff").is_some())
+    {
+        return Json(
+            serde_json::json!({"ok":false,"error":"Channel handoffs must use myagents im send-message"}),
+        );
     }
     let Some(manager) = get_sidecar_state() else {
         return Json(serde_json::json!({
@@ -5523,7 +5203,7 @@ fn resolve_speech_caller(
             "ok": false,
             "code": "SPEECH_MANAGER_UNAVAILABLE",
             "error": "The Sidecar identity owner is unavailable.",
-            "suggestion": "Restart MyAgents and retry.",
+            "suggestion": "Restart LSAGENT and retry.",
         }));
     };
     sidecars
@@ -5626,8 +5306,8 @@ async fn speech_list_handler(
 fn speech_error_value(code: &str) -> serde_json::Value {
     let (error, suggestion) = match code {
         "SPEECH_SESSION_REQUIRED" => (
-            "Speech recognition requires an active MyAgents Session with an authoritative Workspace.",
-            "Run the command from the MyAgents Session that should own the job.",
+            "Speech recognition requires an active LSAGENT Session with an authoritative Workspace.",
+            "Run the command from the LSAGENT Session that should own the job.",
         ),
         "SPEECH_RESOURCE_REQUIRED" | "SPEECH_MODEL_PACK_UNAVAILABLE" | "SPEECH_NATIVE_RUNTIME_UNAVAILABLE" => (
             "The local speech recognition resources are not ready.",
@@ -5663,7 +5343,7 @@ fn speech_error_value(code: &str) -> serde_json::Value {
         ),
         "SPEECH_DEADLINE_EXCEEDED" | "SPEECH_WORKER_TIMEOUT" => (
             "Local speech processing stopped because the Worker exceeded its deadline or heartbeat window.",
-            "Retry once; if it repeats, re-export the media and inspect MyAgents diagnostics.",
+            "Retry once; if it repeats, re-export the media and inspect LSAGENT diagnostics.",
         ),
         "SPEECH_SOURCE_UNAVAILABLE" | "SPEECH_SOURCE_UNSAFE" | "SPEECH_SOURCE_PATH_INVALID" | "SPEECH_SOURCE_CHANGED" => (
             "The media source is missing, unsafe, outside the current Workspace, or changed during admission.",
@@ -5679,7 +5359,7 @@ fn speech_error_value(code: &str) -> serde_json::Value {
         ),
         "SPEECH_MANAGER_UNAVAILABLE" => (
             "The speech recognition manager is unavailable.",
-            "Restart MyAgents and retry.",
+            "Restart LSAGENT and retry.",
         ),
         _ => (
             "The speech recognition operation failed.",
@@ -5769,9 +5449,9 @@ fn document_manager_unavailable() -> Json<serde_json::Value> {
         "ok": false,
         "code": "DOCUMENT_MANAGER_UNAVAILABLE",
         "error": "The document manager is unavailable.",
-        "suggestion": "Restart MyAgents and retry.",
+        "suggestion": "Restart LSAGENT and retry.",
         "recoveryHint": {
-            "message": "Restart MyAgents and retry."
+            "message": "Restart LSAGENT and retry."
         }
     }))
 }
@@ -5822,6 +5502,17 @@ mod channel_discovery_tests {
             );
         }
     }
+}
+
+#[cfg(test)]
+fn network_diagnostic_device(device: &serde_json::Value) -> serde_json::Value {
+    serde_json::json!({
+        "deviceId": device["deviceId"],
+        "deviceName": device["name"],
+        "platform": device["platform"],
+        "appVersion": device["appVersion"],
+        "connectionState": device["connectionState"],
+    })
 }
 
 #[cfg(test)]

@@ -31,7 +31,7 @@ describe('handleInboxDrain scenario routing', () => {
     const message: PendingInboxMessage = {
       messageId: 'msg-space',
       fromSessionId: 'myagents-space',
-      fromLabel: 'MyAgents Space',
+      fromLabel: 'LSAGENT Space',
       toSessionId: 'session-space',
       text: '<system-reminder>\n<myagents-space-issue>\nSpace issue delivery\n</myagents-space-issue>\n</system-reminder>\nVisible Space issue',
       replyBack: false,
@@ -41,7 +41,7 @@ describe('handleInboxDrain scenario routing', () => {
         type: 'space.issue_delivery',
         eventId: 'msg-space',
         sourceSessionId: 'myagents-space',
-        sourceLabel: 'MyAgents Space',
+        sourceLabel: 'LSAGENT Space',
         targetSessionId: 'session-space',
         createdAt: '2026-06-30T00:00:00.000Z',
         deliveryId: 'delivery-1',
@@ -106,7 +106,7 @@ describe('handleInboxDrain scenario routing', () => {
     const malformed = {
       messageId: 'msg-malformed-space',
       fromSessionId: 'myagents-space',
-      fromLabel: 'MyAgents Space',
+      fromLabel: 'LSAGENT Space',
       toSessionId: 'session-space',
       text: '<system-reminder>delivery</system-reminder>',
       replyBack: false,

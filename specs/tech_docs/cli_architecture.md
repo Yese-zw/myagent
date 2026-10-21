@@ -1,8 +1,8 @@
-# MyAgents CLI 架构
+# LSAGENT CLI 架构
 
 ## 概述
 
-MyAgents 内置了一个 CLI 工具（`myagents`），既供 App 内 Agent 调用产品能力，也能在用户显式开启后供本机外部程序调用固定公开能力。CLI 的参数解析、文件输入和输出格式位于随当前安装包发布的 `cli/myagents.cjs`；状态 authority、外部访问策略与业务 mutation 仍在 Sidecar Admin / Rust Management API。安装包内 bundle 是 CLI 业务代码的唯一运行时副本，用户目录只保存薄启动器。
+LSAGENT 内置了一个 CLI 工具（`myagents`），既供 App 内 Agent 调用产品能力，也能在用户显式开启后供本机外部程序调用固定公开能力。CLI 的参数解析、文件输入和输出格式位于随当前安装包发布的 `cli/myagents.cjs`；状态 authority、外部访问策略与业务 mutation 仍在 Sidecar Admin / Rust Management API。安装包内 bundle 是 CLI 业务代码的唯一运行时副本，用户目录只保存薄启动器。
 
 按任务定位：命令解析与端口查“CLI 脚本设计”，安装包/薄启动器查“Bundle authority 与 launcher 收敛”，业务写入查“Admin API”，Task 创建查“Task 创建链路”，运行失败查“排查指南”。
 
@@ -21,7 +21,7 @@ Goal Mode 是 CLI 的特殊 current-session 控制能力：`myagents goal create
 │ 用户: "帮我配个 MCP"                                                 │
 │   → AI Bash 工具 → `myagents mcp add --id xxx ...`                  │
 │   → PATH 首先命中 ~/.myagents/bin/myagents 薄启动器                  │
-│   → 当前 MyAgents executable + private marker                       │
+│   → 当前 LSAGENT executable + private marker                       │
 │   → 当前 bundle Node 执行当前 bundle cli/myagents.cjs               │
 │   → 携带 App 生命周期内部 capability 请求 Admin API              │
 │   → Admin API 写 config → SSE 广播 → 前端同步                        │
@@ -31,7 +31,7 @@ Goal Mode 是 CLI 的特殊 current-session 控制能力：`myagents goal create
 │ 场景 2：用户终端调用（次要用途）                                       │
 │                                                                     │
 │ 前置：App 运行、开启外部调用、设置 MYAGENTS_API_TOKEN               │
-│ 终端: `MyAgents runtime list` 或 `myagents runtime list`            │
+│ 终端: `LSAGENT runtime list` 或 `myagents runtime list`            │
 │   → direct app-binary group 或 launcher private marker 进入 CLI mode │
 │   → 不启动 GUI / 不杀 sidecar / 不触发单实例焦点                      │
 │   → 定位当前安装树中的 bundled Node + cli/myagents.cjs               │
@@ -88,7 +88,7 @@ CLI 文本输出优先使用命令专属格式；其余成功且含 `data` 的�
 
 ### 执行方式
 
-CLI 脚本只有一条执行 authority：`cli.rs` 使用当前安装包的 bundled Node.js 执行当前安装包的 `resources/cli/myagents.cjs`。`.cjs` 是产物自描述契约：即使开发 `.app` 位于上层声明 `type: module` 的源码目录，Node 也必须按 CommonJS 加载。AI Bash 与用户终端的 `myagents` 先经过薄启动器回到当前 app executable；兼容的 `MyAgents <known-group>` 直调则直接进入同一个 Rust CLI mode。两条入口最终执行同一 bundle，不依赖系统 Node 或 HOME 中的业务脚本。
+CLI 脚本只有一条执行 authority：`cli.rs` 使用当前安装包的 bundled Node.js 执行当前安装包的 `resources/cli/myagents.cjs`。`.cjs` 是产物自描述契约：即使开发 `.app` 位于上层声明 `type: module` 的源码目录，Node 也必须按 CommonJS 加载。AI Bash 与用户终端的 `myagents` 先经过薄启动器回到当前 app executable；兼容的 `LSAGENT <known-group>` 直调则直接进入同一个 Rust CLI mode。两条入口最终执行同一 bundle，不依赖系统 Node 或 HOME 中的业务脚本。
 
 ### CLI 端口选择
 
@@ -263,7 +263,7 @@ App 内部 caller 的 `task create-direct` 与 `task list` 在 Sidecar Admin 边
 
 已通过内部 capability 的 CLI caller 从自身 `MYAGENTS_SESSION_ID` 判定 `agent/cli` 或 `user/cli`，把内部 caller metadata 传到既有 Rust transition 审计；Sidecar 不用自己的 `MYAGENTS_PORT` 猜调用者。token-authenticated 外部 caller 的 Task 审计来源由 Host 固定为 `user/cli`，不信任环境或 payload 自报的 Agent/Session 身份。UI 继续在 Tauri command 边界权威盖章为 `user/ui`。archive 仍由状态机执行 user-only guard，delete 记录真实 CLI actor/source。
 
-`--preselectedSessionId current` 在 CLI 边界解析 `MYAGENTS_SESSION_ID`，持久层只接收 canonical id；新建 single-session 不允许空绑定。trigger/spec/checkpoint 文件使用有界 regular-file no-follow 读取，拒绝 NUL、无效 UTF-8、超限或非 object JSON；`trigger test --expect` 也必须在任何 Detector 调用前校验为 `quiet | activate`。test 不提交 MyAgents 状态，但命令的外部副作用仍真实发生。human/JSON failure 都保留结构化 code、suggestion、可选 suggested command，以及 Detector 的有界 stderr/stdout 诊断。pending Activation Event 未结算时，Rust authority 拒绝 `run-now`，CLI 只透传该拒绝而不建立第二条执行路径。
+`--preselectedSessionId current` 在 CLI 边界解析 `MYAGENTS_SESSION_ID`，持久层只接收 canonical id；新建 single-session 不允许空绑定。trigger/spec/checkpoint 文件使用有界 regular-file no-follow 读取，拒绝 NUL、无效 UTF-8、超限或非 object JSON；`trigger test --expect` 也必须在任何 Detector 调用前校验为 `quiet | activate`。test 不提交 LSAGENT 状态，但命令的外部副作用仍真实发生。human/JSON failure 都保留结构化 code、suggestion、可选 suggested command，以及 Detector 的有界 stderr/stdout 诊断。pending Activation Event 未结算时，Rust authority 拒绝 `run-now`，CLI 只透传该拒绝而不建立第二条执行路径。
 
 Agent-facing CLI 统一使用 `myagents task`。`task start/stop/runs` 走 canonical `task/*` route，和 legacy Cron handler 只共享进入同一个 Rust Task authority 的小型 adapter；精确 Task ID 操作不读取当前 workspace。`myagents cron` 仅为 App 内旧脚本继续兼容，不属于 token-authenticated 外部公开面。Task 创建还可用 `--deadline`、`--maxExecutions`、`--aiCanExit` 写入既有 `TaskEndConditions`，不新增结束状态 owner。
 
@@ -277,7 +277,7 @@ myagents diagnose runtime codex [--workspace=<path>] [--json]    # 别名糖
 两条命令路由到同一个 admin endpoint（`runtime/diagnose` 与 `diagnose/runtime`，handler 一致）。Spawn 一个短命 `codex app-server` 进程，跑 `initialize` + 4 个 RPC（`getAuthStatus` / `experimentalFeature.list` / `mcpServerStatus.list` / `app.list`），结构化返回 `RuntimeDiagnostics`：
 
 - `--workspace=<path>` 让诊断按该 workspace 的 agent `runtimeConfig.envPolicy` 注入 env（共享 `env-utils.resolveAgentEnvPolicy` 做 proxy 字面量校验），结果反映真实会话会看到的状态而不是 baseline
-- `--json` 输出稳定的结构化诊断，便于比较用户终端与 MyAgents Runtime 的实际环境
+- `--json` 输出稳定的结构化诊断，便于比较用户终端与 LSAGENT Runtime 的实际环境
 
 详见 [`multi_agent_runtime.md`](multi_agent_runtime.md) 的“诊断与环境”。
 
@@ -307,7 +307,7 @@ Skill frontmatter 以 Agent Skills 标准为 canonical：作者写在 `metadata.
 
 `SYSTEM_SKILLS` 是版本化安装集合，`REQUIRED_SYSTEM_SKILLS` 是其中始终可用的产品契约子集，二者不能混为一谈。canonical 名单在 `src/shared/systemSkills.ts`，Rust workspace/slash 路径在 `src-tauri/src/workspace_files/skills_config.rs` 维护必要镜像，并由 cross-language test 锁定；改名单必须同步这两处，禁止 UI、CLI、文档或其它模块再复制第三份。读取旧 `skills-config.json` 和每次写回都会移除这些名称的 stale disabled 项；Skills API 以 `required:true, enabled:true` 投影，disable 请求返回 409。其它版本化或用户 Skill 仍可正常 enable/disable。
 
-内容所有权与启停权彼此独立：user scope 的 `SYSTEM_SKILLS` 内容一律由 MyAgents 持有并保持只读，不因是否 `required` 而改变；optional system Skill 仍可按现有策略 enable/disable。project scope 中同 canonical name 的实体 Skill 仍归项目所有，可独立编辑和删除；普通用户 Skill 的 CRUD 不变。
+内容所有权与启停权彼此独立：user scope 的 `SYSTEM_SKILLS` 内容一律由 LSAGENT 持有并保持只读，不因是否 `required` 而改变；optional system Skill 仍可按现有策略 enable/disable。project scope 中同 canonical name 的实体 Skill 仍归项目所有，可独立编辑和删除；普通用户 Skill 的 CRUD 不变。
 
 系统同步成功之后，Runtime 还必须经过全局 Skill integrity admission：Node `global-skill-inventory.ts` 是 builtin / Managed Codex / System Codex 与 Claude Code 工作区兼容链接的唯一运行时 authority，一次完整根扫描同时喂给本次边界需要的 resolver、compiler 与 projection。强冲突证据项保留磁盘但不加载；Required 缺失或 blocked 拒绝 Runtime。Rust Launcher 不建立第二份注册表，只用共享 fixtures 镜像 classifier，并跳过指向全局根的 project junction。完整分类、投影收敛与 mutation-only 只读规则见 `pit_of_success.md#system-skill-sync` 和 `pit_of_success.md#workspace-files`。
 
@@ -334,7 +334,7 @@ pub fn is_cli_mode(args: &[String]) -> bool {
 }
 ```
 
-canonical HOME launcher 总是传私有 marker，Rust 在调用 Node 前剥掉它。因此新增 `myagents <group>` 不依赖 Rust group 镜像。`CLI_COMMANDS` 只保留已经发布的 `MyAgents <known-group>` 直调兼容；若产品明确承诺新 group 也支持 app-binary 直调，才扩展该兼容名单。deep link / 普通 GUI 参数不含 marker，不会误进 CLI。
+canonical HOME launcher 总是传私有 marker，Rust 在调用 Node 前剥掉它。因此新增 `myagents <group>` 不依赖 Rust group 镜像。`CLI_COMMANDS` 只保留已经发布的 `LSAGENT <known-group>` 直调兼容；若产品明确承诺新 group 也支持 app-binary 直调，才扩展该兼容名单。deep link / 普通 GUI 参数不含 marker，不会误进 CLI。
 
 应用 `main()` 在 Tauri 初始化前检查 CLI 模式，提前分流：
 - **CLI 模式**：不启动 GUI、不杀 sidecar、不触发单实例窗口焦点
@@ -494,9 +494,9 @@ live runtime 未收敛”，不能把当前 Sidecar 的 `config:changed` 当作�
 
 ### 官方 CLI 工具与用户 CLI 工具
 
-MyAgents CLI 同时承载两类“工具”：
+LSAGENT CLI 同时承载两类“工具”：
 
-- 官方 CLI 工具：产品内置、稳定可用，由 MyAgents 自己实现和审核，例如 `myagents vision analyze`。它们可以出现在设置页「工具箱」和对话工具菜单中，但不属于 MCP，也不受用户 CLI 工具注册表实验开关影响。
+- 官方 CLI 工具：产品内置、稳定可用，由 LSAGENT 自己实现和审核，例如 `myagents vision analyze`。它们可以出现在设置页「工具箱」和对话工具菜单中，但不属于 MCP，也不受用户 CLI 工具注册表实验开关影响。
 - 用户注册 CLI 工具：用户通过 `myagents tool add` 注册的自定义 Agent-CLI 工具，受实验室开关控制，并通过 registry 注入新 session prompt。
 
 `vision` 的开关语义与 MCP 类似：设置页全局启用后，对话内工具菜单还可以做 session 级启用；实际可用性还要求「设置 → 工具箱」中选择了支持图片输入的模型。`vision analyze` 只接受当前 workspace 内的本地图片路径；`--prompt` 用于短指令，`--prompt-file` 用于长/多行指令，但同样只按当前 workspace 解析，拒绝 URL、symlink 与逃逸路径。
@@ -531,7 +531,7 @@ Speech 是官方稳定命令组，不属于 MCP，也不受用户 CLI 工具注�
 
 不受影响：
 - 稳定内置 `myagents` CLI 能力（cron / task / record / speech / im / widget / runtime 等）仍然注入并可用。
-- 已经存在于 `~/.myagents/bin` 的工具 shim 不会被删除；门控的是 MyAgents 的注册、管理、自动发现和 `tool-creator` 注入，不是用户磁盘上可执行文件的生命周期。
+- 已经存在于 `~/.myagents/bin` 的工具 shim 不会被删除；门控的是 LSAGENT 的注册、管理、自动发现和 `tool-creator` 注入，不是用户磁盘上可执行文件的生命周期。
 
 由于系统提示词和 SDK skill 集合只在 session 启动 / pre-warm 时固化，开关变化对已有会话的提示内容不会 retroactive 改写；但实际 `myagents tool ...` 调用会立即被 Admin API 门控。
 
@@ -579,13 +579,13 @@ PATH 优先级（agent-session.ts::buildClaudeSessionEnv）：
   ~/.myagents/bin             → 官方 myagents launcher + Tool Registry shims
   systemNodeDirs              → 用户安装的 Node.js（npm 更可靠）
   bundledNodeDir              → 内置 Node.js（fallback）
-  ~/.myagents/npm-global/bin  → MyAgents-localized npm installs / legacy AI 自装 CLI 落点
+  ~/.myagents/npm-global/bin  → LSAGENT-localized npm installs / legacy AI 自装 CLI 落点
   系统 PATH                    → 用户其他工具
 ```
 
 `myagents` 是 app-owned Runtime 中的产品保留命令，因此官方 bin 必须先于 npm-global、Windows AppData npm 和 inherited PATH；否则正确 launcher 仍会被旧同名 npm 包遮蔽。这个顺序由 shared Session builder、external shell fallback 与内嵌终端共同遵守，不修改用户普通外部终端的系统 PATH。`~/.myagents/bin` 还保存 Tool Registry shims，继续由其命名碰撞校验约束；CLI 迁移不会扫描或删除其它文件。
 
-`~/.myagents/npm-global/` 是 MyAgents 建议的 AI 自装 CLI 落点。`buildClaudeSessionEnv()` 只注入 `MYAGENTS_NPM_GLOBAL_PREFIX` 和 PATH，不再给整个 SDK shell env 设置 `npm_config_prefix` / `NPM_CONFIG_PREFIX` / `PREFIX`，否则 nvm 会在每次 zsh/bash 初始化时吐兼容性警告。需要固定安装落点的 skill 用命令级 env：`npm_config_prefix="$MYAGENTS_NPM_GLOBAL_PREFIX" npm install -g <pkg>`。
+`~/.myagents/npm-global/` 是 LSAGENT 建议的 AI 自装 CLI 落点。`buildClaudeSessionEnv()` 只注入 `MYAGENTS_NPM_GLOBAL_PREFIX` 和 PATH，不再给整个 SDK shell env 设置 `npm_config_prefix` / `NPM_CONFIG_PREFIX` / `PREFIX`，否则 nvm 会在每次 zsh/bash 初始化时吐兼容性警告。需要固定安装落点的 skill 用命令级 env：`npm_config_prefix="$MYAGENTS_NPM_GLOBAL_PREFIX" npm install -g <pkg>`。
 
 ## 安全设计
 
@@ -603,15 +603,15 @@ PATH 优先级（agent-session.ts::buildClaudeSessionEnv）：
 
 | 问题 | 排查方法 |
 |------|---------|
-| `ECONNREFUSED` | MyAgents GUI 未运行，先启动应用 |
-| `MYAGENTS_PORT not set` | 没有 Session 环境且 Global Sidecar port 不可用；启动 MyAgents / 对应 Session 后重试 |
+| `ECONNREFUSED` | LSAGENT GUI 未运行，先启动应用 |
+| `MYAGENTS_PORT not set` | 没有 Session 环境且 Global Sidecar port 不可用；启动 LSAGENT / 对应 Session 后重试 |
 | `CLI_BOOTSTRAP_FAILED ... BUNDLE_RESOURCES_MISSING` | 当前安装包的 bundled Node 或 `cli/myagents.cjs` 损坏；更新或重装，不要复制旧 HOME 脚本 |
 | `CLI_BOOTSTRAP_FAILED ... LAUNCHER_*` | HOME launcher 无法原子收敛；检查路径 / 权限 / 占用，关闭占用程序后重试或重启 app |
 | 终端 `myagents` 找不到 | 场景 2 需要用完整路径或创建 alias，`~/.myagents/bin` 默认不在 shell PATH |
 | `Management API not available` | Node.js Sidecar 起来了但 Rust Management API 没起 — CLI 会附带 `→ Run: myagents status` 指引 |
-| `SPEECH_SESSION_REQUIRED` | 必须从拥有 authoritative Session + Workspace 的 MyAgents 会话调用；不要补传 scope 参数 |
+| `SPEECH_SESSION_REQUIRED` | 必须从拥有 authoritative Session + Workspace 的 LSAGENT 会话调用；不要补传 scope 参数 |
 | `SPEECH_JOB_NOT_FOUND` | 该 job 不属于当前 Session 或已不存在；先在同一 Session 运行 `myagents speech list` |
-| `MyAgents <new-group>` 进了 GUI | app-binary 直调只兼容已发布 group；canonical `myagents <new-group>` 不受 Rust group 名单约束 |
+| `LSAGENT <new-group>` 进了 GUI | app-binary 直调只兼容已发布 group；canonical `myagents <new-group>` 不受 Rust group 名单约束 |
 
 DSH Session 路由下，`myagents skill list` 的 JSON 保留安装字段，并增加 `runtimeAvailability`（准入状态、effective/desired revision、组件调用开关与原因）。文本输出使用同一回执。没有回执显示 unknown，不用 enabled 推断模型可调用；模型可调用不代表已经授予执行权限。
 

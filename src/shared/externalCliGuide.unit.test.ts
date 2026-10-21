@@ -17,7 +17,7 @@ const publicCommands = EXTERNAL_CLI_PUBLIC_CAPABILITIES.map(
   ({ command }) => command,
 );
 
-describe('external MyAgents CLI guide', () => {
+describe('external LSAGENT CLI guide', () => {
   it('never demonstrates an invocation outside the public allowlist', () => {
     for (const invocation of documentedInvocations) {
       if (invocation === '--help') continue;

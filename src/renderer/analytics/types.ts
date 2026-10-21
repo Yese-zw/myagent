@@ -56,7 +56,7 @@ export type Source =
  *
  * `source` 回答"哪个进程触发"（desktop/cli/cron/im），`surface` 回答
  * "desktop 内部哪个 UI 表面触发"。两者正交，配合解释"用户究竟是怎么开始
- * 用 MyAgents 的"。详见 `specs/tech_docs/analytics_design.md`。
+ * 用 LSAGENT 的"。详见 `specs/tech_docs/analytics_design.md`。
  *
  * 取值约定：
  *   - `launcher_input`   启动页输入框直接发首条消息（New Tab 空状态 + 用户打字）
@@ -202,7 +202,7 @@ export type EventName =
   | 'tts_play'
   | 'task_center_open'
   | 'bug_report_submit'
-  // MyAgents 账号
+  // LSAGENT 账号
   | 'account_auth_start'
   | 'account_auth_complete'
   // 系统事件

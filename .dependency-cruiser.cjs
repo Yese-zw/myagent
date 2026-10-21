@@ -1,4 +1,4 @@
-// MyAgents architectural-boundary lint via dependency-cruiser.
+// LSAGENT architectural-boundary lint via dependency-cruiser.
 //
 // This file holds the "module-graph" rules that ESLint can't express:
 // "module A is not allowed to import from module B." Each rule below

@@ -1,14 +1,14 @@
-# MyAgents Windows 构建与测试指南
+# LSAGENT Windows 构建与测试指南
 
 setup / build 分工、业务构建去重与缓存失效规则见 [构建资源准备与复用](../tech_docs/build_resource_preparation.md)。
 
-本文档描述 MyAgents Windows 版本的构建流程、发布流程以及测试注意事项。
+本文档描述 LSAGENT Windows 版本的构建流程、发布流程以及测试注意事项。
 
 ---
 
 ## 概览
 
-MyAgents Windows 版本支持 **x86_64 (64位)** 架构，提供两种分发格式：
+LSAGENT Windows 版本支持 **x86_64 (64位)** 架构，提供两种分发格式：
 
 | 格式 | 文件 | 用途 |
 |------|------|------|
@@ -300,11 +300,11 @@ Get-Process | Where-Object { $_.ProcessName -eq "node" }
 
 **数据存储**：
 
-- [ ] 配置保存在 `%APPDATA%\MyAgents\` 目录
+- [ ] 配置保存在 `%APPDATA%\LSAGENT\` 目录
 
 **验证数据目录**：
 ```powershell
-ls $env:APPDATA\MyAgents
+ls $env:APPDATA\LSAGENT
 ```
 
 ### 五、自动更新测试
@@ -488,8 +488,8 @@ Tauri NSIS 安装程序的默认行为会在检测到旧版本时推荐卸载。
    ```
 
 **注意事项**：
-- 覆盖安装后，用户数据（Projects、Providers）应该保留在 `%APPDATA%\MyAgents`
-- 如遇到 WebView 缓存问题，可清理 `%LOCALAPPDATA%\MyAgents\EBWebView`
+- 覆盖安装后，用户数据（Projects、Providers）应该保留在 `%APPDATA%\LSAGENT`
+- 如遇到 WebView 缓存问题，可清理 `%LOCALAPPDATA%\LSAGENT\EBWebView`
 
 ### 发布问题
 

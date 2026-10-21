@@ -207,7 +207,7 @@ describe('Ubuntu settings availability', () => {
     settingsMocks.linux = false;
     render(<ToastProvider><Settings mode="settings" initialSection="developer" isActive /></ToastProvider>);
 
-    await waitFor(() => expect(screen.getByRole('heading', { name: 'MyAgents' })).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole('heading', { name: 'LSAGENT' })).toBeInTheDocument());
     expect(within(screen.getByRole('navigation')).queryByRole('button', { name: String(i18n.t('sidebar.nav.developer', { ns: 'settings' })) })).not.toBeInTheDocument();
     expect(screen.queryByText(String(i18n.t('general.defaultRuntimeTitle', { ns: 'settings' })))).not.toBeInTheDocument();
   });
@@ -222,7 +222,7 @@ describe('Ubuntu settings availability', () => {
     expect(within(navigation).queryByRole('button', { name: developerLabel })).not.toBeInTheDocument();
     expect(screen.queryByText(runtimeLabel)).not.toBeInTheDocument();
 
-    const wordmark = screen.getByRole('heading', { name: 'MyAgents' });
+    const wordmark = screen.getByRole('heading', { name: 'LSAGENT' });
     for (let i = 0; i < 5; i += 1) fireEvent.click(wordmark);
 
     const developerTab = within(navigation).getByRole('button', { name: developerLabel });
@@ -252,17 +252,6 @@ describe('Ubuntu settings availability', () => {
     await act(async () => { await new Promise(resolve => setTimeout(resolve, 20)); });
     expect(screen.getByRole('tab', { name: String(i18n.t('capabilities.plugins', { ns: 'settings' })) }))
       .toHaveAttribute('aria-selected', 'true');
-  });
-
-  it.each([undefined, false, true])('writes the AgentNet developer gate through config (stored: %s)', async (enabled) => {
-    const { unlockDeveloperSection } = await import('@/utils/developerMode');
-    unlockDeveloperSection();
-    settingsMocks.config.agentNetworkSelfhostDevGate = enabled;
-    render(<ToastProvider><Settings mode="settings" initialSection="developer" isActive /></ToastProvider>);
-    const toggle = await screen.findByRole('button', { name: 'AgentNet multiple networks (experimental)' });
-    expect(toggle).toHaveAttribute('aria-pressed', String(enabled === true));
-    fireEvent.click(toggle);
-    expect(settingsMocks.updateConfig).toHaveBeenCalledWith({ agentNetworkSelfhostDevGate: enabled !== true });
   });
 
 });

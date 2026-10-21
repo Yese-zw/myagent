@@ -109,7 +109,7 @@ function assertSourceBuildPrerequisites() {
   throw new Error(
     [
       `Document-processing source build prerequisites are missing for ${target}.`,
-      "MyAgents builds ONNX Runtime from its locked source so both macOS architectures honor the App's macOS 13 deployment target.",
+      "LSAGENT builds ONNX Runtime from its locked source so both macOS architectures honor the App's macOS 13 deployment target.",
       ...details,
       'The source cache is preserved; install the missing tools and rerun the same command.',
     ].join('\n'),
@@ -169,7 +169,7 @@ function findLockedLibrary(root, pattern) {
   });
   if (matches.length === 1) return matches[0];
   // macOS archives contain both an unversioned loader name and the pinned
-  // versioned payload. Package the versioned payload under MyAgents' stable
+  // versioned payload. Package the versioned payload under LSAGENT' stable
   // resource name; excluding dSYM contents prevents debug symbols from ever
   // being mistaken for the runtime library.
   const versioned = matches.filter((path) =>
@@ -346,7 +346,7 @@ function configurePreparation(options) {
       ? appleSigningIdentity || 'development-build'
       : targetLock.platform === 'windows'
         ? windowsCertificateSha1?.toLowerCase() || 'development-build'
-        : 'MyAgents-resource-manifest-v1';
+        : 'LSAGENT-resource-manifest-v1';
   buildFingerprint = computeBuildFingerprint({
     projectRoot,
     metadata: {
@@ -667,7 +667,7 @@ export async function prepareDocumentProcessing(options) {
     if (targetLock.platform === 'linux') {
       nativeSigning = {
         kind: 'sha256-manifest',
-        identity: 'MyAgents-resource-manifest-v1',
+        identity: 'LSAGENT-resource-manifest-v1',
       };
     }
 
@@ -738,7 +738,7 @@ export async function prepareDocumentProcessing(options) {
 
     const manifestSigning = {
       kind: 'sha256-manifest',
-      identity: 'MyAgents-resource-manifest-v1',
+      identity: 'LSAGENT-resource-manifest-v1',
     };
 
     function integrityFile(path) {
@@ -758,8 +758,8 @@ export async function prepareDocumentProcessing(options) {
       worker: resourceFile(
         join(stageRoot, workerName),
         'AGPL-3.0-only',
-        `MyAgents/${appVersion}`,
-        'current MyAgents source tree',
+        `LSAGENT/${appVersion}`,
+        'current LSAGENT source tree',
         nativeSigning,
       ),
       files: {

@@ -1,8 +1,8 @@
-# MyAgents 开发指引
+# LSAGENT 开发指引
 
 [返回 README](README.md) · [English](#english) · [贡献指南](CONTRIBUTING.md)
 
-MyAgents 使用 Tauri v2 + Rust、React 19 + TypeScript，以及 Node.js v24 Sidecar。Agent Runtime 包括 Claude Agent SDK、Integrated DeepSeek Harness 和 Claude Code / Codex 适配。具体模块职责与边界以[架构文档](specs/ARCHITECTURE.md)为准。
+LSAGENT 使用 Tauri v2 + Rust、React 19 + TypeScript，以及 Node.js v24 Sidecar。Agent Runtime 包括 Claude Agent SDK、Integrated DeepSeek Harness 和 Claude Code / Codex 适配。具体模块职责与边界以[架构文档](specs/ARCHITECTURE.md)为准。
 
 ## 环境准备
 
@@ -19,7 +19,7 @@ MyAgents 使用 Tauri v2 + Rust、React 19 + TypeScript，以及 Node.js v24 Sid
 
 ```bash
 git clone https://github.com/hAcKlyc/MyAgents.git
-cd MyAgents
+cd LSAGENT
 ```
 
 macOS：
@@ -91,7 +91,7 @@ specs/                     架构、设计、技术与构建文档
 
 - [架构总览](specs/ARCHITECTURE.md) · [Session 架构](specs/tech_docs/session_architecture.md) · [Sidecar 冷启动](specs/tech_docs/sidecar_cold_start.md)
 - [多 Runtime](specs/tech_docs/multi_agent_runtime.md) · [任务中心](specs/tech_docs/task_center.md) · [CLI](specs/tech_docs/cli_architecture.md)
-- [AgentNet](specs/tech_docs/agent_network.md) · [Space](specs/tech_docs/space_cloud.md) · [Plugin Bridge](specs/tech_docs/plugin_bridge_architecture.md)
+- [Space](specs/tech_docs/space_cloud.md) · [Plugin Bridge](specs/tech_docs/plugin_bridge_architecture.md)
 - [MCP 与架构护栏](specs/tech_docs/pit_of_success.md) · [设计系统](specs/DESIGN.md)
 - [Cuse 集成与构建](specs/tech_docs/cuse_bundle.md)：可选全局 Skill + CLI，更新维护内容并保留用户的禁用设置。
 
@@ -103,7 +103,7 @@ specs/                     架构、设计、技术与构建文档
 
 ## English
 
-MyAgents uses Tauri v2 + Rust, React 19 + TypeScript, and a Node.js v24 Sidecar. Runtimes include Claude Agent SDK, Integrated DeepSeek Harness, and Claude Code / Codex adapters. The [architecture guide](specs/ARCHITECTURE.md) defines module responsibilities and boundaries.
+LSAGENT uses Tauri v2 + Rust, React 19 + TypeScript, and a Node.js v24 Sidecar. Runtimes include Claude Agent SDK, Integrated DeepSeek Harness, and Claude Code / Codex adapters. The [architecture guide](specs/ARCHITECTURE.md) defines module responsibilities and boundaries.
 
 ### Prerequisites
 

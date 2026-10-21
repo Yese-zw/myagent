@@ -7,27 +7,25 @@ import {
 } from "../../shared/agentMentions";
 import type { DesktopMessageRequest } from "./types";
 const mocks = vi.hoisted(() => ({ discovery: vi.fn() }));
-vi.mock("../agent-network/discovery", () => ({
+vi.mock("../agent-discovery", () => ({
   getAgentDiscovery: mocks.discovery,
 }));
 import { prepareDesktopQuery } from "./query-reminder";
 import { retryDesktopRequest } from "./retry";
-const id = (n: number) =>
-  `00000000-0000-0000-0000-${String(n).padStart(12, "0")}`;
 const snapshot: AgentMentionSnapshot = {
   agent: {
-    selector: `ma-agent:1:${id(1)}:${id(2)}:${id(3)}`,
+    selector: "local-helper",
     name: "Original",
-    deviceId: id(4),
+    deviceId: "device",
     deviceName: "Machine",
     platform: "macos",
     description: "Useful",
-    isLocal: false,
-    source: { serviceId: id(1), networkId: id(2) },
+    isLocal: true,
+    source: null,
   },
-  authGeneration: 4,
-  principalId: "user",
-  networkId: id(2),
+  authGeneration: 0,
+  principalId: null,
+  networkId: null,
 };
 const context = {
   sessionId: "source",
@@ -43,10 +41,10 @@ const request: DesktopMessageRequest = {
 const discovery = (items = [snapshot.agent]) => ({
   items,
   complete: true,
-  networkStatus: "ready",
-  authGeneration: 4,
-  principalId: "user",
-  networkId: id(2),
+  networkStatus: "signedOut",
+  authGeneration: 0,
+  principalId: null,
+  networkId: null,
 });
 beforeEach(() => mocks.discovery.mockReset());
 describe("desktop query owner preparation", () => {
@@ -73,23 +71,13 @@ describe("desktop query owner preparation", () => {
       text,
     );
   });
-  it("keeps an unavailable same-account selection without retargeting or rejecting the query", async () => {
+  it("keeps an unavailable local selection without retargeting or rejecting the query", async () => {
     mocks.discovery.mockResolvedValue(discovery([]));
     const result = await prepareDesktopQuery(request);
     expect(result.needsReselect).toBe(false);
     expect(result.request.text).toContain(
       "&quot;availability&quot;:&quot;unavailable&quot;",
     );
-  });
-  it("never injects a saved prior-account snapshot and gives a reselection hint", async () => {
-    mocks.discovery.mockResolvedValue({
-      ...discovery([]),
-      authGeneration: 5,
-      principalId: "another",
-    });
-    const result = await prepareDesktopQuery(request);
-    expect(result.needsReselect).toBe(true);
-    expect(result.request.text).toBe(text);
   });
   it("retries from the stored typed annotation through fresh lookup and one envelope", async () => {
     const primaryContext = {
@@ -135,64 +123,6 @@ describe("desktop query owner preparation", () => {
     ).toBe(raw);
     expect(mocks.discovery).not.toHaveBeenCalled();
   });
-});
-
-it("binds saved and refreshed mention annotations to their own network while official scope changes", async () => {
-  const scoped = {
-    ...snapshot,
-    agent: { ...snapshot.agent, connectionId: "self-a", networkName: "Team A" },
-  };
-  const self = {
-    connectionId: "self-a",
-    networkName: "Team A",
-    complete: false,
-    networkStatus: "error",
-    context: {
-      authGeneration: 4,
-      principalId: "user",
-      networkId: id(2),
-      deviceId: id(9),
-      deviceName: "Mac",
-      platform: "macos",
-    },
-  };
-  mocks.discovery.mockResolvedValue({
-    ...discovery([]),
-    authGeneration: 20,
-    principalId: null,
-    networkId: null,
-    networks: [self],
-  });
-  const saved = await prepareDesktopQuery({
-    ...request,
-    agentMentions: [scoped],
-  });
-  expect(saved.needsReselect).toBe(false);
-  expect(saved.request.desktopQuery?.agentMentions?.[0]).toMatchObject({
-    authGeneration: 4,
-    principalId: "user",
-    networkId: id(2),
-  });
-  mocks.discovery.mockResolvedValue({
-    ...discovery([scoped.agent]),
-    authGeneration: 20,
-    principalId: null,
-    networkId: null,
-    networks: [{ ...self, complete: true, networkStatus: "ready" }],
-  });
-  const fresh = await prepareDesktopQuery({
-    ...request,
-    agentMentions: undefined,
-  });
-  expect(fresh.request.desktopQuery?.agentMentions?.[0].authGeneration).toBe(4);
-  mocks.discovery.mockResolvedValue({
-    ...discovery([]),
-    networks: [{ ...self, context: { ...self.context, authGeneration: 5 } }],
-  });
-  expect(
-    (await prepareDesktopQuery({ ...request, agentMentions: [scoped] }))
-      .needsReselect,
-  ).toBe(true);
 });
 
 it('preserves the required alignment skill through persisted native retry', async () => {

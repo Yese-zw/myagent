@@ -1,28 +1,28 @@
 ---
 name: myagents-docs
 description: >-
-  MyAgents 产品使用知识库与用户可见行为说明。用户或 Agent 只要需要了解 MyAgents 是什么、能做什么、某项功能怎么用、
+  LSAGENT 产品使用知识库与用户可见行为说明。用户或 Agent 只要需要了解 LSAGENT 是什么、能做什么、某项功能怎么用、
   功能入口或前置条件、功能之间的区别与关系、正确情况下应该出现什么结果、有哪些限制或常见误解，就使用这个 skill；
-  也适用于在任意工作区规划怎样借助 MyAgents 的 Workspace、Session、Task、Goal、Provider、Runtime、MCP、Skill、Agent Channel、
+  也适用于在任意工作区规划怎样借助 LSAGENT 的 Workspace、Session、Task、Goal、Provider、Runtime、MCP、Skill、Agent Channel、
   Agent 网络、协作空间等能力完成工作。它面向软件使用而非源码开发。需要查询或修改当前实例状态时再加载 `/myagents-cli`；
   已经出现报错、崩溃或实际行为偏离预期时，在内置小助理中转入 `/support`。
 metadata:
-  author: MyAgents
+  author: LSAGENT
 ---
 
-# MyAgents 产品使用知识库
+# LSAGENT 产品使用知识库
 
-这个 Skill 是 MyAgents 产品行为的知识入口。它帮助用户理解和使用软件，也帮助 Agent 建立正确的产品心智模型；它不是源码架构文档、命令参数大全或故障日志手册。
+这个 Skill 是 LSAGENT 产品行为的知识入口。它帮助用户理解和使用软件，也帮助 Agent 建立正确的产品心智模型；它不是源码架构文档、命令参数大全或故障日志手册。
 
 ## 先判断用户需要什么
 
 | 用户意图 | 处理方式 |
 |---|---|
 | 了解功能、比较概念、寻找入口、询问限制 | 读取本 Skill 对应 reference，直接解释并给出使用路径 |
-| 设计一套 MyAgents 使用流程 | 读取涉及的 references，先说明各能力的职责，再组合工作流 |
+| 设计一套 LSAGENT 使用流程 | 读取涉及的 references，先说明各能力的职责，再组合工作流 |
 | 希望你查询现场状态或代为操作 | 用本 Skill 确认语义；随后加载 `/myagents-cli`，以 CLI 的实时 help 和返回值为准 |
 | 已按正确方式操作，但报错、崩溃、无响应或结果不符合预期 | 在内置小助理里加载 `/support`；先用本 Skill 确认预期，再用本地证据诊断 |
-| 要修改 MyAgents 源码或评审实现架构 | 如果当前工作区是 MyAgents 仓库，改读仓库 `CLAUDE.md`、`specs/ARCHITECTURE.md` 与相关 `tech_docs/`；本 Skill 不是开发者文档 |
+| 要修改 LSAGENT 源码或评审实现架构 | 如果当前工作区是 LSAGENT 仓库，改读仓库 `CLAUDE.md`、`specs/ARCHITECTURE.md` 与相关 `tech_docs/`；本 Skill 不是开发者文档 |
 
 普通的“怎么用”不等于故障，不要一上来查日志。反过来，用户已经完成正确步骤却失败时，也不要只重复使用说明；应升级到诊断流程。
 
@@ -32,12 +32,11 @@ metadata:
 
 | 用户在问什么 | 读取 |
 |---|---|
-| MyAgents 的定位、能力地图、主要入口、应该选哪类功能 | `references/product-overview.md` |
+| LSAGENT 的定位、能力地图、主要入口、应该选哪类功能 | `references/product-overview.md` |
 | Workspace、Agent、Session、Tab、历史、文件、搜索、终端、浏览器 | `references/workspaces-sessions-files.md` |
 | Provider、Model、订阅、Runtime、权限模式、代理、Codex/Claude Code | `references/models-providers-runtimes.md` |
 | MCP、Skills、官方/自定义 CLI 工具、Claude Plugin、OpenClaw Plugin、读图与 Widget | `references/tools-skills-plugins.md` |
 | 自定义 Agent、IM Channel、Telegram/钉钉/飞书/微信、heartbeat、长期记忆、小助理与悬浮窗 | `references/agents-channels.md` |
-| 同账号跨设备 Agent 网络、本机/远端 Session 协作、@ Agent、会话读取/观察与结果回传 | `references/agent-network.md` |
 | Record、Task、定时/Cron、Goal Mode、状态与执行关系 | `references/automation.md` |
 | 协作空间 / Team Space、Space Goal、Issue、Registered Agent、Delivery、共享 Skill/Tool、官方工具市场 | `references/cloud-space.md` |
 | 实验室门控、生效时机、本地数据、安全、语言、更新与功能可用性 | `references/settings-safety.md` |

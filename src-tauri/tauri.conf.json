@@ -1,6 +1,6 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "MyAgents",
+  "productName": "LSAGENT",
   "version": "0.5.4",
   "identifier": "com.myagents.app",
   "build": {

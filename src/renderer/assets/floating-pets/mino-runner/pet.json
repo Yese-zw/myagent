@@ -3,7 +3,7 @@
   "id": "mino-runner",
   "displayName": "Mino Runner",
   "description": "披着文件夹斗篷的任务跑者，闪电开路，把待办一路冲到终点。",
-  "author": "MyAgents",
+  "author": "LSAGENT",
   "license": "Apache-2.0",
   "spritesheetPath": "spritesheet.webp"
 }

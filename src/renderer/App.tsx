@@ -1,4 +1,3 @@
-import { startAgentNetworkStore } from '@/features/agent-network/store';
 import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { flushSync } from 'react-dom';
 import { useTranslation } from 'react-i18next';
@@ -3257,6 +3256,14 @@ export default function App({ rendererAttachment = COLD_RENDERER_ATTACHMENT }: {
     tabWorkspaceController.open('account', { title: t('tabs.account') });
   }, [t, tabWorkspaceController]);
 
+  const handleOpenRecharge = useCallback(() => {
+    tabWorkspaceController.open('recharge', { title: t('tabs.recharge') });
+  }, [t, tabWorkspaceController]);
+
+  const handleOpenInvite = useCallback(() => {
+    tabWorkspaceController.open('invite', { title: t('tabs.invite') });
+  }, [t, tabWorkspaceController]);
+
   const handleOpenCapabilities = useCallback(
     (
       initialSection?: CapabilitySection,
@@ -4560,7 +4567,6 @@ export default function App({ rendererAttachment = COLD_RENDERER_ATTACHMENT }: {
     updateTabUnread,
   ]);
 
-  useEffect(() => startAgentNetworkStore(), []);
   const activeWorkspacePath = resolveGlobalSidebarWorkspace(activeTab);
   const launcherBinding = useMemo<BuiltinTabBindings['launcher']>(
     () => ({
@@ -4715,9 +4721,10 @@ export default function App({ rendererAttachment = COLD_RENDERER_ATTACHMENT }: {
       settings: settingsBinding,
       capabilities: capabilitiesBinding,
       taskcenter: taskCenterBinding,
-      agentnetwork: null,
       record: recordBinding,
       account: null,
+      recharge: null,
+      invite: null,
     }),
     [
       capabilitiesBinding,
@@ -4743,11 +4750,12 @@ export default function App({ rendererAttachment = COLD_RENDERER_ATTACHMENT }: {
             onNewTab={handleSidebarNewChat}
             onOpenTaskCenter={handleOpenTaskCenter}
             onCreateTask={handleSidebarCreateTask}
-            onOpenAgentNetwork={() => tabWorkspaceController.open('agentnetwork', { title: t('tabs.agentNetwork') })}
             onOpenAppRoute={handleOpenAppRoute}
             onOpenCapabilities={handleOpenCapabilities}
             onOpenSettings={handleOpenSettings}
             onOpenAccount={handleOpenAccount}
+            onOpenRecharge={handleOpenRecharge}
+            onOpenInvite={handleOpenInvite}
             onOpenBugReport={handleOpenBugReport}
             onOpenWorkspace={handleOpenWorkspaceFromSidebar}
             onOpenSession={handleOpenSidebarSession}

@@ -1,16 +1,16 @@
 ---
 name: myagents-task-automation
 description: >-
-  让 Agent 建立 MyAgents Task 的完整产品心智模型，并创建、验证和治理需要持久追踪、独立 Session 或未来触发的工作：理解 Task 与立即执行/Record/Goal 的边界，以及 once/scheduled/recurring、Session routing、结束条件和 command Detector。用户提到创建 Task、定时、稍后、周期检查、持续关注、满足条件才处理时使用；普通立即执行、仅保存 Record 或明确要求 Goal Mode 的工作不使用。
+  让 Agent 建立 LSAGENT Task 的完整产品心智模型，并创建、验证和治理需要持久追踪、独立 Session 或未来触发的工作：理解 Task 与立即执行/Record/Goal 的边界，以及 once/scheduled/recurring、Session routing、结束条件和 command Detector。用户提到创建 Task、定时、稍后、周期检查、持续关注、满足条件才处理时使用；普通立即执行、仅保存 Record 或明确要求 Goal Mode 的工作不使用。
 metadata:
-  author: MyAgents
+  author: LSAGENT
 ---
 
-# MyAgents Task 与自动化
+# LSAGENT Task 与自动化
 
 ## 先建立 Task 产品心智模型
 
-Task 是 MyAgents 对“需要在当前对话之后继续存在、在未来被执行和追踪的工作”的统一承载。它不是一条临时提醒，也不是一段 Cron 表达式；它把用户的行动目标保存成有身份、有状态、有执行记录、可暂停和可恢复的工作项，并在合适的时机把工作交给 AI。
+Task 是 LSAGENT 对“需要在当前对话之后继续存在、在未来被执行和追踪的工作”的统一承载。它不是一条临时提醒，也不是一段 Cron 表达式；它把用户的行动目标保存成有身份、有状态、有执行记录、可暂停和可恢复的工作项，并在合适的时机把工作交给 AI。
 
 一个自动化 Task 由五个彼此独立的决策组成：
 
@@ -39,7 +39,7 @@ Task 解决四类问题：
 | 先保存一条文字或音频记录，暂时不执行 | Record |
 | 一项已经明确、需要未来触发或持续追踪的工作 | Task |
 | 当前 Session 围绕同一目标连续多轮自主推进 | Goal Mode，不用循环 Task 模拟 |
-| App 完全退出后仍必须由 OS 常驻执行 | 不属于 MyAgents Task；不要伪装成已部署成功 |
+| App 完全退出后仍必须由 OS 常驻执行 | 不属于 LSAGENT Task；不要伪装成已部署成功 |
 
 Cron 只是已发布的兼容命令面，不是另一种资源；Sensor 也不是独立产品实体。`TaskStore` 是唯一权威，新 Agent 工作流统一使用 `myagents task ...`。
 
@@ -47,16 +47,16 @@ Cron 只是已发布的兼容命令面，不是另一种资源；Sensor 也不�
 
 创建 Task 只是把它持久化为 `Todo`；首次 `run` 后，时间型 Task 进入 `Running`，表示 scheduler 已启用，不表示 AI 此刻正在执行。每个 tick 经 activation 后才可能产生 AI Turn。首次 tick 由 schedule 决定：固定 interval 默认在 `run` 后约 2 秒产生第一次机会（要延后就显式设置 `--startAt`），Cron 等到下一个墙钟点，scheduled 等到 `dispatchAt`。`stop` 暂停未来调度并停止活跃执行；`start` 按保留的 schedule anchor 恢复，anchor 已过期时下一次机会可能接近当前时间，应以回执里的 `nextExecutionAt` 为准。`rerun` 重新派发终态 Task；`run-now` 是一次绕过 Detector 的人工执行，不改变 schedule 或 checkpoint。
 
-MyAgents App 必须在线才会产生 tick 或执行检查。Task 可以在 App 后台驻留时运行，但完全退出或 OS 休眠期间不会运行，也不会逐个补跑错过的 tick。
+LSAGENT App 必须在线才会产生 tick 或执行检查。Task 可以在 App 后台驻留时运行，但完全退出或 OS 休眠期间不会运行，也不会逐个补跑错过的 tick。
 
-正常创建和列表会自动继承当前 MyAgents workspace，不需要先查 ID。只有明确跨 workspace 操作时才同时传 `--workspaceId` / `--workspacePath`；若要诊断当前身份，使用 `myagents agent current --json`。命令语法有疑问时运行 `myagents task readme` 获取当前紧凑契约；精确参数以对应命令的 leaf help 为准。
+正常创建和列表会自动继承当前 LSAGENT workspace，不需要先查 ID。只有明确跨 workspace 操作时才同时传 `--workspaceId` / `--workspacePath`；若要诊断当前身份，使用 `myagents agent current --json`。命令语法有疑问时运行 `myagents task readme` 获取当前紧凑契约；精确参数以对应命令的 leaf help 为准。
 
 ## 选择激活方式
 
 | 方式 | 每个 schedule tick 的效果 | 适用情况 | Task 配置 |
 |------|---------------------------|----------|-----------|
 | `always` | 直接派发普通 Task AI Turn；没有前置程序判断 | 每次到点都值得让 AI 行动，例如提醒、日报、定期总结；或是否行动只能由模型理解 | 省略 `--trigger-file` |
-| `command Detector` | MyAgents harness 先运行本地命令；`quiet` 不创建 Session、不唤醒 AI，`activate` 才把事件证据交给普通 Task AI Turn | 外部条件能由廉价、确定的程序判断，而且大多数检查应该保持静默 | 验证后传 `--trigger-file` |
+| `command Detector` | LSAGENT harness 先运行本地命令；`quiet` 不创建 Session、不唤醒 AI，`activate` 才把事件证据交给普通 Task AI Turn | 外部条件能由廉价、确定的程序判断，而且大多数检查应该保持静默 | 验证后传 `--trigger-file` |
 
 默认选择 `always`。只有“程序可以可靠判断是否命中”“运行程序明显比唤醒 AI 更便宜”“未命中时不需要 AI 参与”同时成立，才使用 `command Detector`。不要创建一个脚本，再让脚本无条件输出 `activate`；那与 `always` 等价，只增加故障点。
 
@@ -157,7 +157,7 @@ myagents task archive <taskId>           # 用户专属的长期可恢复归档
 myagents task delete <taskId>            # 在对话中先取得用户确认，再执行；CLI 不弹窗
 ```
 
-`check-now` 会提交真实 MyAgents 状态；部署前不提交 MyAgents 状态的验证使用 `trigger test`（脚本自身副作用仍真实发生）。`run-now` 不改变 schedule anchor 或 Detector checkpoint。
+`check-now` 会提交真实 LSAGENT 状态；部署前不提交 LSAGENT 状态的验证使用 `trigger test`（脚本自身副作用仍真实发生）。`run-now` 不改变 schedule anchor 或 Detector checkpoint。
 
 归档和删除不是同一种“软删除”：`archive` 是长期可恢复的产品状态；`delete` 会立即停止调度、移除平台 Trigger state/pending activation，并从正常产品使用中不可恢复地移除 Task。TaskStore 只保留防止旧 Cron 重新迁移所需的内部 tombstone 与审计；没有 30 天恢复承诺，也没有 undelete 命令。两者都不会越权清理工作区脚本、脚本数据库或外部状态。
 

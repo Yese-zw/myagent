@@ -1,6 +1,6 @@
 # 从远程或本地来源安装 Skill
 
-MyAgents 支持从 GitHub 链接、`npx skills add` 命令、HTTPS zip 或本地来源安装 Skill。安装结果始终是 MyAgents 管理目录中的实体副本，不会依赖或改写本地源码目录。
+LSAGENT 支持从 GitHub 链接、`npx skills add` 命令、HTTPS zip 或本地来源安装 Skill。安装结果始终是 LSAGENT 管理目录中的实体副本，不会依赖或改写本地源码目录。
 
 ## GUI 操作
 
@@ -17,7 +17,7 @@ npx skills add foo/bar --skill baz
 https://example.com/x.zip
 ```
 
-点击 **解析并预览** — MyAgents 会：
+点击 **解析并预览** — LSAGENT 会：
 
 1. 解析链接，抽出 GitHub 仓库坐标
 2. 从 `codeload.github.com` 下载 zip（默认分支 `main` → `master` 自动回退）
@@ -74,12 +74,12 @@ myagents skill sync
 
 ## 支持的市场
 
-| 市场 | 形态 | 如何在 MyAgents 使用 |
+| 市场 | 形态 | 如何在 LSAGENT 使用 |
 |------|------|---------------------|
 | [Anthropic 官方 skills 仓](https://github.com/anthropics/skills) | `.claude-plugin/marketplace.json` | `myagents skill add anthropics/skills --plugin document-skills` |
 | [Anthropic 官方 plugins 目录](https://github.com/anthropics/claude-plugins-official) | 同上 | 粘 URL，按提示选插件合集 |
 | [Vercel `skills.sh`](https://skills.sh) / [vercel-labs/skills](https://github.com/vercel-labs/skills) | 标准 GitHub 仓库 | 粘 URL 或 `owner/repo` 直接装 |
-| [SkillsMP](https://skillsmp.com) | 聚合站（底层指向 GitHub） | 在站上拿到源仓库 URL 后粘给 MyAgents |
+| [SkillsMP](https://skillsmp.com) | 聚合站（底层指向 GitHub） | 在站上拿到源仓库 URL 后粘给 LSAGENT |
 | 任意 GitHub 仓库 | 含 `SKILL.md` 即可 | 直接粘链接 |
 
 ## 安全约束
@@ -95,7 +95,7 @@ myagents skill sync
 | 私有仓库 | ❌ 不支持 | 401/403 直接拒绝 |
 | GitLab / SSH | ❌ 不支持 | MVP 只覆盖 GitHub |
 
-GitHub 下载使用 MyAgents 的通用代理基线；任意 HTTPS zip 使用逐跳 SSRF 校验和 DNS pinning。国内用户遇到 GitHub 访问不稳时，可在设置 → 通用 → 代理中配置代理。
+GitHub 下载使用 LSAGENT 的通用代理基线；任意 HTTPS zip 使用逐跳 SSRF 校验和 DNS pinning。国内用户遇到 GitHub 访问不稳时，可在设置 → 通用 → 代理中配置代理。
 
 本地相对路径必须显式写成 `./...` 或 `../...`，并由 CLI 按当前终端目录解析；`foo/bar` 始终是 GitHub `owner/repo` 简写。`.tar.gz/.tgz` 当前不支持。
 
@@ -105,13 +105,13 @@ GitHub 下载使用 MyAgents 的通用代理基线；任意 HTTPS zip 使用逐�
 
 | 维度 | `npx skills add -g` | `myagents skill add` |
 |------|--------------------|----------------------|
-| 安装位置 | `~/.claude/skills/` | `~/.myagents/skills/`（被 MyAgents 直接识别） |
+| 安装位置 | `~/.claude/skills/` | `~/.myagents/skills/`（被 LSAGENT 直接识别） |
 | 外部依赖 | 需要系统 npm/npx | 不依赖用户系统 Node/npm |
 | marketplace.json 支持 | ✗ | ✓（识别插件合集并让用户选） |
 | 冲突交互 | 报错退出 | 返回预览让用户选覆盖/重命名 |
 | GUI 集成 | ✗ | ✓（设置页 + Dialog） |
 
-URL 语法完全兼容 — 用户从 skills.sh / Claude Code README 复制的任何 `npx skills add ...` 命令都能直接扔进 MyAgents。
+URL 语法完全兼容 — 用户从 skills.sh / Claude Code README 复制的任何 `npx skills add ...` 命令都能直接扔进 LSAGENT。
 
 ## 已知限制（后续迭代）
 

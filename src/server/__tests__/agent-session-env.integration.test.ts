@@ -72,7 +72,7 @@ describe('buildClaudeSessionEnv npm prefix isolation', () => {
     vi.unstubAllEnvs();
   });
 
-  it('does not leak MyAgents npm prefix variables into the SDK shell env', () => {
+  it('does not leak LSAGENT npm prefix variables into the SDK shell env', () => {
     const home = process.platform === 'win32'
       ? 'C:\\Users\\myagents-test'
       : '/tmp/myagents-env-home';

@@ -88,7 +88,7 @@ describe('DSH extension Host reverse ports', () => {
       runtimeSessionId: 'runtime-session', productSessionId: 'product-session', params: toolParams(), context: context(),
     });
     expect(result).toEqual({ state: 'succeeded', content: [
-      { type: 'text', text: 'Already completed' }, { type: 'text', text: '[MyAgents Host tool attachment unavailable]' },
+      { type: 'text', text: 'Already completed' }, { type: 'text', text: '[LSAGENT Host tool attachment unavailable]' },
       { type: 'text', text: 'Additional useful output' },
     ] });
     expect(dispatch).toHaveBeenCalledOnce();

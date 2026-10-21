@@ -217,7 +217,7 @@ export default defineConfig(
             },
             {
               name: 'lucide-react',
-              message: "Use the MyAgents icon set from '@/components/icons' (UI glyphs) or '@/components/file-icon' (file identity). lucide glyphs use a different grid, weight and corner language, so mixing them makes toolbars look uneven. Add a missing glyph to AppIcons.tsx instead.",
+              message: "Use the LSAGENT icon set from '@/components/icons' (UI glyphs) or '@/components/file-icon' (file identity). lucide glyphs use a different grid, weight and corner language, so mixing them makes toolbars look uneven. Add a missing glyph to AppIcons.tsx instead.",
             },
           ],
         },

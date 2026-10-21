@@ -1934,7 +1934,7 @@ describe('Codex app-server protocol helpers', () => {
       ).parseNotification(codexProc, method, params, () => {});
 
     // During thread resume Codex can report its pre-turn idle snapshot after
-    // MyAgents has already accepted the query. It must not end that active turn.
+    // LSAGENT has already accepted the query. It must not end that active turn.
     expect(
       parseNotification('thread/status/changed', {
         threadId: 'thread-1',

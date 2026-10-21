@@ -162,8 +162,8 @@ pub fn cmd_record_renderer_boot_event(
 // Wrap an async unit-of-work with `LOG_CONTEXT.scope(LogContext { ... },
 // async { ... }).await` and any nested `ulog_*!` call inside picks up
 // those fields automatically. Used by the HTTP request handler in
-// `local_http.rs` to propagate `X-MyAgents-Request-Id /
-// X-MyAgents-Session-Id / X-MyAgents-Tab-Id` from inbound headers.
+// `local_http.rs` to propagate `X-LSAGENT-Request-Id /
+// X-LSAGENT-Session-Id / X-LSAGENT-Tab-Id` from inbound headers.
 
 #[derive(Debug, Clone, Default)]
 pub struct LogContext {

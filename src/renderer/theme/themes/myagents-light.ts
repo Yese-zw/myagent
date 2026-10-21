@@ -3,7 +3,7 @@ import type { PresetThemeManifest } from './preset-theme';
 
 export const myAgentsLightThemeManifest = {
   id: 'myagents-light',
-  displayName: 'MyAgents Light',
+  displayName: 'LSAGENT Light',
   description: 'Claude-inspired surfaces with neutral-black primary buttons',
   stylesheetText,
 } satisfies PresetThemeManifest;

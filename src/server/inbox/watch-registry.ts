@@ -1,4 +1,4 @@
-import type { NetworkReturnReference } from '../../shared/agentNetworkReturn';
+import type { NetworkReturnReference } from './types';
 
 export interface PendingSessionWatch {
   watchId: string;

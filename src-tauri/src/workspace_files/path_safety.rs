@@ -153,10 +153,10 @@ pub fn validate_external_read_path(absolute_path: &str) -> WfResult<PathBuf> {
 /// Stricter variant of `resolve_inside_workspace` for **read-side** commands:
 /// resolves any symlinks via `fs::canonicalize` and verifies the canonical
 /// path is still inside the canonical workspace root — OR inside a trusted
-/// MyAgents-managed directory (see `is_trusted_managed_target`). Blocks the
+/// LSAGENT-managed directory (see `is_trusted_managed_target`). Blocks the
 /// "malicious `evil_link → /etc/passwd` checked into a repo" attack from
 /// leaking content out of the workspace, while still allowing the
-/// junctions / symlinks MyAgents projects from `~/.myagents/skills` etc.
+/// junctions / symlinks LSAGENT projects from `~/.myagents/skills` etc.
 /// into `<workspace>/.claude/skills/` (see Node `syncProjectUserConfigFiles`).
 ///
 /// Behavior:
@@ -165,7 +165,7 @@ pub fn validate_external_read_path(absolute_path: &str) -> WfResult<PathBuf> {
 ///   makes the failure mode uniform regardless of whether the path is missing
 ///   or rejected for being a symlink escape).
 /// - If the path exists but resolves outside the workspace via symlink AND
-///   isn't under a trusted MyAgents-managed root, returns
+///   isn't under a trusted LSAGENT-managed root, returns
 ///   `Err("Path escapes workspace root via symlink")`.
 /// - If the workspace root itself isn't canonicalizable (rare — race with
 ///   directory deletion), returns `Err("Workspace root canonicalize failed")`
@@ -200,9 +200,9 @@ pub fn resolve_existing_inside_workspace(
     Ok(canonical)
 }
 
-/// Canonicalized roots of MyAgents-managed directories that we sync into
+/// Canonicalized roots of LSAGENT-managed directories that we sync into
 /// workspaces via junctions/symlinks. Targets under any of these roots are
-/// safe to follow from in-workspace links because MyAgents owns the source —
+/// safe to follow from in-workspace links because LSAGENT owns the source —
 /// users can edit them through the Settings UI but they're not attacker-
 /// controlled like an arbitrary file in a cloned repo.
 ///
@@ -231,7 +231,7 @@ fn is_trusted_managed_target(canonical: &Path, roots: &[PathBuf]) -> bool {
 const MANAGED_GLOBAL_SKILL_READ_ONLY: &str =
     "MANAGED_GLOBAL_SKILL_READ_ONLY: workspace Skill projections are read-only; edit the global Skill from Settings";
 
-/// Reject mutations whose target is a MyAgents-managed projection of
+/// Reject mutations whose target is a LSAGENT-managed projection of
 /// `~/.myagents/skills`. Reads deliberately keep using the broader trusted
 /// resolver above; this guard is mutation-only so copy-out and previews remain
 /// available while workspace writes cannot flow through a junction into the

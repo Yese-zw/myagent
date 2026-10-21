@@ -603,7 +603,7 @@ describe('Task Center UX refinements', () => {
     expect(screen.queryByText('简短描述')).not.toBeInTheDocument();
     expect(screen.queryByText('标签')).not.toBeInTheDocument();
     expect(
-      screen.queryByPlaceholderText('以逗号分隔，例如 MyAgents, 维护'),
+      screen.queryByPlaceholderText('以逗号分隔，例如 LSAGENT, 维护'),
     ).not.toBeInTheDocument();
     expect(screen.getByText('任务需求 Task.md')).toBeInTheDocument();
     expect(

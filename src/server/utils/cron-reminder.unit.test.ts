@@ -17,7 +17,7 @@ describe('buildCronTaskReminder', () => {
     expect(wrapped).toBe([
       '<system-reminder>',
       '<CRON_TASK>',
-      'You are running inside a MyAgents scheduled task execution.',
+      'You are running inside a LSAGENT scheduled task execution.',
       'The user-visible text after this reminder is the task prompt for this execution.',
       '',
       'cronTaskId: cron_123',
@@ -33,7 +33,7 @@ describe('buildCronTaskReminder', () => {
         '  myagents task comment --body-file <path>',
         '- Do not record every assistant response; use comments only for durable Task-level collaboration.',
         '',
-        'If this MyAgents scheduled task goal is complete and future executions should stop, run:',
+        'If this LSAGENT scheduled task goal is complete and future executions should stop, run:',
       '  myagents task exit --reason "<brief reason>"',
       '',
       'The command is bound to the current cron execution context; do not pass a task id.',

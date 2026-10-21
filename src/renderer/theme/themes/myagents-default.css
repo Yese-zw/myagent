@@ -1,5 +1,5 @@
 /* Canonical production Theme. This file is the only owner of the current
-   MyAgents palette, font roles, material, Theme radii/shadows and Hero skin. */
+   LSAGENT palette, font roles, material, Theme radii/shadows and Hero skin. */
 
 /* Package globals are also the low-specificity pre-React fallback for an
    unknown Theme ID. The registered Theme root is kept in the same selector

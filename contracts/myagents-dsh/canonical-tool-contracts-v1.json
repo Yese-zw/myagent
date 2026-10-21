@@ -3222,7 +3222,7 @@
       ],
       "checkpoint": "none",
       "concurrency": "parallel",
-      "description": "Policy for native subagent and fork_agent delegation. DSH owns fresh/forked Sessions, continuable conversations, result delivery and lifecycle. MyAgents applies the admitted Host model, workspace, permission and Plan policy.",
+      "description": "Policy for native subagent and fork_agent delegation. DSH owns fresh/forked Sessions, continuable conversations, result delivery and lifecycle. LSAGENT applies the admitted Host model, workspace, permission and Plan policy.",
       "errorCodes": [
         {
           "code": "permission_denied",
@@ -3529,7 +3529,7 @@
       ],
       "checkpoint": "none",
       "concurrency": "session_serial",
-      "description": "Create a task for your own work. Without list, it belongs to this agent's personal list and other agents cannot access it through Task tools. Use meaningful steps for multi-step work, not trivial one-step answers. Only the root agent may use list: shared for collaborative work; shared tasks start unassigned and must be assigned or offered with TaskUpdate. This does not create a MyAgents product task, reminder, or scheduled automation.",
+      "description": "Create a task for your own work. Without list, it belongs to this agent's personal list and other agents cannot access it through Task tools. Use meaningful steps for multi-step work, not trivial one-step answers. Only the root agent may use list: shared for collaborative work; shared tasks start unassigned and must be assigned or offered with TaskUpdate. This does not create a LSAGENT product task, reminder, or scheduled automation.",
       "errorCodes": [
         {
           "code": "task_graph_limit",

@@ -92,7 +92,7 @@ export const _exhaustiveRuntimeCheck: _AssertRuntimeExhaustive = true;
 /** Human-readable display names keyed by runtime type. */
 export const RUNTIME_DISPLAY_NAMES: Record<RuntimeType, string> = {
   builtin: 'Built-in (Claude Agent SDK)',
-  dsh: 'MyAgents (DeepSeek Harness)',
+  dsh: 'LSAGENT (DeepSeek Harness)',
   'claude-code': 'Claude Code CLI',
   codex: 'OpenAI Codex CLI',
 };
@@ -119,7 +119,7 @@ export function normalizeRuntime(value: string | null | undefined): RuntimeType 
  * Returns `true` for ambiguous / unknown values. Callers use this only to drop
  * values that are obviously from another runtime family, e.g. `claude-*` on
  * Codex or `gemini-*` on Claude Code. Unknown future model ids are allowed
- * through so a new runtime release does not require a MyAgents release first.
+ * through so a new runtime release does not require a LSAGENT release first.
  */
 function modelHasFamily(model: string, families: readonly string[]): boolean {
   return families.some((family) => {
@@ -303,14 +303,14 @@ export interface RuntimePermissionMode {
 /**
  * Proxy policy for external-runtime subprocess env (issue #194).
  *
- * - `myagents` (default, legacy) — MyAgents unconditionally injects its own
+ * - `myagents` (default, legacy) — LSAGENT unconditionally injects its own
  *    `proxySettings` into the runtime's env, overriding whatever the parent
- *    shell or system has configured. Best for "MyAgents proxy is THE proxy"
+ *    shell or system has configured. Best for "LSAGENT proxy is THE proxy"
  *    setups.
- * - `terminal` — Drop MyAgents-injected proxy vars; restore whatever proxy
+ * - `terminal` — Drop LSAGENT-injected proxy vars; restore whatever proxy
  *    the user's interactive shell would export (HTTP_PROXY / HTTPS_PROXY /
  *    ALL_PROXY / NO_PROXY, lowercase + UPPERCASE). Best for "I run codex /
- *    claude from terminal and want MyAgents to behave the same."
+ *    claude from terminal and want LSAGENT to behave the same."
  * - `direct` — Strip all proxy vars. Best when system-level proxy (Clash
  *    TUN, transparent proxy) handles routing.
  */
@@ -330,7 +330,7 @@ export type RuntimeProxyPolicy = 'myagents' | 'terminal';
  * `terminal` mode = no proxy injected = same result). Disk values of
  * `'direct'` on existing installs fall through `resolveAgentEnvPolicy`'s
  * validator and default to `'myagents'`; users who relied on stripping
- * MyAgents proxy can pick `terminal` from the UI.
+ * LSAGENT proxy can pick `terminal` from the UI.
  */
 export interface RuntimeEnvPolicy {
   proxy?: RuntimeProxyPolicy;
@@ -883,7 +883,7 @@ export interface RuntimeDiagnostics {
   apps?: RuntimeAppInfo[];
   status: RuntimeDiagnosticsStatus;
   issues?: RuntimeDiagnosticIssue[];
-  /** MyAgents product-extension projection consumed by this Runtime process. */
+  /** LSAGENT product-extension projection consumed by this Runtime process. */
   extensions?: RuntimeExtensionDiagnostics;
   /** Runtime-owned permission state, excluding rule targets and identities. */
   permissions?: RuntimePermissionDiagnostics;

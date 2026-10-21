@@ -875,7 +875,7 @@ async fn cli_goal_list_and_issue_update_use_user_and_registered_agent_contexts()
         set_goal
             .pointer("/issue/goalPathLabel")
             .and_then(Value::as_str),
-        Some("MyAgents社区 / UI Quality")
+        Some("LSAGENT社区 / UI Quality")
     );
     assert_eq!(
         set_goal
@@ -1371,7 +1371,7 @@ async fn mock_space_issue_comment_routes_are_mutable_and_method_guarded() {
     .expect("official metadata should load");
     assert_eq!(
         official.pointer("/data/space/name").and_then(Value::as_str),
-        Some("MyAgents社区")
+        Some("LSAGENT社区")
     );
     assert!(official
         .pointer("/data/tags")

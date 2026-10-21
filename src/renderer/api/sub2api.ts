@@ -9,6 +9,7 @@ export interface Sub2apiSettings {
   registration_enabled: boolean;
   email_verify_enabled: boolean;
   invitation_code_enabled: boolean;
+  affiliate_enabled?: boolean;
   registration_email_suffix_whitelist: string[];
   login_agreement_enabled: boolean;
   login_agreement_documents: Sub2apiAgreement[];
@@ -16,7 +17,7 @@ export interface Sub2apiSettings {
   balance_low_notify_threshold?: number;
 }
 export interface Sub2apiAuthInput {
-  email: string; password: string; verifyCode: string; invitationCode: string; agreed: boolean;
+  email: string; password: string; verifyCode: string; invitationCode: string; affCode?: string; agreed: boolean;
 }
 
 export class Sub2apiError extends Error {
@@ -40,6 +41,8 @@ export const sub2api = {
   authenticate: (input: Sub2apiAuthInput, register: boolean) =>
     call<Sub2apiAccount>('cmd_sub2api_authenticate', { input, register }),
   gateway: () => call<{ baseUrl: string; apiKey: string }>('cmd_sub2api_gateway'),
+  codexAppStatus: () => call<{ installed: boolean; name: string | null }>('cmd_sub2api_codex_app_status'),
+  launchCodex: () => call<boolean>('cmd_sub2api_launch_codex'),
   sendCode: (email: string) => call<number>('cmd_sub2api_send_code', { email }),
   logout: () => call<Sub2apiAccount>('cmd_sub2api_logout'),
   cancel: () => call<void>('cmd_sub2api_cancel'),

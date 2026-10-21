@@ -8,7 +8,7 @@ describe('buildSystemPromptAppend floating-ball surface', () => {
 
     const prompt = buildSystemPromptAppend({ type: 'desktop', surface: 'floating-ball' });
     expect(prompt).toContain('<myagents-floating-ball-instructions>');
-    expect(prompt).toContain('MyAgents desktop floating window');
+    expect(prompt).toContain('LSAGENT desktop floating window');
     expect(prompt).toContain('Keep responses concise');
   });
 });
@@ -42,7 +42,7 @@ describe('buildDshSystemContext', () => {
       { id: 'myagents:capability-routing', order: -70, scope: 'global' },
       { id: 'myagents:session', order: 10, scope: 'root' },
     ]);
-    expect(snapshot.sections[2]?.text).toContain('MyAgents desktop floating window');
+    expect(snapshot.sections[2]?.text).toContain('LSAGENT desktop floating window');
     expect(snapshot.sections[2]?.text).not.toContain('<myagents-identity>');
     expect(snapshot.contexts).toEqual([{
       id: 'workspace-supplement',
@@ -100,7 +100,7 @@ describe('Session environment and desktop presentation', () => {
     for (const runtime of ['builtin', 'dsh', 'codex', 'claude-code'] as const) {
       const options = { runtime, channelBound: true };
       const text = buildSystemPromptAppend({ type: 'desktop' }, options);
-      expect(text).not.toContain('用户正通过 MyAgents 桌面客户端与你对话');
+      expect(text).not.toContain('用户正通过 LSAGENT 桌面客户端与你对话');
       expect(text).not.toContain('<myagents-generative-ui>');
       expect(text).toContain('<myagents-channel>');
       expect(text).toContain('桌面');

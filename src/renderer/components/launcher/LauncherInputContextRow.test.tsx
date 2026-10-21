@@ -60,8 +60,20 @@ describe('LauncherInputContextRow', () => {
 
     const workspaceChip = screen.getByRole('button', { name: 'Workspace' }).parentElement;
     const runtimeChip = screen.getByRole('button', { name: 'Runtime' }).parentElement;
+    const launchButton = screen.getByRole('button', { name: '前往 Codex' });
+    const launchChip = launchButton.parentElement;
+    const logo = launchButton.querySelector('img');
+    expect(logo).toBeTruthy();
+    expect(logo?.getAttribute('src')).toContain('codex');
+    expect(launchButton.innerHTML.indexOf('<img')).toBeLessThan(launchButton.innerHTML.indexOf('前往 Codex'));
     expect(workspaceChip).toHaveClass('h-[34px]');
     expect(runtimeChip).toHaveClass('h-[34px]');
+    expect(launchChip).toHaveClass('h-[34px]');
     expect(runtimeChip?.className).toBe(workspaceChip?.className);
+    expect(launchChip?.className).toBe(workspaceChip?.className);
+
+    const row = runtimeChip?.parentElement;
+    const chips = row ? [...row.children] : [];
+    expect(chips.indexOf(launchChip as Element)).toBeGreaterThan(chips.indexOf(runtimeChip as Element));
   });
 });

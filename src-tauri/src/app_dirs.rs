@@ -6,7 +6,7 @@
 //!
 //! ## PID Lock File
 //!
-//! `~/.myagents/app.lock` contains the PID of the running MyAgents instance.
+//! `~/.myagents/app.lock` contains the PID of the running LSAGENT instance.
 //! - Written by [`acquire_lock()`] during app startup (after single-instance check).
 //! - Read by build scripts (`build_dev.sh`, `start_dev.sh`) to precisely kill the
 //!   running instance before starting a new one.
@@ -80,7 +80,7 @@ fn write_clean_exit_marker(dir: &std::path::Path, is_restart: bool) -> std::io::
     Ok(true)
 }
 
-/// Outcome of [`acquire_lock`] — encodes whether a prior MyAgents instance
+/// Outcome of [`acquire_lock`] — encodes whether a prior LSAGENT instance
 /// existed on this machine when we started.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum LockAcquireResult {
@@ -88,7 +88,7 @@ pub enum LockAcquireResult {
     /// full uninstall / manual data wipe). Caller can skip stale-process
     /// scans because there are no possible orphans.
     FreshLaunch,
-    /// Lock file existed and pointed at a live MyAgents process — we killed
+    /// Lock file existed and pointed at a live LSAGENT process — we killed
     /// it before taking over. Orphan children are likely.
     ReplacedRunning,
     /// Lock file existed but pointed at a dead PID — previous instance
@@ -97,14 +97,14 @@ pub enum LockAcquireResult {
 }
 
 impl LockAcquireResult {
-    /// `true` if a prior MyAgents instance may have left orphaned child
+    /// `true` if a prior LSAGENT instance may have left orphaned child
     /// processes. The startup cleanup pass should run.
     pub fn had_prior_instance(self) -> bool {
         !matches!(self, Self::FreshLaunch)
     }
 }
 
-/// Return the MyAgents data directory (`~/.myagents/` by default).
+/// Return the LSAGENT data directory (`~/.myagents/` by default).
 ///
 /// Future: debug builds may return `~/.myagents-dev/` to enable simultaneous
 /// dev/prod operation with fully isolated state (config, bots, sidecars, ports).
@@ -121,7 +121,7 @@ fn lock_file_path() -> Option<PathBuf> {
 /// Write the current process PID to `~/.myagents/app.lock` and report
 /// whether a prior instance's state was encountered.
 ///
-/// If an existing lock file contains a PID of a still-running MyAgents process,
+/// If an existing lock file contains a PID of a still-running LSAGENT process,
 /// that process is killed with SIGKILL before the new PID is written. This handles
 /// the case where macOS auto-restarts a killed `.app` (Automatic Termination)
 /// before the new build starts, leaving two instances fighting over shared resources.
@@ -153,7 +153,7 @@ pub fn acquire_lock() -> LockAcquireResult {
                         LockAcquireResult::CrashRecovery
                     } else if is_myagents_process(old_pid) {
                         ulog_warn!(
-                            "[app-lock] Killing stale MyAgents instance (PID {}) before acquiring lock",
+                            "[app-lock] Killing stale LSAGENT instance (PID {}) before acquiring lock",
                             old_pid
                         );
                         kill_pid(old_pid);
@@ -202,7 +202,7 @@ pub fn release_lock() {
     }
 }
 
-/// Check if a PID belongs to a running MyAgents process (not just any process).
+/// Check if a PID belongs to a running LSAGENT process (not just any process).
 /// Prevents SIGKILL-ing an unrelated process that recycled the stale PID.
 ///
 /// Unified implementation via `sysinfo` — native API on both platforms, no
@@ -228,7 +228,7 @@ fn is_myagents_process(pid: u32) -> bool {
 #[cfg(unix)]
 fn kill_pid(pid: u32) {
     // SAFETY: SIGKILL is a valid signal for any PID we own permission to kill.
-    // Caller has already verified this PID is a MyAgents process.
+    // Caller has already verified this PID is a LSAGENT process.
     unsafe {
         libc::kill(pid as i32, libc::SIGKILL);
     }

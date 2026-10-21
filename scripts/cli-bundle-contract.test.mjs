@@ -300,7 +300,7 @@ test('built CLI keeps internal surfaces and the public external contract', async
           if (extraArgs.length > 0) {
             assert.equal(JSON.parse(error.stdout).code, 'MYAGENTS_UNAVAILABLE');
           } else {
-            assert.match(error.stderr, /Cannot connect to the MyAgents app/);
+            assert.match(error.stderr, /Cannot connect to the LSAGENT app/);
           }
           return true;
         },

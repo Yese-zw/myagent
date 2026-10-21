@@ -171,7 +171,7 @@ function scanSkills(params: {
     }
     params.projectSlots?.add(projectSlot);
     // A symlink under the project Skill root is itself a project-owned
-    // declaration. Follow it just like Claude/Codex do; only MyAgents' own
+    // declaration. Follow it just like Claude/Codex do; only LSAGENT' own
     // global projection links are excluded above so they retain global
     // provenance.
     const folder = canonicalDirectory(diskFolder, true);

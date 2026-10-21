@@ -4,10 +4,10 @@ description: >
   仅当系统或用户明确指定完整名称 `myagents-memory-update` 时使用；
   不要根据任务语义或相似表述自行触发。
 metadata:
-  author: MyAgents
+  author: LSAGENT
 ---
 
-# MyAgents Memory Update
+# LSAGENT Memory Update
 
 在当前 Session 内完成一次增量记忆巩固。目标不是总结聊天或尽量多记，而是让未来
 Session 通过工作区接续这里造成的真实状态变化和高置信度协作经验。
@@ -19,7 +19,7 @@ Session 通过工作区接续这里造成的真实状态变化和高置信度协
 
 先理解当前工作区内的记忆系统架构：读取工作区指令和已有记忆文件，确认各层职责、
 实际路径及相互引用。沿用这套结构；缺少完成本次维护所必需的文件时，可以按现有
-架构创建。文件编号、命名或分层不同，不表示需要补齐 MyAgents 默认文件组。
+架构创建。文件编号、命名或分层不同，不表示需要补齐 LSAGENT 默认文件组。
 
 ## 审计
 

@@ -1156,7 +1156,7 @@ const SYSTEM_SKILLS: readonly string[] = [
   // automation; command Detector protocol is progressively disclosed inside.
   'myagents-task-automation',
   // v35: stable product-use knowledge and expected-behaviour contract for
-  // every MyAgents session. Live operations remain in myagents-cli.
+  // every LSAGENT session. Live operations remain in myagents-cli.
   'myagents-docs',
   // v18: tool-creator — meta-skill for the CLI tool registry (PRD 0.2.36).
   // Teaches AI to author standards-compliant Agent-CLI tools and register
@@ -1458,12 +1458,6 @@ async function routeAdminApi(
 ): Promise<Record<string, unknown>> {
   // Strip the prefix for matching
   const route = pathname.replace('/api/admin/', '');
-  const sourceKind = caller.kind === 'external-cli' ? 'external-cli' : 'internal-session';
-  if (['agent/show', 'session/list', 'session/get', 'session/start', 'session/send', 'session/watch', 'session/state'].includes(route)) {
-    const { routeNetworkRequest } = await import('./agent-network/source');
-    const networkResult = await routeNetworkRequest(route, payload, sourceKind, signal);
-    if (networkResult) return networkResult;
-  }
   if (
     caller.kind === 'external-cli' &&
     (route.startsWith('task/') || route.startsWith('cron/'))
@@ -1552,7 +1546,7 @@ async function routeAdminApi(
       payload as Parameters<typeof api.handleToolEnv>[0],
     );
 
-  // Official MyAgents CLI tools
+  // Official LSAGENT CLI tools
   if (route === 'anydoc/convert')
     return await api.handleAnydocConvert(
       payload as Parameters<typeof api.handleAnydocConvert>[0],
@@ -1626,14 +1620,6 @@ async function routeAdminApi(
     return api.handleAgentResolveConflict(payload as Parameters<typeof api.handleAgentResolveConflict>[0]);
   if (route === 'agent/current') return await api.handleAgentCurrent();
   if (route === 'agent/discovery') return await api.handleAgentDiscovery(payload);
-  if (route === 'agent/network-catalog') return await api.handleAgentNetworkCatalog();
-  if (route === 'agent/network-precheck' || route === 'agent/network-read' || route === 'agent/network-watch-result') {
-    const target = await import('./agent-network/target');
-    if (route === 'agent/network-watch-result') return target.handleNetworkWatchProjection(payload);
-    return route === 'agent/network-precheck'
-      ? target.handleNetworkTargetPrecheck(payload)
-      : target.handleNetworkTargetRead(payload);
-  }
   if (route === 'agent/show') return await api.handleAgentShow(payload as Parameters<typeof api.handleAgentShow>[0]);
   if (route === 'agent/enable') return api.handleAgentEnable(payload as Parameters<typeof api.handleAgentEnable>[0]);
   if (route === 'agent/disable') return api.handleAgentDisable(payload as Parameters<typeof api.handleAgentDisable>[0]);
@@ -1932,7 +1918,7 @@ async function routeAdminApi(
       payload as Parameters<typeof api.handleRecordCreate>[0],
     );
 
-  // MyAgents Cloud Space — Registered Agent CLI bridge.
+  // LSAGENT Cloud Space — Registered Agent CLI bridge.
   if (route === 'space/list') return await api.handleSpaceList();
   if (route === 'space/whoami')
     return await api.handleSpaceWhoami(
@@ -2088,21 +2074,15 @@ async function routeAdminApi(
     if (Object.keys(payload).some(key => !['watchId', 'all'].includes(key)) || route === 'session/unwatch' && (all === !!cancel)) {
       return { success: false, code: 'ARGUMENT_INVALID', error: 'Choose one watchId or explicit --all.' };
     }
-    const { managementApi } = await import('./utils/management-api-client');
-    const result = await managementApi('/api/agent-network/watches', 'POST', {
-      sidecarId: process.env.MYAGENTS_SIDECAR_ID, ...(cancel ? { cancel } : {}), all,
-    }, { timeoutMs: 22_000 });
+    const { manageLocalSessionWatches } = await import('./inbox/watch-registry');
     const { projectSessionWatchManagement } = await import('./inbox/watch-handler');
-    return result.ok === true ? projectSessionWatchManagement(result.result, cancel, all)
-      : { success: false, code: (result.error as { code?: string })?.code ?? 'WATCH_OWNER_UNAVAILABLE', error: 'Observation owner unavailable; retry the query.' };
-  }
-  if (route === 'agent/network-diagnose') {
-    const { managementApi } = await import('./utils/management-api-client');
-    const result = await managementApi('/api/agent-network/diagnose', 'POST', {
-      sidecarId: process.env.MYAGENTS_SIDECAR_ID, cursor: payload.cursor ?? null, limit: payload.limit ?? 100, network:payload.network??null,
-    }, { timeoutMs: 38_000 });
-    return result.ok === true ? { success: true, data: result.data }
-      : { success: false, code: 'NETWORK_DIAGNOSTIC_UNAVAILABLE', error: 'Network diagnostics unavailable.' };
+    const watcher = getRuntimeSessionIdForRequest();
+    if (!watcher) return { success: false, code: 'WATCH_OWNER_UNAVAILABLE', error: 'Observation owner unavailable; retry the query.' };
+    return projectSessionWatchManagement(
+      { watches: manageLocalSessionWatches(watcher, cancel, all) },
+      cancel,
+      all,
+    );
   }
   if (route === 'session/watch') {
     const { handleAdminSessionWatch } = await import('./inbox/watch-handler');
@@ -2513,8 +2493,8 @@ async function main() {
       // Pattern 6 (HTTP request boundary): each request runs inside an ALS
       // frame so any nested console.* call automatically gets correlation
       // fields injected. Renderer-side code (`tauriClient.ts`) attaches
-      // x-myagents-log-session-id / X-MyAgents-Tab-Id; the server generates a
-      // fresh requestId (or honours an inbound `X-MyAgents-Request-Id` from
+      // x-myagents-log-session-id / X-LSAGENT-Tab-Id; the server generates a
+      // fresh requestId (or honours an inbound `X-LSAGENT-Request-Id` from
       // the Rust proxy if it pre-populated one).
       const incomingRequestId =
         request.headers.get('x-myagents-request-id') ?? undefined;
@@ -2805,7 +2785,7 @@ async function main() {
       //
       // Security: the registry only holds paths registered by saveToolAttachment, which
       // pre-validated them via validateExternalReadPathNode (system/credential blacklist).
-      // The trusted-root fallback is by construction inside the MyAgents-owned tree.
+      // The trusted-root fallback is by construction inside the LSAGENT-owned tree.
       if (
         pathname.startsWith('/api/attachment/tool/') &&
         request.method === 'GET'
@@ -4224,7 +4204,7 @@ async function main() {
         }
         const expectedAuthority = process.env.MYAGENTS_SESSION_DELETE_AUTHORITY;
         const providedAuthority = request.headers.get(
-          'X-MyAgents-Session-Delete-Authority',
+          'X-LSAGENT-Session-Delete-Authority',
         );
         if (!expectedAuthority || providedAuthority !== expectedAuthority) {
           return jsonResponse(
@@ -5011,7 +4991,7 @@ async function main() {
           // Output to Desktop
           const desktopDir = joinPath(homedir(), 'Desktop');
           const timestamp = new Date().toISOString().slice(0, 10);
-          const zipName = `MyAgents-logs-${timestamp}.zip`;
+          const zipName = `LSAGENT-logs-${timestamp}.zip`;
           const zipPath = joinPath(desktopDir, zipName);
 
           // Create zip using platform-appropriate command
@@ -5517,7 +5497,7 @@ async function main() {
                     params: {
                       protocolVersion: '2025-03-26',
                       capabilities: {},
-                      clientInfo: { name: 'MyAgents', version: '0.1.29' },
+                      clientInfo: { name: 'LSAGENT', version: '0.1.29' },
                     },
                   }),
                   signal: controller.signal,
@@ -6656,7 +6636,7 @@ async function main() {
 
       // GET /api/project-capabilities - authoritative candidate + effective set
       // for the current workspace. Unlike the legacy per-directory endpoints,
-      // this resolves MyAgents-managed symlinks back to their global origin,
+      // this resolves LSAGENT-managed symlinks back to their global origin,
       // applies project-over-global winner semantics, and keeps disabled cards.
       if (
         pathname === '/api/project-capabilities' &&
@@ -6935,7 +6915,7 @@ async function main() {
             return jsonResponse(
               {
                 success: false,
-                error: `${folderName} is a required MyAgents system skill and cannot be disabled`,
+                error: `${folderName} is a required LSAGENT system skill and cannot be disabled`,
               },
               409,
             );
@@ -7002,7 +6982,7 @@ async function main() {
         }
       }
 
-      // POST /api/skill/sync-from-claude - Sync skills from Claude Code to MyAgents
+      // POST /api/skill/sync-from-claude - Sync skills from Claude Code to LSAGENT
       // NOTE: This route MUST be before /api/skill/:name to avoid being captured by the wildcard
       if (
         pathname === '/api/skill/sync-from-claude' &&
@@ -9365,7 +9345,7 @@ async function main() {
         }
       }
 
-      // POST /api/agent/sync-from-claude - Sync agents from Claude Code to MyAgents
+      // POST /api/agent/sync-from-claude - Sync agents from Claude Code to LSAGENT
       // NOTE: Must be before /api/agent/:name to avoid wildcard capture
       // Supports conflict handling: mode = 'skip' (default) | 'overwrite'
       //
@@ -11618,7 +11598,7 @@ description: >
             {
               success: false,
               code: 'INTERNAL_CALLER_REQUIRED',
-              error: 'Internal MyAgents caller identity is required.',
+              error: 'Internal LSAGENT caller identity is required.',
             },
             401,
           );

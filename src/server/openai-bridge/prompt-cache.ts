@@ -14,7 +14,7 @@ const LOG_HASH_LENGTH = 12;
 /**
  * Build an upstream-safe prompt cache affinity key.
  *
- * The key must be stable for a MyAgents session but must not reveal raw
+ * The key must be stable for a LSAGENT session but must not reveal raw
  * session ids, workspace paths, prompts, or provider secrets to the upstream.
  */
 export function buildPromptCacheKey(input: PromptCacheKeyInput): string | undefined {

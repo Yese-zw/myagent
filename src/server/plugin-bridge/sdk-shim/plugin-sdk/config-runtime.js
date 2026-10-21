@@ -1,6 +1,6 @@
 // HAND-WRITTEN BRIDGE SHIM — listed in _handwritten.json.
 //
-// MyAgents Plugin Bridge does not own an openclaw.json file. The authoritative
+// LSAGENT Plugin Bridge does not own an openclaw.json file. The authoritative
 // OpenClaw config for a loaded channel is the in-process normalized snapshot
 // built by src/server/plugin-bridge/openclaw-config.ts. This shim exposes the
 // subset of config-runtime that channel plugins use for runtime reload paths

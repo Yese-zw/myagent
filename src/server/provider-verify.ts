@@ -677,7 +677,7 @@ export async function verifySubscription(model?: string): Promise<SubscriptionVe
   // send `x-api-key: <third-party-key>` to api.anthropic.com → 403.
   //
   // OAuth credentials live in macOS Keychain (or `.credentials.json`), neither
-  // of which is gated by settingSources. MyAgents deliberately does not host
+  // of which is gated by settingSources. LSAGENT deliberately does not host
   // the OAuth lifecycle here: buildClaudeSessionEnv() skips
   // CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST for anthropic-sub, so the native
   // Claude Code runtime consumes the same local login state as `claude` CLI.

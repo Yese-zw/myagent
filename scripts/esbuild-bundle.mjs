@@ -25,10 +25,6 @@ import { fileURLToPath } from 'node:url';
 
 import { preparePlaywrightControlRuntime } from './prepare-playwright-control-runtime.mjs';
 import { dshBuildDefines } from './integrated-runtimes/dsh-build-selection.mjs';
-import { verifyAgentNetworkProtocol } from './verify-agent-network-protocol.mjs';
-
-await verifyAgentNetworkProtocol();
-
 // Read package.json version once and inject as a compile-time constant.
 // This is the ONLY way `myagents version` can show the real shipped
 // version in production: the runtime `process.env.npm_package_version`
@@ -117,7 +113,7 @@ const TARGETS = {
     // `--import tsx/esm` so tsx's loader hooks see every module load. When
     // the bundle lives somewhere with no `package.json` above declaring
     // `"type": "module"` (e.g. a Windows production install at
-    // `C:\Users\hackl\AppData\Local\MyAgents\`), Node's default classifier
+    // `C:\Users\hackl\AppData\Local\LSAGENT\`), Node's default classifier
     // returns `format: "commonjs"` for the `.js` entry. tsx's hook then
     // detects ESM syntax in the CJS-classified file, transpiles it to CJS
     // via esbuild, and re-serves it as a `data:text/javascript` URL — which

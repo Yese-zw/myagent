@@ -2,7 +2,7 @@
 
 ## 概述
 
-MyAgents 的全文搜索由一个 Rust 层单例 `SearchEngine` 提供，构建在 [Tantivy](https://github.com/quickwit-oss/tantivy)（Rust 原生全文搜索引擎，BM25 评分）+ [tantivy-jieba](https://github.com/jiegec/tantivy-jieba)（中文分词，~37 万词词典）之上。对外暴露三类能力：
+LSAGENT 的全文搜索由一个 Rust 层单例 `SearchEngine` 提供，构建在 [Tantivy](https://github.com/quickwit-oss/tantivy)（Rust 原生全文搜索引擎，BM25 评分）+ [tantivy-jieba](https://github.com/jiegec/tantivy-jieba)（中文分词，~37 万词词典）之上。对外暴露三类能力：
 
 1. **Session 搜索** — 跨所有工作区检索会话标题与消息内容
 2. **Record 搜索** — 检索 text/audio Record 的 title、tags、content、transcript 与 speaker projection
@@ -326,7 +326,7 @@ snippet 构建常见 "取匹配位置前后各 N 字符" 的近似切片。裸 `
 - 不启动子进程（Tantivy + jieba 都是 in-process Rust crate）
 - 不与代理相关（无任何 outbound 网络调用）
 
-**但搜索的 watcher 自身是第四个 pit-of-success 典范**：把"任何写入者都必须记得通知索引"这条必然会被违反的隐性契约，替换成"watcher 观察结果目录"的可靠模式。这一设计本身就是 MyAgents 长期架构延续性原则的案例（见 CLAUDE.md 核心架构约束第一原则）。
+**但搜索的 watcher 自身是第四个 pit-of-success 典范**：把"任何写入者都必须记得通知索引"这条必然会被违反的隐性契约，替换成"watcher 观察结果目录"的可靠模式。这一设计本身就是 LSAGENT 长期架构延续性原则的案例（见 CLAUDE.md 核心架构约束第一原则）。
 
 ## 已知陷阱速查
 

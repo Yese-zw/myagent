@@ -13,8 +13,8 @@
 | 已解析明暗 | `ResolvedColorScheme` | 每个 Webview 的 Theme runtime | 当前实际使用的 `light / dark` |
 
 Production registry 的展示顺序与 canonical 注册顺序解耦，当前九套完整 Theme 的产品顺序为：
-`myagents-light`（用户可见名 `MyAgents Light`）、`myagents-default`（`MyAgents Classic`）、
-`default-black`（`MyAgents Classic2`）、`sage`、`absolutely`（`Claude`）、`linear`、`proof`、
+`myagents-light`（用户可见名 `LSAGENT Light`）、`myagents-default`（`LSAGENT Classic`）、
+`default-black`（`LSAGENT Classic2`）、`sage`、`absolutely`（`Claude`）、`linear`、`proof`、
 `codex`、`raycast`。canonical package 仍先注册并独立承担 fail-fast fallback。
 不得把 light/dark 拆成两个 Theme，也不得重新用 `theme` 字段表达 appearance。
 

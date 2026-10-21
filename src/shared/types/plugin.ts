@@ -3,7 +3,7 @@
 // A "plugin" here is the unit defined by Anthropic's Claude Code plugin
 // protocol: a self-contained directory containing `.claude-plugin/plugin.json`
 // plus any combination of `skills/`, `agents/`, `hooks/`, `.mcp.json`,
-// `.lsp.json`, `monitors/`, `bin/`, etc. MyAgents downloads the directory
+// `.lsp.json`, `monitors/`, `bin/`, etc. LSAGENT downloads the directory
 // to `~/.myagents/plugins/<name>/` and hands the absolute path to the
 // Claude Agent SDK via `Options.plugins: [{ type: 'local', path }]`. The
 // SDK is responsible for discovering and wiring the inner components — we
@@ -54,7 +54,7 @@ export interface PluginEntry {
 }
 
 /**
- * Parsed `.claude-plugin/plugin.json` metadata. Only the subset MyAgents
+ * Parsed `.claude-plugin/plugin.json` metadata. Only the subset LSAGENT
  * cares about for UI / record-keeping — component path fields are left
  * for the SDK to interpret.
  */

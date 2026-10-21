@@ -1083,8 +1083,8 @@ describe('SimpleChatInput send paths', () => {
     const user = userEvent.setup();
     const provider = {
       id: 'myagents',
-      name: 'MyAgents',
-      vendor: 'MyAgents',
+      name: 'LSAGENT',
+      vendor: 'LSAGENT',
       cloudProvider: '官方',
       type: 'api',
       primaryModel: 'gpt-5.6-sol',
@@ -1109,8 +1109,8 @@ describe('SimpleChatInput send paths', () => {
     const onBuiltinModelSelect = vi.fn();
     const provider = {
       id: 'myagents',
-      name: 'MyAgents',
-      vendor: 'MyAgents',
+      name: 'LSAGENT',
+      vendor: 'LSAGENT',
       cloudProvider: '官方',
       type: 'api',
       primaryModel: 'claude-sonnet',

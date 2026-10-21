@@ -1,13 +1,13 @@
 ---
 name: hatch-pet
-description: Create, repair, validate, visually QA, and package MyAgents/Codex-compatible animated pets and pet spritesheets from character art, generated images, company or prospect brand cues, or visual references. Use when a user wants a lightweight-worker desktop pet workflow, a non-pixel custom pet style, a prospect or company mascot pet, or a full 8x9 animated pet atlas with transparent unused cells, QA contact sheets, and pet.json packaging. This skill composes the installed $imagegen system skill for visual generation and uses bundled scripts for deterministic spritesheet assembly.
+description: Create, repair, validate, visually QA, and package LSAGENT/Codex-compatible animated pets and pet spritesheets from character art, generated images, company or prospect brand cues, or visual references. Use when a user wants a lightweight-worker desktop pet workflow, a non-pixel custom pet style, a prospect or company mascot pet, or a full 8x9 animated pet atlas with transparent unused cells, QA contact sheets, and pet.json packaging. This skill composes the installed $imagegen system skill for visual generation and uses bundled scripts for deterministic spritesheet assembly.
 ---
 
 # Hatch Pet
 
 ## Overview
 
-Create a MyAgents/Codex-compatible animated pet from a concept, brand cue, company/prospect name, one or more reference images, or any combination of those inputs. This workflow keeps the deterministic hatch-pet pipeline for atlas geometry, validation, visual QA, and packaging, while using concise state-specific prompts and allowing any pet-safe visual style.
+Create a LSAGENT/Codex-compatible animated pet from a concept, brand cue, company/prospect name, one or more reference images, or any combination of those inputs. This workflow keeps the deterministic hatch-pet pipeline for atlas geometry, validation, visual QA, and packaging, while using concise state-specific prompts and allowing any pet-safe visual style.
 
 User-facing inputs are optional. If the user omits a pet name, infer one from the concept, brand, company, or reference filenames; if that is not possible, choose a short friendly name. If the user omits a description, infer one from the concept or references. If the user omits reference images, generate the base pet from text first, then use that base as the canonical reference for every animation row.
 
@@ -92,7 +92,7 @@ brand_sources=<same comma-separated URLs from Generation handoff>
 
 The parent should save the markdown brief before preparing the run, then pass it to `prepare_pet_run.py` as `--brand-discovery-file` together with `--brand-name`, `--brand-brief`, repeated `--brand-source`, and a concise `--pet-notes` value based on `avatar_seed` when the user did not provide a better avatar description. Keep the full brief for review; only the compact handoff fields should shape prompts. If web search is unavailable and the user gave only a bare brand name, ask for brand cues before generating.
 
-For a normal pet run, expect up to 10 visual generation jobs: 1 base pet plus 9 row-strip jobs. The MyAgents/Codex pet contract currently uses all 9 states: `idle`, `running-right`, `running-left`, `waving`, `jumping`, `failed`, `waiting`, `running`, and `review`. The only deterministic visual derivation is `running-left`, which may be produced by mirroring `running-right` only after `running-right` has been generated, visually inspected, and explicitly approved as safe to mirror. If mirroring is not appropriate, generate `running-left` as a normal grounded `$imagegen` row.
+For a normal pet run, expect up to 10 visual generation jobs: 1 base pet plus 9 row-strip jobs. The LSAGENT/Codex pet contract currently uses all 9 states: `idle`, `running-right`, `running-left`, `waving`, `jumping`, `failed`, `waiting`, `running`, and `review`. The only deterministic visual derivation is `running-left`, which may be produced by mirroring `running-right` only after `running-right` has been generated, visually inspected, and explicitly approved as safe to mirror. If mirroring is not appropriate, generate `running-left` as a normal grounded `$imagegen` row.
 
 After selecting a visual output, the parent agent copies that exact image into the job's `decoded/` path and marks the job complete in `imagegen-jobs.json`. Do not write helper scripts that populate row outputs. The deterministic Python scripts may only process already-generated visual outputs.
 
@@ -343,7 +343,7 @@ run/
   qa/run-summary.json
 ```
 
-Package output is written outside the run directory by default. In MyAgents, write custom pets to `${MYAGENTS_HOME:-$HOME/.myagents}/pets` so the desktop pet picker can load them directly. The same package shape is compatible with Codex if copied under `${CODEX_HOME:-$HOME/.codex}/pets`.
+Package output is written outside the run directory by default. In LSAGENT, write custom pets to `${MYAGENTS_HOME:-$HOME/.myagents}/pets` so the desktop pet picker can load them directly. The same package shape is compatible with Codex if copied under `${CODEX_HOME:-$HOME/.codex}/pets`.
 
 ```text
 ${MYAGENTS_HOME:-$HOME/.myagents}/pets/<pet-name>/
@@ -415,7 +415,7 @@ Row worker responsibilities:
 Final visual QA worker responsibilities:
 
 - inspect `qa/contact-sheet.png` plus the row GIFs under `qa/previews/`, with `qa/review.json` and `final/validation.json` as text context when useful
-- verify all 9 rows match the MyAgents/Codex pet state contract and the same pet identity
+- verify all 9 rows match the LSAGENT/Codex pet state contract and the same pet identity
 - return a compact result: `visual_qa=pass` or `visual_qa=fail`, plus row-specific repair notes when failing
 - do not edit files, queue repairs, package, or clean up
 
@@ -536,7 +536,7 @@ For extraction-induced motion popping, do not regenerate imagery first. If the s
 - Atlas follows the row/frame counts in `references/animation-rows.md`.
 - Contact sheet and per-row motion previews have been produced and inspected by a lightweight visual QA worker.
 - `qa/review.json` has no errors.
-- Row-by-row review confirms the animation cycles are complete enough for the MyAgents/Codex pet contract.
+- Row-by-row review confirms the animation cycles are complete enough for the LSAGENT/Codex pet contract.
 - Motion previews do not show unintended size popping, reversed directional cadence, or wrong row semantics.
 - Non-pixel styles are accepted when readable at pet size and consistent across rows.
 - `${MYAGENTS_HOME:-$HOME/.myagents}/pets/<pet-name>/pet.json` and `${MYAGENTS_HOME:-$HOME/.myagents}/pets/<pet-name>/spritesheet.webp` are staged together for custom pets.

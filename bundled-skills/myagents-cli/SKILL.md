@@ -1,9 +1,9 @@
 ---
 name: myagents-cli
 description: >-
-  你正在 MyAgents 这款 AI 产品里运行——MyAgents 自带一套"产品能力"（定时任务、任务中心、记录收集、MCP 工具接入、
+  你正在 LSAGENT 这款 AI 产品里运行——LSAGENT 自带一套"产品能力"（定时任务、任务中心、记录收集、MCP 工具接入、
   模型 Provider、IM Bot 渠道、社区插件、Skills 安装、协作空间、Agent 网络与 Session 协作、Generative UI Widget、Goal 目标模式等），通过内置 `myagents` CLI 操作。
-  当用户的需求**落在 MyAgents 产品能力的射程内**，就加载并使用这个 skill，用 CLI 主动帮用户把事情做掉，
+  当用户的需求**落在 LSAGENT 产品能力的射程内**，就加载并使用这个 skill，用 CLI 主动帮用户把事情做掉，
   而不是让用户去 GUI 点击。
   典型触发场景：用户说"每天 X 点帮我 Y / 等 X 发生后继续 / 持续盯着，命中才处理"（→ myagents-task-automation）、"记一下这个想法"（→ record）、"派发成任务"（→ task）、
   "接个 X 工具进来"（→ mcp）、"配 X 模型/Provider"（→ model）、"在飞书/钉钉/Telegram 里跟我聊"（→ agent channel）、
@@ -11,17 +11,17 @@ description: >-
   "把图发到 IM 里"（→ im send-media）、"用已配置的读图模型理解图片"（→ vision analyze）、"持续执行直到目标完成"（→ goal）、
   "做个图表/仪表盘"
   （→ widget readme）、"看下我有啥任务/定时/Runtime/版本"（→ list / status / version）、"改下应用设置"（→ config）。
-  即使用户没说"用 MyAgents 做"几个字，只要意图能映射到上述能力之一，就该走这个 skill。
-  反向边界：纯业务任务（立即写代码、查资料、读文件）不归这里；只有需要操作 MyAgents 产品状态或未来自动化时才使用本 Skill。
+  即使用户没说"用 LSAGENT 做"几个字，只要意图能映射到上述能力之一，就该走这个 skill。
+  反向边界：纯业务任务（立即写代码、查资料、读文件）不归这里；只有需要操作 LSAGENT 产品状态或未来自动化时才使用本 Skill。
 metadata:
-  author: MyAgents
+  author: LSAGENT
 ---
 
-# myagents-cli — MyAgents 产品能力的 CLI 入口
+# myagents-cli — LSAGENT 产品能力的 CLI 入口
 
-MyAgents 是带状态的 Agent 平台：Goal、Task、Record、IM Bot、MCP、Provider、插件、Skill、协作空间、Agent 网络与 Session 协作、Widget。CLI 负责产品操作；使用知识与功能边界查 `/myagents-docs`，登录、入网和开放 Agent 等没有 CLI 写入口的操作使用产品 UI。
+LSAGENT 是带状态的 Agent 平台：Goal、Task、Record、IM Bot、MCP、Provider、插件、Skill、协作空间、Agent 网络与 Session 协作、Widget。CLI 负责产品操作；使用知识与功能边界查 `/myagents-docs`，登录、入网和开放 Agent 等没有 CLI 写入口的操作使用产品 UI。
 
-**这个 skill 不只是"管理工具"，它是 MyAgents 产品能力的执行入口**。用户表达的需求只要能映射到产品能力，就该用 CLI 主动帮用户做掉，而不是给用户一堆操作步骤让他自己去 Settings 点。这份文档列出全部能力以及"什么时候应该用哪条命令"。
+**这个 skill 不只是"管理工具"，它是 LSAGENT 产品能力的执行入口**。用户表达的需求只要能映射到产品能力，就该用 CLI 主动帮用户做掉，而不是给用户一堆操作步骤让他自己去 Settings 点。这份文档列出全部能力以及"什么时候应该用哪条命令"。
 
 ## 前置：CLI 是否可用
 
@@ -55,11 +55,11 @@ CLI 通过 `~/.myagents/bin/myagents` 暴露，App 内 Agent 的 PATH 和调用�
 
 ### AnyDoc 本地文档转换
 
-MyAgents 内置 AnyDoc 本地文档转 Markdown/OCR 能力。先运行 `myagents anydoc --help`；需要详细使用说明时加载 `/myagents-anydoc`。
+LSAGENT 内置 AnyDoc 本地文档转 Markdown/OCR 能力。先运行 `myagents anydoc --help`；需要详细使用说明时加载 `/myagents-anydoc`。
 
 ### 本地附件语音识别
 
-MyAgents 能把当前 Workspace 内的单个本地音频或视频附件提交给 App-owned 离线异步转写任务。先运行 `myagents speech --help`；需要完整 Session 隔离、输入格式与任务生命周期说明时加载 `/myagents-speech-recognition`。Session 与 Workspace 由产品自动绑定，不自行传参。
+LSAGENT 能把当前 Workspace 内的单个本地音频或视频附件提交给 App-owned 离线异步转写任务。先运行 `myagents speech --help`；需要完整 Session 隔离、输入格式与任务生命周期说明时加载 `/myagents-speech-recognition`。Session 与 Workspace 由产品自动绑定，不自行传参。
 
 ### MCP 工具（mcp）
 
@@ -122,7 +122,7 @@ myagents tool env <name> delete KEY      # 删
 
 ### 官方图片理解工具（vision）
 
-这是 MyAgents 内置官方 CLI 工具，不属于 MCP，也不属于用户注册 `tool` 实验功能。它用于在当前会话启用“图片理解”工具时，让不支持多模态的主模型把本地工作区图片交给用户在「设置 → 工具箱」里配置好的读图模型分析。
+这是 LSAGENT 内置官方 CLI 工具，不属于 MCP，也不属于用户注册 `tool` 实验功能。它用于在当前会话启用“图片理解”工具时，让不支持多模态的主模型把本地工作区图片交给用户在「设置 → 工具箱」里配置好的读图模型分析。
 
 ```bash
 myagents vision readme
@@ -132,7 +132,7 @@ myagents vision analyze --image @myagents_files/screenshot.png --prompt "Extract
 ```
 
 **约束：**
-- 只接受当前 MyAgents 工作区内的本地图片路径；不要传 URL。
+- 只接受当前 LSAGENT 工作区内的本地图片路径；不要传 URL。
 - `--prompt` 是短指令；长/多行/含引号的检查指令写进当前 workspace 内的文本文件，再用 `--prompt-file`。
 - `--prompt-file` 路径也按当前 workspace 安全解析；不要传 URL、symlink 或 workspace 外路径。
 - 如果报“not enabled / not configured”，让用户在「设置 → 工具箱」启用图片理解并选择支持图片输入的模型。
@@ -207,7 +207,7 @@ myagents diagnose runtime dsh                           # 资源校验、当前�
 - 在跑 `task create-direct --runtime X --model Y --permissionMode Z` **之前**先 `runtime describe X` 把合法值查清楚——`--help` 只列 flag，值靠这俩命令现场查，不会因为文档漂移而错
 - "我装了哪些 Agent CLI" → `runtime list`
 - 用户问"codex 支持什么 model" → `runtime describe codex`
-- 「@oai/artifact-tool 我从终端能调用、MyAgents 里就不行」/「Codex MCP 在 MyAgents 里看不到」/「Codex 是不是用错代理了」→ `runtime diagnose codex`。它 spawn 一个临时 codex app-server，跑 `getAuthStatus` / `experimentalFeature/list` / `mcpServerStatus/list` / `app/list` 四个 RPC，把 Codex 自己看到的状态原样吐出来，省得猜。effectiveEnv 节里能看到 MyAgents 注入的代理是不是真到了子进程，feature flag 是不是真生效。
+- 「@oai/artifact-tool 我从终端能调用、LSAGENT 里就不行」/「Codex MCP 在 LSAGENT 里看不到」/「Codex 是不是用错代理了」→ `runtime diagnose codex`。它 spawn 一个临时 codex app-server，跑 `getAuthStatus` / `experimentalFeature/list` / `mcpServerStatus/list` / `app/list` 四个 RPC，把 Codex 自己看到的状态原样吐出来，省得猜。effectiveEnv 节里能看到 LSAGENT 注入的代理是不是真到了子进程，feature flag 是不是真生效。
 
 每个 Runtime 有自己的 model 清单、权限模式和计划状态。DSH 模型目录查 `model list`；Codex 模型通过当前 Runtime 查询。不要把旧 CLI 名称、产品权限与 Runtime 原生策略混用；Codex system-cli probe 不能代替 `codex-sub` 的 Managed Codex 诊断。
 
@@ -238,7 +238,7 @@ myagents skill sync [name ...] --apply                   # 导入选定候选；
 | `/absolute/path/private-skill` | 本地绝对路径（Windows 也支持 drive-letter 路径） |
 | `file:///absolute/path/private.skill` | 本地 file URL |
 
-本地来源会物化复制到 MyAgents 管理目录，不保留 source symlink；`--dry-run` 只解析和预览，不写目标或 staging。
+本地来源会物化复制到 LSAGENT 管理目录，不保留 source symlink；`--dry-run` 只解析和预览，不写目标或 staging。
 
 **不支持**：`.tar.gz/.tgz`、GitLab、私有仓库、git SSH。
 
@@ -248,7 +248,7 @@ myagents skill sync [name ...] --apply                   # 导入选定候选；
 - "装 React 最佳实践" → `skill add vercel-labs/skills --skill react-best-practices`
 - 报错 `该仓库是 Claude Plugins 市场` → 按提示加 `--plugin <name>`，比如 `skill add anthropics/skills --plugin document-skills` 一次装 docx/pdf/pptx/xlsx
 - 报错 `技能 X 已存在` → 跟用户确认要不要 `--force` 覆盖
-- 用户在 `~/.claude/skills/` 自己塞了东西 MyAgents 看不见 → `skill sync` 预览，再按授权 `--apply` 导入并启用
+- 用户在 `~/.claude/skills/` 自己塞了东西 LSAGENT 看不见 → `skill sync` 预览，再按授权 `--apply` 导入并启用
 
 ### 定时与未来自动化 Task
 
@@ -358,7 +358,7 @@ myagents task delete <taskId>                           # 不可恢复地移出�
 
 **归档与删除**：`task archive` 是仅用户可执行、长期可恢复的归档状态，Agent 调用会被 Task authority 拒绝。执行 `task delete/remove` 前在对话中向用户说明具体对象并取得确认；已有明确删除授权时直接执行，CLI 不弹界面确认框。删除不可恢复，没有 30 天恢复或 undelete 承诺；它会停止调度并清平台 Trigger state/pending activation，但内部 tombstone/审计仍用于 authority 与迁移安全，工作区脚本和脚本自持状态不归 TaskStore 删除。
 
-### MyAgents Cloud Space（space）
+### LSAGENT Cloud Space（space）
 
 ```bash
 myagents space list --json
@@ -471,7 +471,7 @@ myagents im readme                                      # 拉 IM 工具完整文
 
 **何时用：**
 - 你正在某个 IM 渠道（Telegram / 飞书 / 钉钉 / OpenClaw）的会话里跟用户聊，要发图片 / 视频 / 文件给对方时用 `im send-media`
-- `--file` 必须是绝对路径，且路径白名单：必须落在 workspace / `/tmp` / MyAgents scratch 目录之一——这是为了防 prompt injection 把 `~/.ssh/id_rsa` 之类发给聊天对方
+- `--file` 必须是绝对路径，且路径白名单：必须落在 workspace / `/tmp` / LSAGENT scratch 目录之一——这是为了防 prompt injection 把 `~/.ssh/id_rsa` 之类发给聊天对方
 - 不在 IM session 内调用会返回 "No IM context"，正常——这命令本来就是 session-scoped
 
 ### Agent 网络与 Session 协作（agent / session）
@@ -584,7 +584,7 @@ Claude Agent SDK 的原生协议是 Anthropic Messages API；DSH 可使用 Provi
 
 **第一步：找 Anthropic / Claude Code 接入板块（优先）**
 
-大多数支持 Anthropic 协议的服务商，会在文档里以「接入 Claude Code」的形式呈现——MyAgents 和 Claude Code 共享 SDK，所以 Claude Code 的接入方式就是我们最原生的接入方式。
+大多数支持 Anthropic 协议的服务商，会在文档里以「接入 Claude Code」的形式呈现——LSAGENT 和 Claude Code 共享 SDK，所以 Claude Code 的接入方式就是我们最原生的接入方式。
 
 文档里搜：`Claude Code` / `Anthropic` / `ANTHROPIC_BASE_URL` / `ANTHROPIC_API_KEY` / `/anthropic`。
 
@@ -605,7 +605,7 @@ Claude Agent SDK 的原生协议是 Anthropic Messages API；DSH 可使用 Provi
 
 #### Claude Code 环境变量 → CLI flag 映射
 
-| Claude Code 环境变量 | MyAgents CLI |
+| Claude Code 环境变量 | LSAGENT CLI |
 |---------------------|------------|
 | `ANTHROPIC_BASE_URL` | `--base-url` |
 | `ANTHROPIC_API_KEY` | `model set-key` 设置 |

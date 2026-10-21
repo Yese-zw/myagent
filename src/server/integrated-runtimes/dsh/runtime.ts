@@ -358,7 +358,7 @@ function nonNegativeInteger(value: unknown, description: string): number {
 function productPermissionMode(value: string | undefined): ProductPermissionMode {
   if (value === undefined || value === '') return 'approval-required';
   if (value === 'approval-required' || value === 'workspace-autonomous' || value === 'full-autonomous') return value;
-  throw new Error(`Unsupported MyAgents DSH permission mode: ${value}`);
+  throw new Error(`Unsupported LSAGENT DSH permission mode: ${value}`);
 }
 
 function reasoningSelection(value: string | undefined): DshReasoningEffortSelection {
@@ -405,7 +405,7 @@ async function resourceRootForNode(nodeExecutablePath: string): Promise<string> 
 
 async function installedRuntime() {
   const nodeExecutablePath = getBundledNodePath();
-  if (!nodeExecutablePath) throw new Error('MyAgents bundled Node is unavailable');
+  if (!nodeExecutablePath) throw new Error('LSAGENT bundled Node is unavailable');
   return await resolveDshRuntimeInstallation({
     nodeExecutablePath,
     resourceRoot: await resourceRootForNode(nodeExecutablePath),

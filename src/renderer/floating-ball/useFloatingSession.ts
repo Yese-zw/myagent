@@ -419,7 +419,7 @@ function withFloatingCorrelation(sessionId: string, options: RequestInit = {}): 
         headers: {
             ...headerRecord(options.headers),
             [LOG_SESSION_HEADER]: sessionId,
-            'X-MyAgents-Tab-Id': OWNER_ID,
+            'X-LSAGENT-Tab-Id': OWNER_ID,
         },
     };
 }

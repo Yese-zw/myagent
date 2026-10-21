@@ -1,14 +1,14 @@
 ---
 name: myagents-speech-recognition
 description: >-
-  当用户要把当前 MyAgents Workspace 内的单个本地音频或视频附件转成带时间戳的文字稿，或要查询、等待、取消、列出自己当前 Session 发起的语音识别任务时使用。通过内置 `myagents speech` CLI 调用 App 持有的离线异步任务；不用于录制会议、读取 Record、在线 ASR、批量目录、URL、说话人区分或 AI 纪要。
+  当用户要把当前 LSAGENT Workspace 内的单个本地音频或视频附件转成带时间戳的文字稿，或要查询、等待、取消、列出自己当前 Session 发起的语音识别任务时使用。通过内置 `myagents speech` CLI 调用 App 持有的离线异步任务；不用于录制会议、读取 Record、在线 ASR、批量目录、URL、说话人区分或 AI 纪要。
 metadata:
-  author: MyAgents
+  author: LSAGENT
 ---
 
 # myagents-speech-recognition — 本地附件转写
 
-这是 MyAgents 随 App 发布的离线附件转写能力。任务由 Desktop App 持有，并自动绑定发起调用的真实 Session 与 authoritative Workspace；不要传、猜测或请求用户提供 Session ID / Workspace 参数。
+这是 LSAGENT 随 App 发布的离线附件转写能力。任务由 Desktop App 持有，并自动绑定发起调用的真实 Session 与 authoritative Workspace；不要传、猜测或请求用户提供 Session ID / Workspace 参数。
 
 ## 使用顺序
 

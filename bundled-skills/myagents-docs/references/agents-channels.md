@@ -2,7 +2,7 @@
 
 ## Agent 是什么
 
-MyAgents 中的 Agent 围绕一个 Workspace 工作。它不仅是一段 Prompt，还可以包含：
+LSAGENT 中的 Agent 围绕一个 Workspace 工作。它不仅是一段 Prompt，还可以包含：
 
 - 默认 Provider、Model、Runtime 与 permission mode
 - Workspace 级 MCP、Skills、Plugin 与官方工具选择
@@ -29,7 +29,7 @@ Channel 把 Agent 接入外部消息平台。
 
 ### 内置 Channel
 
-Telegram、钉钉、飞书由 MyAgents 桌面应用直接提供配置向导并管理连接。通常优先使用设置页中直接出现的内置 Channel。
+Telegram、钉钉、飞书由 LSAGENT 桌面应用直接提供配置向导并管理连接。通常优先使用设置页中直接出现的内置 Channel。
 
 飞书向导支持扫码授权，也保留手动配置方式；无需为了使用内置飞书先寻找社区插件。
 
@@ -56,13 +56,13 @@ Telegram、钉钉、飞书由 MyAgents 桌面应用直接提供配置向导并�
 
 ## IM 中的媒体与结果
 
-Agent 在 IM Session 中可以发送图片、视频或文件，但只允许来自当前 Workspace、MyAgents scratch 或明确安全临时目录的文件。普通桌面 Session 调用 IM media 命令会得到“No IM context”，这是作用域边界，不是产品故障。
+Agent 在 IM Session 中可以发送图片、视频或文件，但只允许来自当前 Workspace、LSAGENT scratch 或明确安全临时目录的文件。普通桌面 Session 调用 IM media 命令会得到“No IM context”，这是作用域边界，不是产品故障。
 
 Task、Goal 和 heartbeat 的结果需要回到触发它们的正确 Channel/peer。用户看到“任务执行了但发给了另一个聊天”属于实际路由异常，应转 support。
 
 ## AI 小助理
 
-小助理是 MyAgents 的产品使用与本地支持入口：
+小助理是 LSAGENT 的产品使用与本地支持入口：
 
 - 解释功能、比较概念、帮助用户选择能力
 - 通过既有 CLI 代为完成安全的产品操作
@@ -74,7 +74,7 @@ Task、Goal 和 heartbeat 的结果需要回到触发它们的正确 Channel/pee
 
 ## 桌面宠物 / 悬浮窗
 
-悬浮球和伴随窗口提供轻量唤起入口，可以跟随默认 Workspace 或绑定特定 Workspace。它复用 MyAgents 的 Global/Session 能力，不维护另一份独立配置。
+悬浮球和伴随窗口提供轻量唤起入口，可以跟随默认 Workspace 或绑定特定 Workspace。它复用 LSAGENT 的 Global/Session 能力，不维护另一份独立配置。
 
 适合快速提问和小任务；需要查看大量历史、文件树、终端或多 Tab 时回到主窗口。
 

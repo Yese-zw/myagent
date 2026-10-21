@@ -12,7 +12,7 @@ Session 不是单一对象，而是同一产品会话在不同生命周期阶段
 | 当前 Product Session 绑定 | `session-engine/product-session-binding.ts` | 当前 Sidecar 正在服务哪个 Product Session |
 | Runtime execution identity | 对应 SessionEngine adapter | builtin 的 SDK Session UUID；DSH/外部 Runtime 的 session/thread id |
 | Sidecar 生命周期与 Owner | Rust `SidecarManager` | 创建、复用、replacement、Owner 附着与释放 |
-| transcript | `SessionStore` | MyAgents UI、搜索与恢复使用的产品历史 |
+| transcript | `SessionStore` | LSAGENT UI、搜索与恢复使用的产品历史 |
 | 当前 turn 与 Runtime queue | 对应 adapter | admission、执行、stop 与 terminal settlement |
 | Goal 状态 | Rust `SessionGoalManager` | 独立于 Session metadata 与 Task 的 durable state |
 | Renderer 投影 | `TabProvider` / `useTabState()` | 只投影当前 Tab 所属 Session，不反向成为业务 authority |
@@ -233,22 +233,22 @@ Space Issue Delivery 复用 Inbox admission，但使用专用 `myagents-space-is
 
 ## 6. 持久化与恢复
 
-### 6.1 MyAgents transcript
+### 6.1 LSAGENT transcript
 
 `SessionStore` 用 `sessions.json` 固定格式和 metadata；旧 Session 沿用 `sessions/` 的原 JSON/JSONL 读写，新建及 fork 目标固定到 `sessions-v2/` 的内容操作日志。无迁移、双写或 V2→V1 fallback。路径先经过 canonical Session id validation。
 
 V2 的 live projection 与异步 writer 同属 SessionStore。约 100 ms 的持续批次保存未结束内容，插话产生稳定展示段，完整帧/工具/附件更新原目标。待写队列无容量上限，持续故障时接受积压的内存风险；保存失败或挂起只报告产品记录异常与 toast，不主动阻断 AI。显式 fork/rewind/reset/delete 仍守自身 lifecycle 和物理写权限边界。格式、恢复与接口细节见 [`session_transcript_v2.md`](session_transcript_v2.md)。
 
-### 6.2 MyAgents 与 SDK 双重存储
+### 6.2 LSAGENT 与 SDK 双重存储
 
 两份历史服务不同 authority：
 
 | 存储 | 用途 |
 |---|---|
-| MyAgents V1/V2 产品文件 | UI 展示、搜索、Session 列表、跨 Runtime 的产品历史 |
+| LSAGENT V1/V2 产品文件 | UI 展示、搜索、Session 列表、跨 Runtime 的产品历史 |
 | Runtime 原生存储 | SDK/CLI resume、上下文连续性、Runtime 自有 cache 与 branch 语义 |
 
-不能用其中一份替代另一份。产品层恢复以 MyAgents transcript 为准，执行层 resume 以 adapter 的 native identity/history 为准；两者通过显式 identity 和 rewind boundary 对齐。
+不能用其中一份替代另一份。产品层恢复以 LSAGENT transcript 为准，执行层 resume 以 adapter 的 native identity/history 为准；两者通过显式 identity 和 rewind boundary 对齐。
 
 ### 6.3 REST snapshot 与 SSE
 

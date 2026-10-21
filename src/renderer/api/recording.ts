@@ -27,7 +27,7 @@ import { isTauriEnvironment } from '@/utils/browserMock';
 
 function requireDesktop(): void {
   if (!isTauriEnvironment()) {
-    throw new Error('Recording commands require the MyAgents desktop app');
+    throw new Error('Recording commands require the LSAGENT desktop app');
   }
 }
 

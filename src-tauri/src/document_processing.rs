@@ -639,8 +639,8 @@ impl DocumentProcessingManager {
         if !state.accepting {
             return Err(DocumentServiceError::new(
                 "DOCUMENT_MANAGER_SHUTTING_DOWN",
-                "MyAgents is shutting down and cannot accept a new conversion.",
-                "Restart MyAgents, then submit the conversion again.",
+                "LSAGENT is shutting down and cannot accept a new conversion.",
+                "Restart LSAGENT, then submit the conversion again.",
             ));
         }
         if let Some(error) = state.resource_error.clone() {
@@ -670,7 +670,7 @@ impl DocumentProcessingManager {
             return Err(DocumentServiceError::new(
                 "DOCUMENT_PRIVATE_STORAGE_UNAVAILABLE",
                 format!("The private job directory could not be created: {error}"),
-                "Check free disk space and MyAgents data-directory permissions.",
+                "Check free disk space and LSAGENT data-directory permissions.",
             ));
         }
         if set_private_permissions(&private_dir)
@@ -701,7 +701,7 @@ impl DocumentProcessingManager {
             return Err(DocumentServiceError::new(
                 "DOCUMENT_PRIVATE_STORAGE_UNAVAILABLE",
                 "The staging ownership marker could not be saved.",
-                "Check output and MyAgents data-directory permissions, then retry.",
+                "Check output and LSAGENT data-directory permissions, then retry.",
             ));
         }
         let now = Utc::now();
@@ -2881,7 +2881,7 @@ fn resource_error(code: &str) -> DocumentServiceError {
     DocumentServiceError::new(
         code,
         "Bundled document-processing resources are missing, corrupt, or incompatible with this build.",
-        "Reinstall this MyAgents build and retry.",
+        "Reinstall this LSAGENT build and retry.",
     )
 }
 
@@ -3473,7 +3473,7 @@ fn manager_unavailable() -> DocumentServiceError {
     DocumentServiceError::new(
         "DOCUMENT_MANAGER_UNAVAILABLE",
         "The document manager is unavailable.",
-        "Restart MyAgents and retry.",
+        "Restart LSAGENT and retry.",
     )
 }
 fn store_error(_message: String) -> DocumentServiceError {
@@ -3555,7 +3555,7 @@ fn worker_error(job_id: &str, code: &str, retryable: bool) -> DocumentJobError {
         | "DOCUMENT_OCR_RUNTIME_UNAVAILABLE"
         | "DOCUMENT_PDFIUM_LOAD_FAILED" => (
             "A bundled document-processing resource is missing, corrupt, or could not be loaded.",
-            "Reinstall this MyAgents build and retry.",
+            "Reinstall this LSAGENT build and retry.",
             None,
         ),
         "DOCUMENT_TIMEOUT" => (
@@ -3567,7 +3567,7 @@ fn worker_error(job_id: &str, code: &str, retryable: bool) -> DocumentJobError {
         | "DOCUMENT_WORKER_START_FAILED"
         | "DOCUMENT_WORKER_PROTOCOL_ERROR" => (
             "The isolated document Worker exited or failed its private protocol.",
-            "Restart MyAgents if the error repeats, then submit a new job.",
+            "Restart LSAGENT if the error repeats, then submit a new job.",
             Some("myagents anydoc convert --file <input>"),
         ),
         "DOCUMENT_PUBLISH_FAILED" | "DOCUMENT_STAGING_WRITE_FAILED" => (

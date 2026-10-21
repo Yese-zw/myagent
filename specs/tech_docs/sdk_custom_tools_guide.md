@@ -1,6 +1,6 @@
 # In-process MCP 工具架构
 
-MyAgents 的 builtin custom tools 以 MCP server handler 为复用边界。Builtin Claude 通过 Claude Agent SDK 的 in-process MCP transport 使用它们；Managed Codex 与 Integrated DSH 经共享 `product-extensions` dispatcher，把同一 handler 投影到各自的原生 Host tool 协议。
+LSAGENT 的 builtin custom tools 以 MCP server handler 为复用边界。Builtin Claude 通过 Claude Agent SDK 的 in-process MCP transport 使用它们；Managed Codex 与 Integrated DSH 经共享 `product-extensions` dispatcher，把同一 handler 投影到各自的原生 Host tool 协议。
 
 本文不维护完整工具清单。当前注册项以 `src/server/tools/builtin-mcp-meta.ts`、动态 Channel owner 和测试为准。
 
@@ -128,4 +128,4 @@ Task/Cron completion 与 IM scheduled delivery 由统一 `myagents` CLI / manage
 
 `tools/channel-messaging.ts` 为 `myagents im send-message` 的统一 Node handler，各 Runtime 的 CLI 共用请求 schema、文件约束及 Rust management API。Rust 拥有连接、精确默认绑定和最终发送；调用方身份来自 Sidecar/generation，schema 不接受模型指定 sessionId。两种 mode 都提供工具，配置只管普通回推。
 
-Builtin、Managed Codex 新旧 thread、DSH、Claude Code 和系统 Codex 均通过既有 MyAgents CLI 运行 `myagents im send-message`。不注册新 MCP/host tool；system prompt 和逐轮 reminder 统一写 CLI 方法。可用性依赖可信 Session/Agent 资格，不依赖正在进行的 IM request。
+Builtin、Managed Codex 新旧 thread、DSH、Claude Code 和系统 Codex 均通过既有 LSAGENT CLI 运行 `myagents im send-message`。不注册新 MCP/host tool；system prompt 和逐轮 reminder 统一写 CLI 方法。可用性依赖可信 Session/Agent 资格，不依赖正在进行的 IM request。

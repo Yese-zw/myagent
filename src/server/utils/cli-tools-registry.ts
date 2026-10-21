@@ -195,7 +195,7 @@ export function findPathCollision(name: string, effectivePath?: string): string 
   const candidates = process.platform === 'win32'
     ? [name, `${name}.exe`, `${name}.cmd`, `${name}.bat`]
     : [name];
-  // 显式补上 MyAgents 自有的 AI 自装 CLI 落点，防止注册工具遮蔽 AI 装过的命令
+  // 显式补上 LSAGENT 自有的 AI 自装 CLI 落点，防止注册工具遮蔽 AI 装过的命令
   const extraDirs = [join(getMyAgentsDir(), 'npm-global', 'bin')];
   for (const dir of [...pathEnv.split(delimiter), ...extraDirs]) {
     if (!dir) continue;
@@ -339,7 +339,7 @@ export function buildUserToolsSectionText(tools: ReadonlyArray<{ name: string; d
     ? `\n\n…and ${overflow} more registered tool(s) — run \`myagents tool list\` to see all.`
     : '';
   return `<myagents-user-tools>
-The user has registered the following CLI tools in MyAgents. They are on PATH —
+The user has registered the following CLI tools in LSAGENT. They are on PATH —
 invoke them directly from your shell tool. Before first use in a session, run
 \`<tool> readme\` for the full usage doc; \`<tool> --help\` shows arguments.
 Pass --json for machine-readable output. Non-zero exit = failure; stderr carries

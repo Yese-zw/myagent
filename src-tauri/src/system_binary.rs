@@ -214,7 +214,7 @@ fn append_windows_runtime_dirs(parts: &mut Vec<String>) {
         push_path_part(parts, home.join("AppData").join("Roaming").join("npm"));
     }
 
-    push_env_dir(parts, "LOCALAPPDATA", &["MyAgents", "nodejs"]);
+    push_env_dir(parts, "LOCALAPPDATA", &["LSAGENT", "nodejs"]);
     push_env_dir(parts, "LOCALAPPDATA", &["Volta", "bin"]);
     push_env_dir(parts, "LOCALAPPDATA", &["bun", "bin"]);
     push_env_dir(parts, "LOCALAPPDATA", &["Programs", "Git", "cmd"]);

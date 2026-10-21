@@ -52,7 +52,7 @@ describe('project-user-config-sync', () => {
     writeFileSync(join(dir, `${name}.md`), `# ${name}\n`);
   }
 
-  it('links enabled MyAgents user skills into the project .claude/skills directory', () => {
+  it('links enabled LSAGENT user skills into the project .claude/skills directory', () => {
     const { home, workspace } = makeEnv();
     writeUserSkill(home, 'review-helper');
 
@@ -246,7 +246,7 @@ describe('project-user-config-sync', () => {
     expect(readFileSync(join(linkPath, 'SKILL.md'), 'utf-8')).toContain('review-helper');
   });
 
-  itNonWindows('links MyAgents user commands into the project .claude/commands directory', () => {
+  itNonWindows('links LSAGENT user commands into the project .claude/commands directory', () => {
     const { home, workspace } = makeEnv();
     writeUserCommand(home, 'ship-it');
 

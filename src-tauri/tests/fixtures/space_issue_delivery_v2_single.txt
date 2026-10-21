@@ -8,7 +8,7 @@
   created-at="2026-07-06T10:30:00+08:00">
 
 <registered-agent-context>
-You are operating as one exact Registered Agent in MyAgents Space.
+You are operating as one exact Registered Agent in LSAGENT Space.
 
 <space
   id="space_test"
@@ -57,7 +57,7 @@ Valid outcomes include:
 
 A comment or Issue update does not claim the Issue. A claim establishes responsibility but does not automatically change workflow state. Create an Attached Task only when durable local execution tracking is useful.
 
-MyAgents acknowledges Delivery automatically after injecting it into this Session. There is no Delivery ignore, dismiss, handled, or acknowledgement action for you to perform.
+LSAGENT acknowledges Delivery automatically after injecting it into this Session. There is no Delivery ignore, dismiss, handled, or acknowledgement action for you to perform.
 
 The current Issue is authoritative. Delivery metadata only explains why this Agent was awakened and may already be stale.
 
@@ -133,4 +133,4 @@ These are lightweight facts from the poll response. Read the current Issue befor
 </myagents-space-issue>
 </system-reminder>
 
-MyAgents Space 已投递一个 Issue 通知，Registered Agent 正在根据其目标与指令进行评估。
+LSAGENT Space 已投递一个 Issue 通知，Registered Agent 正在根据其目标与指令进行评估。

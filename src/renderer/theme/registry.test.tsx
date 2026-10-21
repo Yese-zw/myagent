@@ -54,9 +54,9 @@ describe('ThemeRegistry', () => {
   it('ships nine complete production Themes in product order', () => {
     expect(themeRegistry.getProductionIds()).toEqual(productionThemeIds);
     expect(themeRegistry.getAcceptedDefinitions().map(definition => definition.displayName)).toEqual([
-      'MyAgents Light',
-      'MyAgents Classic',
-      'MyAgents Classic2',
+      'LSAGENT Light',
+      'LSAGENT Classic',
+      'LSAGENT Classic2',
       'Sage',
       'Claude',
       'Linear',
@@ -121,7 +121,7 @@ describe('ThemeRegistry', () => {
     for (const definition of themeRegistry.getAcceptedDefinitions()) {
       for (const scheme of ['light', 'dark'] as const) {
         const resolved = themeRegistry.resolve(definition.id, scheme, false);
-        expect(resolved.hero.productName).toBe('MyAgents');
+        expect(resolved.hero.productName).toBe('LSAGENT');
         expect(resolved.hero.slogans['zh-CN']).toBe('每个人都应享受智能的推背感，欢迎来到言出法随的世界');
         expect(resolved.hero.slogans['en-US']).toBe('Your intent, amplified');
         expect(resolved.adapters.xterm.palette.cursor).toBeTruthy();

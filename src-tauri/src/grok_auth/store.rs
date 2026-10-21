@@ -77,7 +77,7 @@ pub fn auth_store_path() -> Result<PathBuf, GrokAuthError> {
     let root = crate::app_dirs::myagents_data_dir().ok_or_else(|| {
         GrokAuthError::new(
             GrokAuthErrorCode::Internal,
-            "Cannot determine MyAgents data directory",
+            "Cannot determine LSAGENT data directory",
         )
     })?;
     Ok(root.join("credentials").join("grok-oauth.json"))

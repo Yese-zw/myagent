@@ -301,7 +301,7 @@ const SimpleChatInput = memo(forwardRef<SimpleChatInputHandle, SimpleChatInputPr
 
   // Ref for current provider availability — used in handleKeyDown without adding deps
   const isCurrentProviderAvailable = providerAvailable ?? (provider ? isProviderAvailable(provider, apiKeys, providerVerifyStatus) : false);
-  // External runtimes (Claude Code / Codex) authenticate via their own CLI — no MyAgents provider required.
+  // External runtimes (Claude Code / Codex) authenticate via their own CLI — no LSAGENT provider required.
   const canSendMessage = !sendBlocked && (isExternalRuntime || isCurrentProviderAvailable);
   const canSendMessageRef = useRef(canSendMessage);
   canSendMessageRef.current = canSendMessage;

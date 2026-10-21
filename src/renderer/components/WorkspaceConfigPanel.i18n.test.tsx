@@ -195,7 +195,7 @@ describe('WorkspaceConfigPanel i18n', () => {
     expect(screen.getByText('Basic Settings')).toBeInTheDocument();
     expect(screen.getByText('Runtime')).toBeInTheDocument();
     expect(screen.getByText('Network proxy')).toBeInTheDocument();
-    expect(screen.getByText('MyAgents proxy')).toBeInTheDocument();
+    expect(screen.getByText('LSAGENT proxy')).toBeInTheDocument();
     expect(screen.getByText('Follow terminal')).toBeInTheDocument();
     expect(screen.getByText('Proactive Agent Mode')).toBeInTheDocument();
 

@@ -108,7 +108,7 @@ describe('tauriClient owner-addressed control dispatch', () => {
                 path: '/api/test',
                 method: 'GET',
                 body: undefined,
-                headers: { 'X-MyAgents-Tab-Id': 'new-launcher-tab' },
+                headers: { 'X-LSAGENT-Tab-Id': 'new-launcher-tab' },
             },
         });
     });
@@ -126,8 +126,8 @@ describe('tauriClient owner-addressed control dispatch', () => {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-MyAgents-Tab-Id': 'target-tab',
-                'X-MyAgents-Session-Id': 'target-session',
+                'X-LSAGENT-Tab-Id': 'target-tab',
+                'X-LSAGENT-Session-Id': 'target-session',
             },
             body: '{}',
         });
@@ -139,8 +139,8 @@ describe('tauriClient owner-addressed control dispatch', () => {
                 body: '{}',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-MyAgents-Tab-Id': 'target-tab',
-                    'X-MyAgents-Session-Id': 'target-session',
+                    'X-LSAGENT-Tab-Id': 'target-tab',
+                    'X-LSAGENT-Session-Id': 'target-session',
                 },
             },
         });

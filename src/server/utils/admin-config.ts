@@ -178,7 +178,7 @@ export interface AdminAppConfig {
   cliToolEnv?: Record<string, Record<string, string>>;
   // Experimental gate for user-registered CLI tools. Omitted means disabled.
   cliToolRegistryEnabled?: boolean;
-  // MyAgents official CLI tools
+  // LSAGENT official CLI tools
   enabledOfficialToolIds?: OfficialToolId[];
   officialToolSettings?: OfficialToolSettings;
   // Provider
@@ -1832,7 +1832,7 @@ export function resolveWorkspaceConfig(
       : '[config] mcpResolution=skipped',
   );
 
-  // --- Resolve MyAgents official CLI tools ---
+  // --- Resolve LSAGENT official CLI tools ---
   const globalOfficialTools = new Set(
     getGloballyEnabledOfficialToolIds(config),
   );

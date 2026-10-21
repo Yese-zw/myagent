@@ -2,7 +2,7 @@
 
 ## 文档职责
 
-本文描述 Runtime 工具产物进入 MyAgents 消息、持久化和 WebView 数据面的当前契约。历史接入过程和未来能力不属于本文。
+本文描述 Runtime 工具产物进入 LSAGENT 消息、持久化和 WebView 数据面的当前契约。历史接入过程和未来能力不属于本文。
 
 `ToolAttachment` wire 与 Renderer 都是 Runtime-neutral；当前生产者包括 builtin Claude Agent SDK、Codex 和 Integrated DSH。没有产物映射的 Runtime 不伪造附件。
 

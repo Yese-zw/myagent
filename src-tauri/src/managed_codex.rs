@@ -325,6 +325,11 @@ fn is_regular_file_within_runtime_root(path: &Path) -> bool {
     candidate != root && candidate.starts_with(root)
 }
 
+/// Verified managed Codex binary for this platform, if installed.
+pub(crate) fn installed_binary_path() -> Option<PathBuf> {
+    managed_codex_binary_path(platform_key()?)
+}
+
 fn managed_codex_binary_path(platform: &str) -> Option<PathBuf> {
     let meta = read_installed_json()?;
     if !installed_meta_has_required_security(&meta, platform) {

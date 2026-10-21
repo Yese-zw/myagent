@@ -763,7 +763,7 @@ export function lookupModelModalitySupport(
  *
  * Known cosmetic trade-off (documented in #335): the SDK's own `/context`
  * HEADLINE window is the raw suffix value (1M) — the env cap only shapes the
- * auto-compact threshold / free-space rows, which stay correct. MyAgents' own
+ * auto-compact threshold / free-space rows, which stay correct. LSAGENT' own
  * context ring (`chat:context-usage`) uses the registry window and shows the
  * true value. Models at exactly 200K (claude-sonnet-4-6 wire-default,
  * claude-haiku-4-5) stay unwrapped — for first-party Anthropic models the

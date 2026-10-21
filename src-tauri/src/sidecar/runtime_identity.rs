@@ -428,7 +428,7 @@ fn workspace_paths_match(agent_path: &str, workspace_path: &std::path::Path) -> 
 /// Agent config (resolve_agent_runtime_identity_from_config) decides the default for NEW sessions
 /// using explicit preference or the root default; session metadata is stable once
 /// created so an existing runtime-A history is never reopened as
-/// runtime B under the same MyAgents session_id.
+/// runtime B under the same LSAGENT session_id.
 #[allow(dead_code)]
 pub fn resolve_session_runtime_identity(session_id: &str) -> Option<String> {
     resolve_session_runtime_identity_full(session_id).map(|identity| identity.runtime)

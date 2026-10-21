@@ -81,7 +81,7 @@ function collectChannelAliases(args: {
     if (value && value !== args.channelKey) aliases.add(value);
   };
 
-  // Old MyAgents data often uses the installation/package identity while
+  // Old LSAGENT data often uses the installation/package identity while
   // OpenClaw plugins read their protocol channel identity.
   add(packageBasename(args.entryModule));
   add(legacyInferredChannelKey(args.entryModule));

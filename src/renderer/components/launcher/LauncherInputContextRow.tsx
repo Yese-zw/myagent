@@ -16,6 +16,7 @@
 import { memo } from 'react';
 
 import RuntimeSelector from '@/components/RuntimeSelector';
+import LaunchCodexButton from '@/features/account/LaunchCodexButton';
 import type { Project } from '@/config/types';
 import type { RuntimeType, RuntimeDetections } from '../../../shared/types/runtime';
 
@@ -87,6 +88,10 @@ export default memo(function LauncherInputContextRow({
           />
         </div>
       )}
+      {/* Writes the signed-in gateway URL and key, then opens the Codex desktop app. */}
+      <div className={CHIP_WRAPPER_CLASS}>
+        <LaunchCodexButton />
+      </div>
     </div>
   );
 });

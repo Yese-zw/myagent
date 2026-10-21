@@ -49,7 +49,7 @@ pub fn read_disabled_list(myagents_root: &Path) -> Vec<String> {
 }
 
 /// Product-owned runtime contracts that must remain enabled across every
-/// MyAgents surface. Keep in sync with `src/shared/systemSkills.ts`.
+/// LSAGENT surface. Keep in sync with `src/shared/systemSkills.ts`.
 pub const REQUIRED_SYSTEM_SKILLS: &[&str] = &[
     "myagents-task-alignment",
     "myagents-memory-update",

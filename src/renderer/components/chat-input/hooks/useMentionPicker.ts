@@ -13,10 +13,6 @@ import type {
   FileSearchResult,
   WorkspaceFileService,
 } from "@/hooks/useWorkspaceFileService";
-import {
-  useAgentNetworkSnapshot,
-  useAgentNetworkDirectoryVersion,
-} from "@/features/agent-network/store";
 
 export type MentionKind = "agent" | "thought" | "file";
 export type MentionItem =
@@ -88,13 +84,11 @@ export function useMentionPicker(
   workspace: string | null | undefined,
   files: WorkspaceFileService,
 ) {
-  const network = useAgentNetworkSnapshot("official");
-  const directoryVersion = useAgentNetworkDirectoryVersion();
   const kinds = useMemo(
     () => (query.trim() ? ORDER : ORDER.slice(0, 2)),
     [query],
   );
-  const scope = JSON.stringify([workspace, query, open, directoryVersion]);
+  const scope = JSON.stringify([workspace, query, open]);
   const scopeRef = useRef(scope);
   scopeRef.current = scope;
   const generation = useRef(0);
@@ -173,45 +167,18 @@ export function useMentionPicker(
           next: string | null = null,
           partial = false;
         if (kind === "agent") {
-          const readAgents = async (localOnly: boolean) => {
-            const result = agentDiscoverySchema.parse(
-              await invoke("cmd_agent_discovery", { localOnly }),
-            );
-            if (
-              result.authGeneration !== network.authGeneration ||
-              result.principalId !== network.principalId ||
-              result.networkId !== network.networkId
-            )
-              throw new Error("PICKER_ACCOUNT_CHANGED");
-            return result;
-          };
-          // Stage local identities immediately, independently of the cloud read.
-          // They stay behind the initial presentation barrier until it settles.
-          const local = await readAgents(true);
-          update(requestScope, requestGeneration, kind, (group) => ({
-            ...group,
-            items: filterMentionAgents(local.items, query).map((agent) => ({
-              kind: "agent",
-              key: `agent:${agent.selector}`,
-              value: {
-                agent,
-                authGeneration: local.authGeneration,
-                principalId: local.principalId,
-                networkId: local.networkId,
-              },
-            })),
-            partial: !local.complete,
-          }));
-          const result = local.complete ? local : await readAgents(false);
-          partial = !result.complete;
-          items = filterMentionAgents(result.items, query).map((agent) => ({
+          const result = agentDiscoverySchema.parse(
+            await invoke("cmd_agent_discovery", { localOnly: true }),
+          );
+          const localItems = result.items.filter((agent) => agent.isLocal);
+          items = filterMentionAgents(localItems, query).map((agent) => ({
             kind: "agent",
             key: `agent:${agent.selector}`,
             value: {
               agent,
-              authGeneration: discoveryContext(result, agent)!.authGeneration,
-              principalId: discoveryContext(result, agent)!.principalId,
-              networkId: discoveryContext(result, agent)!.networkId,
+              authGeneration: discoveryContext(result).authGeneration,
+              principalId: discoveryContext(result).principalId,
+              networkId: discoveryContext(result).networkId,
             },
           }));
         } else {
@@ -266,14 +233,7 @@ export function useMentionPicker(
         pendingLoads.current.delete(loadKey);
       }
     },
-    [
-      files,
-      network.authGeneration,
-      network.principalId,
-      network.networkId,
-      query,
-      update,
-    ],
+    [files, query, update],
   );
   const invalidate = useCallback(() => {
     ++generation.current;

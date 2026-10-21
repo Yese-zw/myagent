@@ -4,7 +4,7 @@
 export * from "./index.auto.js";
 // === END AUTO-AUGMENT ===
 
-// OpenClaw plugin-sdk root shim for MyAgents Plugin Bridge
+// OpenClaw plugin-sdk root shim for LSAGENT Plugin Bridge
 // Covers all runtime symbols imported by installed plugins from 'openclaw/plugin-sdk'
 
 import crypto from 'node:crypto';
@@ -261,7 +261,7 @@ export function buildChannelConfigSchema(schema) {
 
 export async function resolveSenderCommandAuthorizationWithRuntime(params) {
   // Thin wrapper: extract functions from params.runtime and delegate to
-  // resolveSenderCommandAuthorization. In Bridge mode, MyAgents handles
+  // resolveSenderCommandAuthorization. In Bridge mode, LSAGENT handles
   // access control at Rust layer, so the base function already returns
   // senderAllowedForCommands: true.
   return resolveSenderCommandAuthorization({

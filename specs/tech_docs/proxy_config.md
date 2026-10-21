@@ -1,6 +1,6 @@
 # 代理配置架构
 
-MyAgents 的代理不是一个 process-global 开关，而是按网络请求 owner 分流。本文定义 current scope、baseline 和 helper；Provider 的认证与模型路由见 [`third_party_providers.md`](third_party_providers.md)。
+LSAGENT 的代理不是一个 process-global 开关，而是按网络请求 owner 分流。本文定义 current scope、baseline 和 helper；Provider 的认证与模型路由见 [`third_party_providers.md`](third_party_providers.md)。
 
 ## 配置与 scope
 
@@ -34,7 +34,7 @@ config.json proxySettings
        |
        +-- general owner
        |     updater, resource/runtime downloads, model metadata,
-       |     generic MyAgents HTTP, Plugin Bridge
+       |     generic LSAGENT HTTP, Plugin Bridge
        |
        +-- provider owner(providerId)
              Builtin SDK, OpenAI Bridge upstream, provider probe,
@@ -69,7 +69,7 @@ Renderer 与 Sidecar 的控制面、Rust 到 Sidecar、IPC 及内部 HTTP 必须
 
 `src/server/proxy-state.ts` 同时维护：
 
-1. immutable `inheritedProxySnapshot`：Rust / MyAgents overlay 之前的 proxy env；
+1. immutable `inheritedProxySnapshot`：Rust / LSAGENT overlay 之前的 proxy env；
 2. app-proxy overlay：当前应用代理 URL；SOCKS5 时是本地 bridge URL；
 3. `process.env`：当前 general owner 的有效 baseline。
 

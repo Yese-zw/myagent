@@ -1,4 +1,4 @@
-# MyAgents Cloud Space 架构
+# LSAGENT Cloud Space 架构
 
 > 本文只描述 Desktop 侧的 Cloud Space owner、身份、Connector、Session 注入与安全边界。Cloud API、D1/R2/KV、配额与运营逻辑以平级仓库 `../MyAgents_space/specs/ARCHITECTURE.md` 为准；逐字 IssueDelivery prompt 见 [`space_issue_delivery_protocol.md`](space_issue_delivery_protocol.md)。
 
@@ -8,7 +8,7 @@ Cloud Space（中文入口“协作空间”，英文 Team Space）是 Desktop �
 
 | 事实 | Authority |
 |---|---|
-| Cloud 用户、Space、Issue、Goal、Skill、Tool、Registered Agent、Delivery、plan/quota | MyAgents Space Cloud API |
+| Cloud 用户、Space、Issue、Goal、Skill、Tool、Registered Agent、Delivery、plan/quota | LSAGENT Space Cloud API |
 | build capability 与 service origin | Rust build/runtime capability |
 | 用户 credential 与 redacted account cache | Rust `space_cloud` root facade |
 | 本地 device id | `src-tauri/src/device_identity.rs` |

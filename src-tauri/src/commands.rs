@@ -35,7 +35,7 @@ use crate::sidecar::{
 };
 use crate::{ulog_error, ulog_info, ulog_warn};
 
-const NETWORK_PROBE_USER_AGENT: &str = "MyAgents-Network-Probe/1.0";
+const NETWORK_PROBE_USER_AGENT: &str = "LSAGENT-Network-Probe/1.0";
 const PROXY_CONNECTIVITY_TEST_URL: &str = "https://www.google.com/generate_204";
 
 // ============= Legacy Commands (for backward compatibility) =============
@@ -1097,7 +1097,7 @@ const SYSTEM_SKILLS: &[&str] = &[
     // installs and the CLI-owned explicit-relative cwd boundary.
     // v9: myagents-cli promoted from helper-bundled skill (was at
     // bundled-agents/myagents_helper/.claude/skills/self-config/) to a
-    // global system skill. Every AI session inside MyAgents — Chat / IM Bot
+    // global system skill. Every AI session inside LSAGENT — Chat / IM Bot
     // / Cron / Helper — should be able to drive the product's own
     // capabilities (cron, task center, MCP, Provider, channels, plugins,
     // skills, Cloud Space, widgets) through the CLI. SKILL.md changes track CLI surface
@@ -1116,7 +1116,7 @@ const SYSTEM_SKILLS: &[&str] = &[
     // Detector protocol remains a progressive reference, not a competing
     // Sensor product entry.
     "myagents-task-automation",
-    // v35: product-use knowledge shared by every MyAgents session. It owns
+    // v35: product-use knowledge shared by every LSAGENT session. It owns
     // stable user-facing concepts, feature relationships, prerequisites and
     // expected behaviour; live state/actions stay in myagents-cli and the
     // helper-local support skill owns diagnosis.
@@ -1128,7 +1128,7 @@ const SYSTEM_SKILLS: &[&str] = &[
     // contract must track the registry's server-side validation (800-char
     // description cap, reserved names) in lockstep.
     "tool-creator",
-    // v33: MyAgents memory maintenance skills. These are managed flow
+    // v33: LSAGENT memory maintenance skills. These are managed flow
     // targets, so their bundled contracts must stay in lockstep with the
     // hidden scheduler, injected-turn prompt, and rule-substrate templates.
     "myagents-memory-update",
@@ -1147,7 +1147,7 @@ const SYSTEM_SKILLS: &[&str] = &[
 ];
 
 /// Product-owned system skills whose former independent workflow must not
-/// survive an upgrade. These directories were force-overwritten by MyAgents,
+/// survive an upgrade. These directories were force-overwritten by LSAGENT,
 /// so removing the exact retired names cannot delete a user-owned skill.
 const RETIRED_SYSTEM_SKILLS: &[&str] = &["myagents-sensor", "task-alignment", "task-implement"];
 
@@ -1662,7 +1662,7 @@ mod system_skills_tests {
         assert!(SYSTEM_SKILLS.contains(&"myagents-task-automation"));
 
         let memory_update = include_str!("../../bundled-skills/myagents-memory-update/SKILL.md");
-        assert!(memory_update.contains("author: MyAgents"));
+        assert!(memory_update.contains("author: LSAGENT"));
         assert!(memory_update
             .contains("仅当系统或用户明确指定完整名称 `myagents-memory-update` 时使用"));
         assert!(memory_update.contains("不要根据任务语义或相似表述自行触发"));
@@ -1682,7 +1682,7 @@ mod system_skills_tests {
 
         let product_docs = include_str!("../../bundled-skills/myagents-docs/SKILL.md");
         assert!(product_docs.contains("name: myagents-docs"));
-        assert!(product_docs.contains("author: MyAgents"));
+        assert!(product_docs.contains("author: LSAGENT"));
         assert!(product_docs.contains("它面向软件使用而非源码开发"));
         assert!(product_docs.contains("随后加载 `/myagents-cli`"));
         assert!(product_docs.contains("在内置小助理里加载 `/support`"));
@@ -1693,7 +1693,7 @@ mod system_skills_tests {
             include_str!("../../bundled-skills/myagents-memory-gardener/SKILL.md"),
             include_str!("../../bundled-skills/myagents-memory-molt/SKILL.md"),
         ] {
-            assert!(content.contains("author: MyAgents"));
+            assert!(content.contains("author: LSAGENT"));
         }
     }
 
@@ -1790,7 +1790,7 @@ mod system_skills_tests {
                 metadata
                     .get(&serde_yaml::Value::String("author".into()))
                     .and_then(serde_yaml::Value::as_str),
-                Some("MyAgents"),
+                Some("LSAGENT"),
                 "{name} must publish metadata.author"
             );
         }

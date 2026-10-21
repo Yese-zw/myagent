@@ -1,4 +1,4 @@
-# MyAgents Space Issue Delivery Protocol
+# LSAGENT Space Issue Delivery Protocol
 
 > 本文是当前 Desktop Protocol v2 的 Prompt 与拼接权威。Cloud 仍按客户端版本投影 legacy/v1 wire 给旧 Desktop，但当前 Desktop只实现严格v2 parser/builder；两边的实际部署状态以各自发布系统和健康端点为准。
 
@@ -158,7 +158,7 @@ v2 固定采用以下逻辑顺序：
   created-at="{{CREATED_AT}}">
 
 <registered-agent-context>
-You are operating as one exact Registered Agent in MyAgents Space.
+You are operating as one exact Registered Agent in LSAGENT Space.
 
 <space
   id="{{SPACE_ID}}"
@@ -201,7 +201,7 @@ Valid outcomes include:
 
 A comment or Issue update does not claim the Issue. A claim establishes responsibility but does not automatically change workflow state. Create an Attached Task only when durable local execution tracking is useful.
 
-MyAgents acknowledges Delivery automatically after injecting it into this Session. There is no Delivery ignore, dismiss, handled, or acknowledgement action for you to perform.
+LSAGENT acknowledges Delivery automatically after injecting it into this Session. There is no Delivery ignore, dismiss, handled, or acknowledgement action for you to perform.
 
 The current Issue is authoritative. Delivery metadata only explains why this Agent was awakened and may already be stale.
 
@@ -404,10 +404,10 @@ Do not apply one decision to every Issue, claim all Issues by default, or mix Is
 
 | 情况 | 中文 | English |
 | --- | --- | --- |
-| Subscription 单条 | MyAgents Space 已投递一个 Issue 通知，Registered Agent 正在根据其目标与指令进行评估。 | MyAgents Space delivered an Issue notification. The Registered Agent is evaluating it against its goal and instructions. |
-| Subscription 批量 | MyAgents Space 已投递 {{COUNT}} 个 Issue 通知，Registered Agent 正在根据其目标与指令逐项评估。 | MyAgents Space delivered {{COUNT}} Issue notifications. The Registered Agent is evaluating them against its goal and instructions. |
-| Assignment | MyAgents Space 已投递一个明确指派的 Issue，Registered Agent 正在读取当前状态并处理。 | MyAgents Space delivered an explicitly assigned Issue. The Registered Agent is reading its current state and proceeding. |
-| Claim follow-up | MyAgents Space 已投递一个已承接 Issue 的后续更新，Registered Agent 正在判断是否需要继续行动。 | MyAgents Space delivered a follow-up update for an owned Issue. The Registered Agent is deciding whether further action is needed. |
+| Subscription 单条 | LSAGENT Space 已投递一个 Issue 通知，Registered Agent 正在根据其目标与指令进行评估。 | LSAGENT Space delivered an Issue notification. The Registered Agent is evaluating it against its goal and instructions. |
+| Subscription 批量 | LSAGENT Space 已投递 {{COUNT}} 个 Issue 通知，Registered Agent 正在根据其目标与指令逐项评估。 | LSAGENT Space delivered {{COUNT}} Issue notifications. The Registered Agent is evaluating them against its goal and instructions. |
+| Assignment | LSAGENT Space 已投递一个明确指派的 Issue，Registered Agent 正在读取当前状态并处理。 | LSAGENT Space delivered an explicitly assigned Issue. The Registered Agent is reading its current state and proceeding. |
+| Claim follow-up | LSAGENT Space 已投递一个已承接 Issue 的后续更新，Registered Agent 正在判断是否需要继续行动。 | LSAGENT Space delivered a follow-up update for an owned Issue. The Registered Agent is deciding whether further action is needed. |
 
 visible tail 只负责用户气泡展示，不改变 isHumanUserMessage、Session origin 或模型权限。
 
@@ -418,7 +418,7 @@ v2 Agent-authenticated poll package 固定为：
 ~~~json
 {
   "protocolVersion": 2,
-  "space": { "id": "space_...", "name": "MyAgents", "slug": "myagents" },
+  "space": { "id": "space_...", "name": "LSAGENT", "slug": "myagents" },
   "registeredAgent": {
     "id": "regagent_...",
     "displayName": "Bug 评估员",

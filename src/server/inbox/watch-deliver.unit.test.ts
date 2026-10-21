@@ -10,8 +10,6 @@ vi.mock('../SessionStore', () => ({ getSessionMetadata: () => null, getSessionDa
 vi.mock('../utils/cancellation', () => ({
   cancellableFetch: fetchMock.cancellableFetch,
 }));
-vi.mock('../agent-network/return', () => ({ deliverNetworkReturn: fetchMock.networkReturn }));
-
 import { deliverSessionWatchEvents } from './watch-deliver';
 import {
   clearPendingSessionWatchesForTest,
@@ -96,40 +94,14 @@ describe('deliverSessionWatchEvents', () => {
     expect(replies.every(reply => reply.replyBack === false && reply.text.includes('shared result'))).toBe(true);
   });
 
-  it('settles a remote watch once without treating the remote source as a local Session', async () => {
+  it('acks leftover remote watches without treating them as local Sessions', async () => {
     process.env.MYAGENTS_MANAGEMENT_PORT = '8123';
     const reference = { opId: 'op', returnRouteId: 'route' };
     registerPendingSessionWatch({ watchId: 'remote-watch', watcherSessionId: 'remote-source',
       targetSessionId: 'target-session', targetLabel: 'Target', targetStateAtRegistration: 'running',
       registeredAt: 'now', networkReturn: reference });
-    fetchMock.networkReturn.mockResolvedValue('unconfirmed');
     await deliverSessionWatchEvents('target-session', { text: 'done' });
-    expect(fetchMock.networkReturn).toHaveBeenCalledWith(reference, expect.objectContaining({
-      type: 'watch.completed', watchId: 'remote-watch', sourceSessionId: 'target-session',
-      targetSessionId: 'remote-source', latestResult: 'done',
-    }));
     expect(fetchMock.cancellableFetch).not.toHaveBeenCalled();
-    expect(pendingSessionWatchCount()).toBe(0);
-    await deliverSessionWatchEvents('target-session', { text: 'later' });
-    expect(fetchMock.networkReturn).toHaveBeenCalledTimes(1);
-  });
-  it('never settles a watch from an unknown or different turn and does not serialize remote returns', async () => {
-    process.env.MYAGENTS_MANAGEMENT_PORT = '8123';
-    for (const id of ['one', 'two']) registerPendingSessionWatch({ watchId: id, watcherSessionId: id,
-      targetSessionId: 'target-session', targetLabel: 'Target', targetStateAtRegistration: 'running',
-      registeredAt: 'now', turnId: 'turn', networkReturn: { opId: id, returnRouteId: id } });
-    await deliverSessionWatchEvents('target-session', { text: 'unrelated', turnId: 'next' });
-    await deliverSessionWatchEvents('target-session', { text: 'unknown' });
-    expect(fetchMock.networkReturn).not.toHaveBeenCalled();
-    let settle!: () => void;
-    fetchMock.networkReturn.mockImplementationOnce(() => new Promise<void>(resolve => { settle = resolve; }));
-    fetchMock.networkReturn.mockResolvedValueOnce('delivered');
-    const delivery = deliverSessionWatchEvents('target-session', { text: 'partial', turnId: 'turn', terminalStatus: 'stopped', requestEventIds: ['request'] });
-    await Promise.resolve();
-    expect(fetchMock.networkReturn).toHaveBeenCalledTimes(2);
-    expect(fetchMock.networkReturn.mock.calls[1][1]).toMatchObject({ turnId: 'turn', terminalStatus: 'stopped', requestEventIds: ['request'] });
-    settle();
-    await delivery;
     expect(pendingSessionWatchCount()).toBe(0);
   });
 

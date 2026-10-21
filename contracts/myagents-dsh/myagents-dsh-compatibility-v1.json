@@ -454,7 +454,7 @@
     },
     {
       "id": "catalog-is-advisory",
-      "statement": "The installed pi-ai catalog is a versioned snapshot and is not authority for MyAgents model availability."
+      "statement": "The installed pi-ai catalog is a versioned snapshot and is not authority for LSAGENT model availability."
     },
     {
       "id": "native-cloud-and-oauth-auth-unadvertised",

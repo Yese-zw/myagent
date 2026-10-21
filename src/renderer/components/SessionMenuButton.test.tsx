@@ -69,10 +69,10 @@ describe('SessionMenuButton', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '对话操作' }));
 
-    const runtimeName = screen.getByText('MyAgents (DeepSeek Harness)');
+    const runtimeName = screen.getByText('LSAGENT (DeepSeek Harness)');
     const sessionIdLabel = screen.getByText('SessionID:');
     expect(runtimeName.compareDocumentPosition(sessionIdLabel) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    expect(screen.queryByRole('button', { name: 'MyAgents (DeepSeek Harness)' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'LSAGENT (DeepSeek Harness)' })).not.toBeInTheDocument();
     expect(screen.getByText('SessionID:')).toBeInTheDocument();
     expect(screen.getByText(SESSION_ID)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '复制 SessionID' })).toBeInTheDocument();
@@ -110,7 +110,7 @@ describe('SessionMenuButton', () => {
     fireEvent.click(screen.getByRole('button', { name: '对话操作' }));
 
     expect(screen.getByText('运行环境加载中…')).toBeInTheDocument();
-    expect(screen.queryByText('MyAgents (DeepSeek Harness)')).not.toBeInTheDocument();
+    expect(screen.queryByText('LSAGENT (DeepSeek Harness)')).not.toBeInTheDocument();
   });
 
   it('hides the trigger tooltip while the session menu is open', () => {

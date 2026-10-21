@@ -268,7 +268,7 @@ export function createPresetTheme(manifest: PresetThemeManifest): ThemeDefinitio
   return {
     ...manifest,
     hero: {
-      productName: 'MyAgents',
+      productName: 'LSAGENT',
       slogans: {
         'zh-CN': '每个人都应享受智能的推背感，欢迎来到言出法随的世界',
         'en-US': 'Your intent, amplified',

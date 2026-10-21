@@ -84,7 +84,7 @@ export function getFallbackPaths(options: FallbackPathOptions = {}): string[] {
         pushPath(paths, appData ? joinForPlatform(platform, appData, 'npm') : '', platform);
         pushPath(paths, userProfile ? joinForPlatform(platform, userProfile, 'AppData', 'Roaming', 'npm') : '', platform);
         pushPath(paths, bundledNodeDir, platform);
-        pushPath(paths, localAppData ? joinForPlatform(platform, localAppData, 'MyAgents', 'nodejs') : '', platform);
+        pushPath(paths, localAppData ? joinForPlatform(platform, localAppData, 'LSAGENT', 'nodejs') : '', platform);
         pushPath(paths, getMyAgentsNpmGlobalBinDir(userProfile, platform), platform);
         pushPath(paths, userProfile ? joinForPlatform(platform, userProfile, '.bun', 'bin') : '', platform);
         pushPath(paths, localAppData ? joinForPlatform(platform, localAppData, 'bun', 'bin') : '', platform);
@@ -201,7 +201,7 @@ let warmupInFlight: Promise<void> | null = null;
  * (issue #194). When the user runs `codex` / `claude` directly in terminal,
  * THESE are the values their CLI subprocess inherits. RuntimeEnvPolicy
  * `proxy: 'terminal'` will substitute these into the external-runtime spawn
- * env so MyAgents behaves consistently with terminal invocations.
+ * env so LSAGENT behaves consistently with terminal invocations.
  *
  * Each key's value is `null` while warmup hasn't completed, an empty string
  * `''` if the user's shell has the var explicitly unset, or the value otherwise.
@@ -391,7 +391,7 @@ export function warmupShellPath(): Promise<void> {
  * Return value semantics:
  *  - `null`: warmup hasn't run yet. Caller should treat as "no info".
  *  - `{}`: warmup ran but user has no proxy env set. Distinct from null —
- *     caller can safely strip MyAgents-injected proxy vars from the subprocess
+ *     caller can safely strip LSAGENT-injected proxy vars from the subprocess
  *     env in this case (terminal-parity = unset).
  *  - `{ HTTP_PROXY: '…', … }`: real values to inject into subprocess env.
  *     Always check both upper- and lower-case keys when applying.

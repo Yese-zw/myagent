@@ -5,7 +5,7 @@ import { NpxMcpResolutionError, buildMcpStdioLaunchConfig } from '../../../utils
 
 const CODEX_MCP_NO_PROXY_VAL =
   'localhost,localhost.localdomain,127.0.0.1,127.0.0.0/8,::1';
-/** Native attempt bound, deliberately independent from MyAgents' 10s dispatch grace. */
+/** Native attempt bound, deliberately independent from LSAGENT' 10s dispatch grace. */
 export const MANAGED_CODEX_MCP_STARTUP_TIMEOUT_SEC = 60;
 const CODEX_MCP_PROXY_ENV_KEYS = [
   'HTTP_PROXY',
@@ -152,7 +152,7 @@ function hasCodexMcpTemplate(value: string): boolean {
 }
 
 function unsafeCodexMcpStdioValueReason(value: string): string | null {
-  if (hasCodexMcpTemplate(value)) return 'contains MyAgents env placeholder';
+  if (hasCodexMcpTemplate(value)) return 'contains LSAGENT env placeholder';
   if (CODEX_MCP_SECRET_VALUE_RE.test(value))
     return 'contains inline secret-looking value';
   if (/bearer\s+\S+/i.test(value)) return 'contains inline bearer token';
@@ -194,7 +194,7 @@ export function resolveStdioMcpLaunch(
 }
 
 function unsafeCodexMcpUrlReason(rawUrl: string): string | null {
-  if (hasCodexMcpTemplate(rawUrl)) return 'contains MyAgents env placeholder';
+  if (hasCodexMcpTemplate(rawUrl)) return 'contains LSAGENT env placeholder';
   let parsed: URL;
   try {
     parsed = new URL(rawUrl);
@@ -388,7 +388,7 @@ export function projectManagedCodexMcpLaunchConfig(
         );
       } else {
         unsupported(
-          `Codex app-server does not support MyAgents MCP type ${server.type}`,
+          `Codex app-server does not support LSAGENT MCP type ${server.type}`,
         );
       }
 

@@ -1,4 +1,3 @@
-import { agentNetworkTabModule } from '@/features/agent-network/tabModule';
 import { createNewTab, type Tab } from '@/types/tab';
 import type { ModuleBinding, ModuleTab } from '@/tab-workspace/contracts';
 import { defineTabModules } from '@/tab-workspace/registry';
@@ -11,17 +10,20 @@ import { taskCenterTabModule } from '@/features/task-center/tabModule';
 import { recordTabModule } from '@/features/record/tabModule';
 import type { RecordTabCloseReason } from '@/features/record/useRecordTabLifecycle';
 import { accountTabModule } from '@/features/account/tabModule';
+import { rechargeTabModule } from '@/features/recharge/tabModule';
+import { inviteTabModule } from '@/features/invite/tabModule';
 
-/** The single composition root for the builtin MyAgents edition. */
+/** The single composition root for the builtin LSAGENT edition. */
 export const builtinTabModules = defineTabModules<Tab>()({
   launcher: launcherTabModule,
   chat: chatTabModule,
   settings: settingsTabModule,
   capabilities: capabilitiesTabModule,
   taskcenter: taskCenterTabModule,
-  agentnetwork: agentNetworkTabModule,
   record: recordTabModule,
   account: accountTabModule,
+  recharge: rechargeTabModule,
+  invite: inviteTabModule,
 });
 
 export type BuiltinTabModules = typeof builtinTabModules;

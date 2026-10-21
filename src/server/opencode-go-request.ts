@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from 'crypto';
 import { OPENCODE_GO_PROVIDER_ID } from '../shared/opencode-go';
 
-export const OPENCODE_GO_USER_AGENT = 'MyAgents';
+export const OPENCODE_GO_USER_AGENT = 'LSAGENT';
 export const OPENCODE_GO_SDK_CLIENT_APP = 'myagents';
 
 /** Never send the local Product Session ID to an external provider. */

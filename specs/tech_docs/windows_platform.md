@@ -45,7 +45,7 @@ Claude SDK 的 Bash output最终以 UTF-8 string进入 Session JSONL/SSE，但 W
 - `LANG=C.UTF-8` / `LC_ALL=C.UTF-8`；
 - `PYTHONUTF8=1` / `PYTHONIOENCODING=utf-8`；
 - `LESSCHARSET=utf-8`；
-- MyAgents-owned `BASH_ENV` prelude，在 Git Bash启动时切换到 UTF-8 code page。
+- LSAGENT-owned `BASH_ENV` prelude，在 Git Bash启动时切换到 UTF-8 code page。
 
 PowerShell不读取 `BASH_ENV`。机器可读 PowerShell结果应在 producer端转成 base64(UTF-8(JSON)) 等 ASCII-safe envelope；不要在 Renderer修复已经错误解码的 string。
 
@@ -87,7 +87,7 @@ Task Activation Detector同样拥有 Job Object。timeout、stdout超限、Task 
 
 ## CLI launcher
 
-`%USERPROFILE%\.myagents\bin\myagents.cmd` 和 extensionless `myagents` 是 Rust生成的薄 launcher，只调用当前 `MyAgents.exe` 的私有 CLI入口并透明转发 argv。业务代码只存在安装目录 `resources/cli/myagents.cjs`。
+`%USERPROFILE%\.myagents\bin\myagents.cmd` 和 extensionless `myagents` 是 Rust生成的薄 launcher，只调用当前 `LSAGENT.exe` 的私有 CLI入口并透明转发 argv。业务代码只存在安装目录 `resources/cli/myagents.cjs`。
 
 Launcher使用 no-follow检查、临时文件和原子 replace；路径 quoting必须覆盖空格、Unicode和 `%`。CLI mode attach parent console，并只使用当前 bundle的 Node和CLI。资源缺失时fail closed，不执行HOME旧 payload或系统 Node。
 
@@ -119,7 +119,7 @@ CSP authority是 `src-tauri/tauri.conf.json`。新增 network/subresource surfac
 
 持续负载必须追到仍在工作的生产者：JS timer/rAF、CSS 动画、媒体播放、native browser 页面或真实业务事件。页面复杂度会放大一次更新的成本，但不能单凭历史消息数量认定空闲持续渲染的原因；Chat 已有分页和虚拟列表。
 
-- 只采样 MyAgents 精确进程树，按 `--type` 区分 browser、renderer、GPU 和 utility；全机同名 `msedgewebview2.exe` 不都属于本应用。
+- 只采样 LSAGENT 精确进程树，按 `--type` 区分 browser、renderer、GPU 和 utility；全机同名 `msedgewebview2.exe` 不都属于本应用。
 - `Win32_Perf*Data_PerfProc_Process` 的 I/O bytes 包含文件、网络和设备 I/O，不能换算成 SSD 写入量。目录净大小、缓存文件存在或单次修改时间也不能证明持续原地改写。需要用 ProcMon/ETW 的具体路径、操作和字节量确定磁盘写入；参见 [Microsoft 计数器定义](https://learn.microsoft.com/en-us/previous-versions/aa394323(v=vs.85))。
 - GPU 重启必须有进程退出/启动或失败事件；“存在 ShaderCache / GPUCache”不构成证据。性能定位优先采集 DevTools Performance 与 WebView2 ETW trace，见 [Microsoft WebView2 性能指南](https://learn.microsoft.com/en-us/microsoft-edge/webview2/concepts/performance)。
 - 对比前台会话、非会话 Tab、窗口隐藏/最小化、恢复和托盘彻底退出；记录桌宠、内嵌浏览器与媒体是否活跃。未经控制的低负载样本不能用作前台高占用问题的修复验收。
@@ -165,7 +165,7 @@ Localhost Rust HTTP统一走 `crate::local_http` 并显式no-proxy。外部reque
 
 ## Builtin shell tools
 
-`buildClaudeSessionEnv()` 在 Windows 显式设置 `CLAUDE_CODE_USE_POWERSHELL_TOOL=1`。SDK 的 PowerShell 工具启用不再依赖上游 rollout（MyAgents 的非必要联网策略会关闭该机制）；产品工具目录同时保留 Bash 与 PowerShell，由模型选择，权限仍由既有 policy 裁决。macOS / Linux 不设置此开关。
+`buildClaudeSessionEnv()` 在 Windows 显式设置 `CLAUDE_CODE_USE_POWERSHELL_TOOL=1`。SDK 的 PowerShell 工具启用不再依赖上游 rollout（LSAGENT 的非必要联网策略会关闭该机制）；产品工具目录同时保留 Bash 与 PowerShell，由模型选择，权限仍由既有 policy 裁决。macOS / Linux 不设置此开关。
 
 Bash 工具在 Windows 使用 Git Bash；PowerShell 工具由 SDK 直接执行 PowerShell。NSIS installer 检测并可安装随包 Git installer；开发或自定义环境也可通过 `CLAUDE_CODE_GIT_BASH_PATH` 指定。不能通过 `cmd.exe` 模拟 Git Bash 或把 shell 缺失归因于 Node。
 

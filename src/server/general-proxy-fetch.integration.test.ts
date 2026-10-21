@@ -85,7 +85,7 @@ describe('general request dispatcher', () => {
     ]);
   });
 
-  it('always bypasses both inherited and MyAgents proxies for localhost', async () => {
+  it('always bypasses both inherited and LSAGENT proxies for localhost', async () => {
     const inheritedUrl = `http://127.0.0.1:${inheritedProxy.port}`;
     _resetProxyStateForTests({
       enabled: true,

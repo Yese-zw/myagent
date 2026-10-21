@@ -16,7 +16,7 @@ Space IssueDelivery 在这层通用 envelope 内还有独立的 Registered Agent
 
 不适用场景：
 
-- 整个 Session 生命周期都稳定成立的 MyAgents 身份、场景与能力发现提示，走
+- 整个 Session 生命周期都稳定成立的 LSAGENT 身份、场景与能力发现提示，走
   [`system_prompt_architecture.md`](./system_prompt_architecture.md) 的产品级 system
   prompt append；Workspace 长期规则继续由 `CLAUDE.md` / rules / Runtime 原生项目指令
   拥有。
@@ -212,7 +212,7 @@ Cron 结果投送 IM session 的回归样例见：
 
 单 envelope 顺序为既有 primary（Goal/Task/Heartbeat/Inbox 等）→ CHANNEL_CONTEXT → AGENT_MENTIONS；原 visible tail 与附件不因渠道预算被裁剪。`decorateChannelQuery` 只在产品调用方声明已有可信 envelope 时合成，原始用户 XML 不被提升为系统上下文。无 primary 时 kind=CHANNEL_CONTEXT；存在 primary 时不改变原 badge/触发归因。
 
-模型 facts 描述连接 scope、Bot 身份、当前发言者、容器与消息；connection 可附本轮 source/time。内部非 IM 输入 sender/message 为 null，投影后省略；内部无绑定时 mode/defaultTarget 为 null，不虚构收件人。所有 Runtime 固定提示 MyAgents CLI 命令，不注册独立发送工具。delivery 仅作为内部状态驱动短 instruction：未绑定不渲染；assistant owner 为 none 时投影 suppressed（即使配置 tool_only 也无需发送）；其余 tool_only 轮次使用显式发送指令；auto+caller_managed 由任务发起方处理投递；auto+forwarded 才说明自动推送。not_forwarded 不等于工具发送模式。必要提问仍按真实 host capability 处理。
+模型 facts 描述连接 scope、Bot 身份、当前发言者、容器与消息；connection 可附本轮 source/time。内部非 IM 输入 sender/message 为 null，投影后省略；内部无绑定时 mode/defaultTarget 为 null，不虚构收件人。所有 Runtime 固定提示 LSAGENT CLI 命令，不注册独立发送工具。delivery 仅作为内部状态驱动短 instruction：未绑定不渲染；assistant owner 为 none 时投影 suppressed（即使配置 tool_only 也无需发送）；其余 tool_only 轮次使用显式发送指令；auto+caller_managed 由任务发起方处理投递；auto+forwarded 才说明自动推送。not_forwarded 不等于工具发送模式。必要提问仍按真实 host capability 处理。
 
 渠道提示词只属于 Rust 确认当前实际绑定的 Session：固定 system 段与逐轮 `CHANNEL_CONTEXT` 都按精确绑定准入，不能用 Agent 的渠道能力列表或入口 scenario 代替绑定。桌面打开已绑定 Session 保留渠道语义；未绑定桌面即使所属 Agent 有渠道也不注入。mode 切换不修改固定 system 前缀，实际执行轮快照与下一轮生效策略不变。
 

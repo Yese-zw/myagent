@@ -38,7 +38,7 @@ use crate::{ulog_debug, ulog_error, ulog_info, ulog_warn};
 // bot using the same plugin spawns).
 //
 // In-process async mutex per `plugin_dir` is enough because:
-//   - Tauri single-instance plugin prevents cross-process MyAgents.
+//   - Tauri single-instance plugin prevents cross-process LSAGENT.
 //   - We only need to serialize *our own* mutations of `plugin_dir`.
 //
 // Keyed by canonicalised plugin_dir path so lexically-different paths
@@ -1543,7 +1543,7 @@ pub async fn spawn_plugin_bridge<R: tauri::Runtime>(
     _creation_permit: &crate::sidecar::LifecycleSpawnPermit,
 ) -> Result<BridgeProcess, String> {
     let (node_path, _) = find_bundled_node_npm(app_handle).ok_or_else(|| {
-        "Bundled Node.js/npm is missing. Reinstall MyAgents to restore the plugin runtime."
+        "Bundled Node.js/npm is missing. Reinstall LSAGENT to restore the plugin runtime."
             .to_string()
     })?;
 
@@ -1683,7 +1683,7 @@ pub async fn spawn_plugin_bridge<R: tauri::Runtime>(
         .arg(bot_id)
         // Pass config via env var to avoid leaking secrets in `ps` process listing
         .env("BRIDGE_PLUGIN_CONFIG", &config_json)
-        // Keep plugin runtime state per MyAgents channel. QR-login plugins such
+        // Keep plugin runtime state per LSAGENT channel. QR-login plugins such
         // as Weixin include local tokens from this state when asking the
         // platform for a QR code; falling back to ~/.openclaw makes separate
         // workspaces look like the same OpenClaw instance.
@@ -1813,7 +1813,7 @@ pub async fn spawn_plugin_bridge<R: tauri::Runtime>(
     Ok(BridgeProcess { child, port })
 }
 
-/// Apply MyAgents proxy policy to a child `Command`.
+/// Apply LSAGENT proxy policy to a child `Command`.
 /// Delegates to the centralized `proxy_config::apply_to_subprocess()` (pit-of-success).
 fn apply_proxy_env(cmd: &mut std::process::Command) {
     crate::proxy_config::apply_to_subprocess(cmd);
@@ -2166,7 +2166,7 @@ pub async fn install_openclaw_plugin<R: tauri::Runtime>(
     // package/network/script is an install failure, not a reason to retry with
     // a different Node ABI or run lifecycle scripts twice.
     let (node_bin, npm_cli) = find_bundled_node_npm(app_handle).ok_or_else(|| {
-        "Bundled Node.js/npm is missing. Reinstall MyAgents to restore the plugin runtime."
+        "Bundled Node.js/npm is missing. Reinstall LSAGENT to restore the plugin runtime."
             .to_string()
     })?;
     ensure_package_json(&base_dir, &plugin_id).await?;
@@ -2282,7 +2282,7 @@ async fn check_plugin_compat(pkg_json_path: &std::path::Path) -> Option<String> 
 
     if req > shim {
         Some(format!(
-            "Plugin requires openclaw >={} but MyAgents shim supports {}. Some features may not work.",
+            "Plugin requires openclaw >={} but LSAGENT shim supports {}. Some features may not work.",
             required_ver, SHIM_COMPAT_VERSION,
         ))
     } else {

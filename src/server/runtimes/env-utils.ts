@@ -66,7 +66,7 @@ function which(command: string, pathStr: string): string | null {
  *
  * Issue #194 — `policy.proxy` selects how proxy env reaches the runtime:
  *  - `myagents` (default): inherit Sidecar's process.env proxy vars (Rust
- *    injects MyAgents-configured proxy into the Sidecar's env at spawn).
+ *    injects LSAGENT-configured proxy into the Sidecar's env at spawn).
  *  - `terminal`: replace the inherited proxy vars with whatever the user's
  *    interactive shell exports (detected during shell.ts warmup). If warmup
  *    found nothing, all proxy vars are stripped — that's terminal parity for
@@ -100,8 +100,8 @@ export function augmentedProcessEnv(
   }
 
   // 'terminal' — strip every inherited proxy var, then restore whatever the
-  // user's interactive shell would set. Drop the MyAgents-injected marker
-  // too so downstream code doesn't mistake a stripped env for a MyAgents-
+  // user's interactive shell would set. Drop the LSAGENT-injected marker
+  // too so downstream code doesn't mistake a stripped env for a LSAGENT-
   // controlled one.
   for (const k of PROXY_KEYS_ALL) delete env[k];
   delete env.MYAGENTS_PROXY_INJECTED;
@@ -161,7 +161,7 @@ export async function resolveAgentEnvPolicy(
       // Covers legacy `'direct'` from 0.2.16 dev (removed before release) and
       // any other malformed value (`'inherit'` typo, `true` from wrong UI
       // wire). Silent fallback to the safe default — UI will re-render
-      // showing `'MyAgents 代理'` selected and user can pick `'terminal'` if
+      // showing `'LSAGENT 代理'` selected and user can pick `'terminal'` if
       // they previously relied on stripping proxy.
       console.warn(
         `[env-utils] Ignoring unsupported envPolicy.proxy=${JSON.stringify(proxyRaw)} for ${workspacePath} — defaulting to 'myagents'`,

@@ -435,7 +435,7 @@ describe('GlobalSidebar rail flyout', () => {
     fireEvent.click(brandLink);
 
     await vi.waitFor(() => {
-      expect(mocks.openExternal).toHaveBeenCalledWith('https://myagents.io');
+      expect(mocks.openExternal).toHaveBeenCalledWith('https://lingsiai.vip');
     });
   });
 
@@ -1304,7 +1304,7 @@ describe('GlobalSidebar rail flyout', () => {
     expect(navigation.querySelector('[data-global-sidebar-workspace-rail]')).not.toBeInTheDocument();
     expect(navigation.querySelector('[data-global-sidebar-workspace-region]')).not.toHaveClass('border-t', 'border-[var(--line-subtle)]');
     expect(navigation.querySelector('[data-global-sidebar-footer-actions]')).not.toHaveClass('global-sidebar-rail-stack');
-    expect(brandName?.querySelector('[data-myagents-logotype]')).toHaveAccessibleName('MyAgents');
+    expect(brandName?.querySelector('[data-myagents-logotype]')).toHaveAccessibleName('LSAGENT');
     expect(brandName).toHaveClass('theme-product-wordmark', 'text-sm', 'font-medium');
     expect(brandName).not.toHaveClass('font-semibold', 'tracking-wide', 'theme-launcher-hero-title');
     expect(brandName).toHaveAttribute('aria-hidden', 'false');
@@ -1836,23 +1836,16 @@ describe('Agent network navigation', () => {
     expect(more).toHaveFocus();
     expect(screen.queryByRole('menu')).not.toBeInTheDocument();
   });
-  it('exposes AgentNet in primary navigation and keeps the Bot shortcut in the hover menu', async () => {
-    const onOpenAgentNetwork = vi.fn();
-    const networkTab: Tab = { id: 'network-tab', view: 'agentnetwork', title: 'AgentNet' };
-    renderSidebar({ onOpenAgentNetwork, activeTab: networkTab });
+  it('keeps the Bot shortcut in the hover menu without AgentNet in primary navigation', async () => {
+    renderSidebar();
     const buttons = screen.getAllByRole('button').filter(button => button.hasAttribute('data-global-sidebar-nav-button'));
     const labels = buttons.map(button => button.getAttribute('aria-label'));
-    expect(labels).toEqual(['新对话', '自动化任务', '技能与工具', 'AgentNet 局域网络', '更多', '小助理', '设置']);
-    const network = screen.getByRole('button', { name: String(i18n.t('app:globalSidebar.agentNetwork')) });
+    expect(labels).toEqual(['新对话', '自动化任务', '技能与工具', '更多', '小助理', '设置']);
+    expect(screen.queryByRole('button', { name: 'AgentNet 局域网络' })).not.toBeInTheDocument();
     const more = screen.getByRole('button', { name: String(i18n.t('app:globalSidebar.more')) });
-    expect(network).toHaveAttribute('aria-current', 'page');
-    expect(more).not.toHaveAttribute('aria-current');
-    fireEvent.click(network);
-    expect(onOpenAgentNetwork).toHaveBeenCalledOnce();
-    fireEvent.pointerEnter(screen.getByRole('button', { name: String(i18n.t('app:globalSidebar.more')) }));
+    fireEvent.pointerEnter(more);
     expect(await screen.findByRole('menuitem', { name: '聊天机器人 Bot' })).toBeVisible();
     expect(screen.getAllByRole('menuitem').map(item => item.textContent)).toEqual(['聊天机器人 Bot']);
-    expect(screen.queryByRole('menuitem', { name: String(i18n.t('app:globalSidebar.agentNetwork')) })).not.toBeInTheDocument();
     fireEvent.click(more);
     expect(more).toHaveAttribute('aria-expanded', 'true');
     fireEvent.click(more);

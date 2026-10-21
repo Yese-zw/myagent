@@ -24,13 +24,13 @@
 
 - `args` 是 JSON array，每项原样传递，不按空格拆分，也不拼成 `sh -c` / `cmd /c`。
 - `cwd` 可省略，此时使用 Task `workspacePath`；提供时必须是存在的绝对目录。
-- bare `node` / `node.exe` 固定使用 MyAgents bundled Node.js v24。
+- bare `node` / `node.exe` 固定使用 LSAGENT bundled Node.js v24。
 - Python、Bash 等其他 executable 必须现场确认存在；需要 shell 语法时，把 shell 本身作为显式 executable 和 argv。
 - `timeoutMs` 默认 30000，范围 1000..=300000。
 
 ## 输入
 
-MyAgents 向 stdin 写一个 JSON object 后关闭 stdin：
+LSAGENT 向 stdin 写一个 JSON object 后关闭 stdin：
 
 ```json
 {
@@ -120,7 +120,7 @@ myagents task trigger test --spec-file trigger.test-failure.json \
 
 最后一条应非零退出并给出结构化 harness 诊断；`--expect` 只接受 quiet/activate，不存在 `--expect failure`。
 
-`trigger test` 会真实执行命令，但不提交 MyAgents checkpoint、health、counter、Activation Event，也不启动 AI。脚本自己的文件、网络或数据库副作用不会回滚，因此 fixture 路径和外部目标必须隔离。
+`trigger test` 会真实执行命令，但不提交 LSAGENT checkpoint、health、counter、Activation Event，也不启动 AI。脚本自己的文件、网络或数据库副作用不会回滚，因此 fixture 路径和外部目标必须隔离。
 
 创建后也可以用 `trigger test <taskId>` 做无提交测试。`task check-now <taskId>` 不同：它使用持久 checkpoint、提交结果，并在 activate 时真实唤醒 AI。
 

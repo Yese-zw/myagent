@@ -57,7 +57,7 @@ describe.runIf(process.env.MYAGENTS_PLAYWRIGHT_BROWSER_SMOKE === '1')(
         const navigate = await client.callTool({
           name: 'browser_navigate',
           arguments: {
-            url: 'data:text/html,<title>MyAgents Browser Host</title><h1>ready</h1>',
+            url: 'data:text/html,<title>LSAGENT Browser Host</title><h1>ready</h1>',
           },
         });
         const snapshot = await client.callTool({ name: 'browser_snapshot', arguments: {} });

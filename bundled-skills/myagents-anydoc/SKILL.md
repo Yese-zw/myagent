@@ -1,14 +1,14 @@
 ---
 name: myagents-anydoc
 description: >-
-  当用户要读取、解析、提取或转换本地 Office、PDF、扫描件、图片、OpenDocument、RTF、EPUB 或 CSV，尤其需要离线 OCR、文档转 Markdown、处理加密文档或追踪转换任务时使用。通过 MyAgents 内置 `myagents anydoc` CLI 提交和管理本地异步转换；不用于 URL 抓取、目录批量处理、云 OCR、GPT/VLM 识别或文档索引。
+  当用户要读取、解析、提取或转换本地 Office、PDF、扫描件、图片、OpenDocument、RTF、EPUB 或 CSV，尤其需要离线 OCR、文档转 Markdown、处理加密文档或追踪转换任务时使用。通过 LSAGENT 内置 `myagents anydoc` CLI 提交和管理本地异步转换；不用于 URL 抓取、目录批量处理、云 OCR、GPT/VLM 识别或文档索引。
 metadata:
-  author: MyAgents
+  author: LSAGENT
 ---
 
 # myagents-anydoc — 本地文档转 Markdown
 
-这是 MyAgents 随 App 发布的全离线文档转换能力。底层任务由 Desktop App 持有；CLI 退出、当前会话结束或切换 Runtime 都不会转移任务 owner。
+这是 LSAGENT 随 App 发布的全离线文档转换能力。底层任务由 Desktop App 持有；CLI 退出、当前会话结束或切换 Runtime 都不会转移任务 owner。
 
 ## 使用顺序
 

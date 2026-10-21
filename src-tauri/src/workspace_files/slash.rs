@@ -319,7 +319,7 @@ fn scan_skills_dir(
         let folder_path = entry.path();
 
         // Launcher scans the project surface before the global surface. A
-        // MyAgents-managed projection must not be mislabelled as a project
+        // LSAGENT-managed projection must not be mislabelled as a project
         // Skill and win that priority race; its canonical global entry is
         // classified below by the same evidence contract as Node.
         if scope == "project" && canonical_path_is_within(&folder_path, global_skills_root) {

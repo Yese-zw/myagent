@@ -1,14 +1,14 @@
 /**
  * CLI-backed capability hints injected into the system prompt.
  *
- * Each section teaches the AI about a MyAgents-specific capability surfaced
+ * Each section teaches the AI about a LSAGENT-specific capability surfaced
  * through the `myagents` CLI rather than as an MCP tool. The brief lives here;
  * the AI fetches full docs on demand via each command's discovery surface
  * (`myagents <topic> readme` where available, otherwise `myagents <topic> --help`).
  *
  * Two scopes
  * ----------
- * - `buildCliToolsAppend(scenario)` — MyAgents-CLI capability hints
+ * - `buildCliToolsAppend(scenario)` — LSAGENT-CLI capability hints
  *   (Task automation, Task self-exit, Goal Mode, IM media send, Record capture). Universal
  *   across runtimes (builtin Claude Agent SDK + Codex / Claude Code
  *   CLI) since v0.2.11 dropped the corresponding in-process MCP servers
@@ -37,7 +37,7 @@ import {
 // them conditionally per scenario in `buildCliToolsAppend` below.
 
 const SECTION_TASK_AUTOMATION = `<myagents-cli-task-automation>
-MyAgents represents every future, scheduled, recurring, or conditionally
+LSAGENT represents every future, scheduled, recurring, or conditionally
 activated automation as one Task. Use the required system skill
 \`myagents-task-automation\` whenever the user asks for anything like:
 
@@ -54,7 +54,7 @@ current command surface and \`myagents task --help\` for exact flags. Pass
 remain compatible but are not the Agent-facing workflow.
 
 Do not use system cron/crontab/at/launchctl/schtasks; those commands cannot see
-MyAgents Task, Session, Runtime, notification, or Detector state.
+LSAGENT Task, Session, Runtime, notification, or Detector state.
 </myagents-cli-task-automation>`;
 
 const SECTION_TASK_EXIT = `<myagents-cli-task-exit>
@@ -70,7 +70,7 @@ out of transient errors; retry instead.
 </myagents-cli-task-exit>`;
 
 const SECTION_GOAL = `<myagents-cli-goal>
-MyAgents Goal Mode lets the current MyAgents session keep working toward one
+LSAGENT Goal Mode lets the current LSAGENT session keep working toward one
 long-running objective across turns. Use it only when the User explicitly asks
 to start / enter / use Goal Mode, Goal Loop, 目标模式, 设立目标, or to keep a
 goal running continuously until completion.
@@ -95,7 +95,7 @@ shell command.
 </myagents-cli-goal>`;
 
 const SECTION_RECORD = `<myagents-cli-record>
-The user can ask you to save a passing idea or note into MyAgents Records.
+The user can ask you to save a passing idea or note into LSAGENT Records.
 Create a text Record only when the user explicitly asks to save specific
 content for later, e.g. "记一下", "帮我记", "记下来", "note this down",
 or "save this for later".
@@ -112,7 +112,7 @@ For listing Records, tags, and other options:
 </myagents-cli-record>`;
 
 const SECTION_VISION = `<myagents-cli-vision>
-If the active model/runtime cannot see images, use MyAgents' image-understanding
+If the active model/runtime cannot see images, use LSAGENT' image-understanding
 helper instead of guessing. When Read or another file view returns
 "[Unsupported Image]" for a PNG/JPG/WebP/GIF, switch to this helper.
 
@@ -130,7 +130,7 @@ For details:
 </myagents-cli-vision>`;
 
 const SECTION_SPEECH = `<myagents-cli-speech>
-MyAgents can transcribe one audio or video attachment from the current
+LSAGENT can transcribe one audio or video attachment from the current
 Workspace with its local speech models. Use the required system skill
 \`myagents-speech-recognition\` when the user asks you to transcribe a local
 meeting, voice note, recording, or media attachment.
@@ -138,7 +138,7 @@ meeting, voice note, recording, or media attachment.
 Start with the exact command help:
   myagents speech --help
 
-The command is asynchronous. MyAgents automatically binds every job to the
+The command is asynchronous. LSAGENT automatically binds every job to the
 current Session and Workspace; never look for or invent Session/Workspace
 scope flags.
 </myagents-cli-speech>`;
@@ -171,14 +171,14 @@ Before your first widget in a session, run \`myagents widget readme <module> [<m
 // Thin discovery guidance; exact CLI contracts belong to the current help.
 
 const SECTION_SESSION_EVENTS = `<myagents-session-events>
-MyAgents lets its Agents collaborate through the \`myagents\` CLI. Run these
+LSAGENT lets its Agents collaborate through the \`myagents\` CLI. Run these
 commands from your shell/Bash tool.
 For local product capabilities (MCP, providers, skills and configuration), start
 with \`myagents --help\`, then the relevant command's \`--help\`. Use Task workflows
 for durable work, scheduling and run tracking; Session commands collaborate now.
 
 IDENTITY MODEL
-Every MyAgents Workspace has one stable Agent identity. An Agent is the
+Every LSAGENT Workspace has one stable Agent identity. An Agent is the
 long-lived address for that workspace and its execution settings; \`enabled\`
 only controls heartbeat and memory capabilities; channels have their own switch. One Agent
 can own many Sessions. Each Session is an isolated execution context under that
@@ -189,7 +189,7 @@ same account. Choose using description, deviceName and isLocal; copy the full
 device under its own Session permissions. \`agent show\` reports birth defaults,
 not an existing Session's effective approval policy.
 
-Product IDs are used by MyAgents GUI/CLI; internal Runtime IDs are not substitutes.
+Product IDs are used by LSAGENT GUI/CLI; internal Runtime IDs are not substitutes.
 For build/runtime diagnostics on demand, run \`myagents version --json\`.
 
 CHOOSE THE RIGHT ACTION
@@ -215,7 +215,7 @@ Use IDs returned by discovery commands; do not guess IDs or use workspace paths
 as selectors. \`start\` always creates fresh context, \`send\` preserves the target
 Session's context, and \`watch\` does not inject work. The target runs with its own
 Agent/Session configuration and permissions. \`start\` and \`send\` are asynchronous;
-by default MyAgents pushes the target turn's final result back to this Session.
+by default LSAGENT pushes the target turn's final result back to this Session.
 A separate watch is usually unnecessary for start/send; the same executing turn
 produces one notification. Manage observations with \`myagents session watches\`
 and \`myagents session unwatch <watchId>\` (or explicit --all). waiting_user_action requires the target's own

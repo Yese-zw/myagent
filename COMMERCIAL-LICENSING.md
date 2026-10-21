@@ -1,8 +1,8 @@
-# MyAgents Commercial Licensing / MyAgents 商业许可说明
+# LSAGENT Commercial Licensing / LSAGENT 商业许可说明
 
 ## English
 
-MyAgents-owned components are available under `AGPL-3.0-only`. The AGPL permits
+LSAGENT-owned components are available under `AGPL-3.0-only`. The AGPL permits
 free use, including commercial use, subject to compliance with its terms. A
 separate commercial license provides an alternative contractual license grant
 for customers that do not wish, or are not able, to comply with applicable AGPL
@@ -26,7 +26,7 @@ rights, sublicensing, source-code access, updates, maintenance, support,
 warranties, indemnities, limitations of liability, fees, and trademark rights.
 
 Third-party software, model services, SDKs, runtimes, plugins, Skills, content,
-assets, and trademarks are not licensed by a MyAgents commercial agreement
+assets, and trademarks are not licensed by a LSAGENT commercial agreement
 unless that agreement expressly states otherwise. Customers remain responsible
 for compliance with all applicable third-party terms.
 
@@ -50,7 +50,7 @@ law. Any executed commercial agreement prevails over this overview.
 
 ## 中文
 
-MyAgents 自有组件以 `AGPL-3.0-only` 提供。在遵守该许可条款的前提下，AGPL 允许免费
+LSAGENT 自有组件以 `AGPL-3.0-only` 提供。在遵守该许可条款的前提下，AGPL 允许免费
 使用，包括商业使用。对于不希望或无法履行适用 AGPL 义务的客户，单独的商业许可可以
 提供另一条合同授权路径。
 
@@ -68,7 +68,7 @@ MyAgents 自有组件以 `AGPL-3.0-only` 提供。在遵守该许可条款的前
 转授权、源码访问、更新、维护、支持、担保、赔偿、责任限制、费用及商标权利。
 
 除非商业协议明确另有约定，第三方软件、模型服务、SDK、运行时、插件、Skills、内容、素材和商标均不由
-MyAgents 商业协议代为授权。客户仍需独立遵守所有适用的第三方条款。
+LSAGENT 商业协议代为授权。客户仍需独立遵守所有适用的第三方条款。
 
 仅在组织内部制作和运行私有修改，并不当然需要购买商业许可。具体结论取决于实际分发、网络交互、
 组件组合方式，以及客户是否选择并能够遵守 AGPL。

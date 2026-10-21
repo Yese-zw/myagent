@@ -108,7 +108,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.5.0] - 2026-10-06
 
-> MyAgents 0.5.0 新增跨设备 Agent 协作，并更新 Agent 创建、协作空间与账户入口。
+> LSAGENT 0.5.0 新增跨设备 Agent 协作，并更新 Agent 创建、协作空间与账户入口。
 
 ### Added
 
@@ -131,7 +131,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.24] - 2026-10-03
 
-> MyAgents 0.4.24 修复 Codex 订阅历史会话无法继续发送的问题，并改善消息发送、启动等待和失败重发的体验。
+> LSAGENT 0.4.24 修复 Codex 订阅历史会话无法继续发送的问题，并改善消息发送、启动等待和失败重发的体验。
 
 ### Fixed
 
@@ -144,11 +144,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.23] - 2026-10-03
 
-> MyAgents 0.4.23 新增 DeepSeek Harness 运行环境，开放 Agent 运行环境选择，并统一设置入口与应用图标。
+> LSAGENT 0.4.23 新增 DeepSeek Harness 运行环境，开放 Agent 运行环境选择，并统一设置入口与应用图标。
 
 ### Added
 
-- **DeepSeek Harness 运行环境**：可在 Agent 设置中选择 MyAgents (DeepSeek Harness)，使用已配置的模型服务进行对话，支持文件操作、工具调用、权限审批、会话恢复、回退与分叉。
+- **DeepSeek Harness 运行环境**：可在 Agent 设置中选择 LSAGENT (DeepSeek Harness)，使用已配置的模型服务进行对话，支持文件操作、工具调用、权限审批、会话恢复、回退与分叉。
 - **默认 Agent 运行环境**：在通用设置中选择 Claude Agent SDK 或 DeepSeek Harness，作为未单独选择运行环境的 Agent 的默认值；已有对话和明确保存的选择保持不变。
 
 ### Changed
@@ -162,7 +162,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.22] - 2026-09-30
 
-> MyAgents 0.4.22 新增 OpenCode Go 接入与 Markdown 阅读字号设置，升级内置 AI 运行时，并改善会话保存、聊天机器人和本地转写的可靠性。
+> LSAGENT 0.4.22 新增 OpenCode Go 接入与 Markdown 阅读字号设置，升级内置 AI 运行时，并改善会话保存、聊天机器人和本地转写的可靠性。
 
 ### Added
 
@@ -187,7 +187,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.21] - 2026-09-23
 
-> MyAgents 0.4.21 支持本机外部 AI 与 MyAgents 协作，提升会话回退、插件卸载和聊天机器人配置的可靠性，并升级托管 Codex。
+> LSAGENT 0.4.21 支持本机外部 AI 与 LSAGENT 协作，提升会话回退、插件卸载和聊天机器人配置的可靠性，并升级托管 Codex。
 
 ### Added
 
@@ -210,7 +210,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.20] - 2026-09-19
 
-> MyAgents 0.4.20 修复排队消息开始执行时的按钮状态，提升连续对话中停止操作与错误提示的可靠性。
+> LSAGENT 0.4.20 修复排队消息开始执行时的按钮状态，提升连续对话中停止操作与错误提示的可靠性。
 
 ### Fixed
 
@@ -222,7 +222,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.19] - 2026-09-19
 
-> MyAgents 0.4.19 提升会话保存、回溯、分叉与重试的可靠性，改善问答、定时任务和渠道操作，并升级内置 Claude Agent SDK。
+> LSAGENT 0.4.19 提升会话保存、回溯、分叉与重试的可靠性，改善问答、定时任务和渠道操作，并升级内置 Claude Agent SDK。
 
 ### Changed
 
@@ -250,7 +250,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.18] - 2026-09-17
 
-> MyAgents 0.4.18 新增 Markdown 文档大纲导航，改善长文档编辑、流式对话阅读及录音转写与播放体验，更新 DeepSeek Flash 默认模型和 Codex 推理选项，并提供 Ubuntu 24.04 x64 源码构建入口。
+> LSAGENT 0.4.18 新增 Markdown 文档大纲导航，改善长文档编辑、流式对话阅读及录音转写与播放体验，更新 DeepSeek Flash 默认模型和 Codex 推理选项，并提供 Ubuntu 24.04 x64 源码构建入口。
 
 ### Added
 
@@ -282,7 +282,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.17] - 2026-09-13
 
-> MyAgents 0.4.17 新增 Antigravity 订阅接入，提升 Markdown 阅读、表格和文件链接体验，并改善长对话保存、录音转写与说话人识别。
+> LSAGENT 0.4.17 新增 Antigravity 订阅接入，提升 Markdown 阅读、表格和文件链接体验，并改善长对话保存、录音转写与说话人识别。
 
 ### Added
 
@@ -311,7 +311,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.16] - 2026-09-10
 
-> MyAgents 0.4.16 带来工作区 Markdown 二合一编辑器，支持直接修改正文和表格、粘贴图片及逐行处理文件冲突；同时升级会话搜索，改善录音转写、浏览器和日常交互的稳定性。
+> LSAGENT 0.4.16 带来工作区 Markdown 二合一编辑器，支持直接修改正文和表格、粘贴图片及逐行处理文件冲突；同时升级会话搜索，改善录音转写、浏览器和日常交互的稳定性。
 
 ### Added
 
@@ -343,7 +343,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.15] - 2026-09-06
 
-> MyAgents 0.4.15 接入词元跳动，支持一键连接账户、查看余额与扫码充值；同时更新桌面操作能力，改善供应商展示和对话计时。
+> LSAGENT 0.4.15 接入词元跳动，支持一键连接账户、查看余额与扫码充值；同时更新桌面操作能力，改善供应商展示和对话计时。
 
 ### Added
 
@@ -365,7 +365,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.14] - 2026-09-05
 
-> MyAgents 0.4.14 增加 DeepSeek 与智谱的新模型预设，更新内置执行引擎，并改善文件编辑、插件加载和长期记忆进化的稳定性。
+> LSAGENT 0.4.14 增加 DeepSeek 与智谱的新模型预设，更新内置执行引擎，并改善文件编辑、插件加载和长期记忆进化的稳定性。
 
 ### Added
 
@@ -387,7 +387,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.13] - 2026-09-03
 
-> MyAgents 0.4.13 新增跨工作区的 Session 多标签整理，以及侧边栏重命名和置顶能力；版本同时改善文件夹定位、图片理解配置和 Codex 连续发送体验，并让内嵌浏览器、桌面宠物与源码构建的资源生命周期更可靠。
+> LSAGENT 0.4.13 新增跨工作区的 Session 多标签整理，以及侧边栏重命名和置顶能力；版本同时改善文件夹定位、图片理解配置和 Codex 连续发送体验，并让内嵌浏览器、桌面宠物与源码构建的资源生命周期更可靠。
 
 ### Added
 
@@ -411,7 +411,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.12] - 2026-08-31
 
-> MyAgents 0.4.12 新增完整的本地录音与离线语音识别工作流：可以同时录制麦克风与系统声音，实时查看转写，在 Record 中播放、整理说话人、记录笔记，并把结果交给 AI 继续讨论。版本还支持在对话中离线转写本地音视频附件，并让 OCR 与语音模型在共享推理资源下保持前台优先和有界回收。
+> LSAGENT 0.4.12 新增完整的本地录音与离线语音识别工作流：可以同时录制麦克风与系统声音，实时查看转写，在 Record 中播放、整理说话人、记录笔记，并把结果交给 AI 继续讨论。版本还支持在对话中离线转写本地音视频附件，并让 OCR 与语音模型在共享推理资源下保持前台优先和有界回收。
 
 ### Added
 
@@ -447,13 +447,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.10] - 2026-08-23
 
-> MyAgents 0.4.10 将 Task Center 升级为围绕 `task.md`、执行 Session 与本地评论协作的任务中枢，并新增应用托管浏览器、统一通知中心、Space 团队工具资源池和飞书扫码接入。版本同时改善长对话滚动、工具启动与多 Runtime 会话的稳定性。
+> LSAGENT 0.4.10 将 Task Center 升级为围绕 `task.md`、执行 Session 与本地评论协作的任务中枢，并新增应用托管浏览器、统一通知中心、Space 团队工具资源池和飞书扫码接入。版本同时改善长对话滚动、工具启动与多 Runtime 会话的稳定性。
 
 ### Added
 
 - **Task 智能创建与本地协作**：创建任务时可以先与 AI 多轮讨论，由 AI 在最终确认前生成完整 `task.md` 和触发参数；任务详情以内容视图展示正文、调度信息、执行 Session 与线性评论，评论可继续发送到最近或指定 Session，Agent 回复也会回写到任务。
 - **Task 评论通知与精确跳转**：Agent 在本地 Task 中回复后会进入统一通知中心；点击应用内或系统通知可直接打开对应任务并定位评论，已读状态在重启后保持一致。
-- **MyAgents 托管浏览器**：新增独立于 Playwright MCP 的“浏览器”工具，由应用管理 Chromium、登录状态和 Session 隔离；全局可以同时启用两种工具，具体对话中按需互斥选择，避免重复暴露浏览器能力。
+- **LSAGENT 托管浏览器**：新增独立于 Playwright MCP 的“浏览器”工具，由应用管理 Chromium、登录状态和 Session 隔离；全局可以同时启用两种工具，具体对话中按需互斥选择，避免重复暴露浏览器能力。
 - **Space 团队工具资源池**：Skills 旁新增 Tools 页面，团队可共享经过脱敏和可移植性校验的 MCP 配置，或发布面向小助理的自定义安装提示词；两类资源使用一致的卡片、详情、版本历史、回滚和删除体验。
 - **安全的本地工具安装闭环**：MCP 工具安装会写入全局配置并默认保持禁用，同 ID 的不同配置必须显式确认替换；自定义工具会新开小助理会话并使用内置 `/tool-install` Skill 执行安装与验证。
 - **安全安装本地 Skills**：可以从本地目录或压缩包安装 Skill；安装前会限制读取范围、校验结构并在失败时回滚，避免把目录外文件或半成品写入能力库。
@@ -479,7 +479,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.9] - 2026-08-16
 
-> MyAgents 0.4.9 带来完全离线的本地文档转换、统一的文件图标与回合文件操作，并将默认 Mino 工作区模板直接随应用发布。版本同时改善 Session 回退、Codex 子 Agent、Space 登录、Channel 与自动记忆维护的可靠性，让多 Runtime 和无人值守场景更稳定。
+> LSAGENT 0.4.9 带来完全离线的本地文档转换、统一的文件图标与回合文件操作，并将默认 Mino 工作区模板直接随应用发布。版本同时改善 Session 回退、Codex 子 Agent、Space 登录、Channel 与自动记忆维护的可靠性，让多 Runtime 和无人值守场景更稳定。
 
 ### Added
 
@@ -490,7 +490,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **文件图标在整个产品中保持一致**：文件树、搜索、附件、文件卡片和回合摘要统一使用随应用打包的 Symbols 图标；常见格式使用专属识别，长尾格式按类别或通用文件图标兜底。
-- **Office 文档能力统一为 OfficeCLI**：Word、Excel 与 PowerPoint 使用同一工作流；旧 `docx`、`pptx`、`xlsx` 和 PDF bundle 不再预装，`agent-browser` 也不再由 MyAgents 管理。已有用户自行安装的副本不会被删除。
+- **Office 文档能力统一为 OfficeCLI**：Word、Excel 与 PowerPoint 使用同一工作流；旧 `docx`、`pptx`、`xlsx` 和 PDF bundle 不再预装，`agent-browser` 也不再由 LSAGENT 管理。已有用户自行安装的副本不会被删除。
 - **默认 Mino 工作区不再依赖 GitHub 下载**：模板直接打包在应用中，首次启动、Bot 和模板库共用同一份只读来源；已有用户工作区保持独立且不会被升级覆盖。内置模板精简为 6 个常用 Skills。
 - **Skills 与工具管理更持续、更清晰**：`skill-creator` 成为可随版本更新的 optional system Skill；技能与工具页面的标题、卡片和开关层级进一步统一。
 - **历史搜索进入过程更连贯**：打开历史面板时先显示右侧紧凑搜索框，激活后再向左展开为整行输入；浏览筛选与键盘焦点保持连续。
@@ -511,12 +511,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.8] - 2026-08-12
 
-> MyAgents 0.4.8 聚焦多 Runtime、订阅 Provider 与 IM 会话的可靠性：Managed Codex 会等工具真正就绪后再开始首轮，Grok 与 Gemini 的验证和模型发现不再走错误的进程或隐藏登录路径。版本同时改善 Agent CLI、Skill 详情、图片能力判断和 Chat 错误恢复。
+> LSAGENT 0.4.8 聚焦多 Runtime、订阅 Provider 与 IM 会话的可靠性：Managed Codex 会等工具真正就绪后再开始首轮，Grok 与 Gemini 的验证和模型发现不再走错误的进程或隐藏登录路径。版本同时改善 Agent CLI、Skill 详情、图片能力判断和 Chat 错误恢复。
 
 ### Changed
 
 - **Agent CLI 的命令与诊断更准确**：不存在的命令会在请求前直接拒绝并给出可执行建议；`task get` 作为单条任务详情入口，dry-run、订阅 Provider 验证与 Sidecar 能力限制都有对应说明。
-- **System Skill 的所有权更清晰**：MyAgents 内置 system Skill 在用户范围内保持只读，optional Skill 仍可启停；项目内同名实体 Skill 继续独立可编辑。
+- **System Skill 的所有权更清晰**：LSAGENT 内置 system Skill 在用户范围内保持只读，optional Skill 仍可启停；项目内同名实体 Skill 继续独立可编辑。
 
 ### Fixed
 
@@ -531,7 +531,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.7] - 2026-08-11
 
-> MyAgents 0.4.7 新增按 Agent 管理工作区 Skills 与 Commands 的能力，并为 Managed Codex 提供原生上下文压缩和与真实 Runtime 一致的命令入口。版本同时修复单个 Skill、MCP 或扩展异常导致整个 Codex 会话不可用的问题，改善自动标题、IM 新会话、CLI 与全局 Skill 投影的可靠性。
+> LSAGENT 0.4.7 新增按 Agent 管理工作区 Skills 与 Commands 的能力，并为 Managed Codex 提供原生上下文压缩和与真实 Runtime 一致的命令入口。版本同时修复单个 Skill、MCP 或扩展异常导致整个 Codex 会话不可用的问题，改善自动标题、IM 新会话、CLI 与全局 Skill 投影的可靠性。
 
 ### Added
 
@@ -541,7 +541,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **Goal 与斜杠命令更贴合当前 Runtime**：输入框可以直接进入 Goal 模式；Chat 与 Launcher 只展示所选 Runtime 真正支持的系统命令，同时保留项目 Skill、自定义 Command 和正确的来源标识。
-- **CLI 始终使用当前安装的 MyAgents 版本**：用户目录只保留指向当前 App 的轻量启动器，不再运行升级前遗留的旧业务副本；macOS、Windows、Linux 与内嵌终端使用一致的命令来源。
+- **CLI 始终使用当前安装的 LSAGENT 版本**：用户目录只保留指向当前 App 的轻量启动器，不再运行升级前遗留的旧业务副本；macOS、Windows、Linux 与内嵌终端使用一致的命令来源。
 - **Agent 设置与能力列表更清晰**：权限菜单、Workspace 控件、Skill、Command 与 Sub-Agent 卡片使用统一的交互和信息层级，窄宽度下也会优先保留关键名称。
 
 ### Fixed
@@ -558,11 +558,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.6] - 2026-08-08
 
-> MyAgents 0.4.6 让 Managed Codex 完整接入 MyAgents 的 Skills、Commands、Agents、Plugins、MCP 与产品工具，并在安全的 Runtime 生命周期边界应用配置变更。版本同时改善多会话恢复体验，并提升文件路径交互、Sidecar 锁恢复、支持日志脱敏与长上下文失败诊断的可靠性。
+> LSAGENT 0.4.6 让 Managed Codex 完整接入 LSAGENT 的 Skills、Commands、Agents、Plugins、MCP 与产品工具，并在安全的 Runtime 生命周期边界应用配置变更。版本同时改善多会话恢复体验，并提升文件路径交互、Sidecar 锁恢复、支持日志脱敏与长上下文失败诊断的可靠性。
 
 ### Added
 
-- **Managed Codex 完整接入 MyAgents 扩展能力**：工作区、全局和 Plugin Skills，Commands、Agents、外部 MCP 以及 MyAgents 进程内工具统一通过受管 Runtime 生效；配置变更在下一次启动或当前回合结束后的安全边界应用，正常等待状态保持安静，真实失败和不支持项仍提供明确诊断。
+- **Managed Codex 完整接入 LSAGENT 扩展能力**：工作区、全局和 Plugin Skills，Commands、Agents、外部 MCP 以及 LSAGENT 进程内工具统一通过受管 Runtime 生效；配置变更在下一次启动或当前回合结束后的安全边界应用，正常等待状态保持安静，真实失败和不支持项仍提供明确诊断。
 
 ### Changed
 
@@ -580,13 +580,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.5] - 2026-08-06
 
-> MyAgents 0.4.5 带来“满足条件才唤醒 AI”的任务自动化、Codex 对话回退与分支，以及全新的 MyAgents Light 默认主题。任务中心、Agent CLI 和侧栏操作更顺手，并进一步提升配置、MCP、Provider 路由和长上下文会话的可靠性。
+> LSAGENT 0.4.5 带来“满足条件才唤醒 AI”的任务自动化、Codex 对话回退与分支，以及全新的 LSAGENT Light 默认主题。任务中心、Agent CLI 和侧栏操作更顺手，并进一步提升配置、MCP、Provider 路由和长上下文会话的可靠性。
 
 ### Added
 
 - **任务支持 Command Detector 条件触发**：定时检查先运行本地命令，只有命令明确返回匹配结果时才创建 Session 并唤醒 AI；未命中时保持安静且不消耗模型额度，同时提供配置校验、测试运行、立即检查、超时与有界诊断。
 - **Codex 对话支持回退与分支**：可以从指定用户消息回退当前对话，或保留原会话并创建分支；文件恢复结果、会话身份和后续消息会落到正确的目标会话。
-- **新增 MyAgents Light 主题**：新安装默认使用更明亮、克制的产品主题；已有用户明确选择过的主题保持不变。
+- **新增 LSAGENT Light 主题**：新安装默认使用更明亮、克制的产品主题；已有用户明确选择过的主题保持不变。
 
 ### Changed
 
@@ -605,7 +605,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.4] - 2026-08-03
 
-> MyAgents 0.4.4 聚焦旧版 Agent 工作区升级兼容性：工作区被移动、历史 Agent 重复或路径记录不一致时，仍会按稳定的 Agent 身份加载正确配置，并使用 Project 的当前路径运行，不再因旧路径阻断工作区。版本同时改用系统原生滚动条，让首条提问更快成为会话标题，并完善 MCP 连接测试与 Managed Codex 标题生成。
+> LSAGENT 0.4.4 聚焦旧版 Agent 工作区升级兼容性：工作区被移动、历史 Agent 重复或路径记录不一致时，仍会按稳定的 Agent 身份加载正确配置，并使用 Project 的当前路径运行，不再因旧路径阻断工作区。版本同时改用系统原生滚动条，让首条提问更快成为会话标题，并完善 MCP 连接测试与 Managed Codex 标题生成。
 
 ### Changed
 
@@ -622,7 +622,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.3] - 2026-08-02
 
-> MyAgents 0.4.3 聚焦多入口会话与后台运行可靠性：桌面、IM、任务和 CLI 会更稳定地共享正确的 Agent、模型、权限与 Session 身份，Sidecar 重启和并发消息也不会串写或丢失。版本同时升级 Managed Codex、加入 Agent 定向的 CLI 协作入口，并改善恢复会话、流式阅读、窄屏布局和 Chat 细节交互。
+> LSAGENT 0.4.3 聚焦多入口会话与后台运行可靠性：桌面、IM、任务和 CLI 会更稳定地共享正确的 Agent、模型、权限与 Session 身份，Sidecar 重启和并发消息也不会串写或丢失。版本同时升级 Managed Codex、加入 Agent 定向的 CLI 协作入口，并改善恢复会话、流式阅读、窄屏布局和 Chat 细节交互。
 
 ### Added
 
@@ -647,7 +647,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.2] - 2026-07-30
 
-> MyAgents 0.4.2 聚焦历史会话恢复与内容预览：已有 Session 会在独立 Tab 中稳定打开或复活，恢复期间只展示一次最终内容，侧边栏历史也会随磁盘变化实时刷新。版本同时统一网页与文件链接动作，补齐图片和文档预览的缩放手势，并收紧 Sidecar 重启、应用退出和消息持久化边界。
+> LSAGENT 0.4.2 聚焦历史会话恢复与内容预览：已有 Session 会在独立 Tab 中稳定打开或复活，恢复期间只展示一次最终内容，侧边栏历史也会随磁盘变化实时刷新。版本同时统一网页与文件链接动作，补齐图片和文档预览的缩放手势，并收紧 Sidecar 重启、应用退出和消息持久化边界。
 
 ### Added
 
@@ -669,7 +669,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.1] - 2026-07-29
 
-> MyAgents 0.4.1 聚焦会话可靠性与聊天体验：升级 Claude Agent SDK，修复断线、重置和删除期间的会话竞态，并让 Agent 停用或移除后及时释放 Channel 与 Plugin Runtime。版本同时改进 Markdown、代码主题、图片预览、Tab 标题与 macOS 构建资源隔离。
+> LSAGENT 0.4.1 聚焦会话可靠性与聊天体验：升级 Claude Agent SDK，修复断线、重置和删除期间的会话竞态，并让 Agent 停用或移除后及时释放 Channel 与 Plugin Runtime。版本同时改进 Markdown、代码主题、图片预览、Tab 标题与 macOS 构建资源隔离。
 
 ### Added
 
@@ -695,7 +695,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.4.0] - 2026-07-27
 
-> MyAgents 0.4.0 重构桌面导航与资源浏览：全局侧边栏让工作区、历史会话和产品能力在所有 Tab 间始终可达，Launcher 回归专注的新对话入口。版本同时优化输入框权限与工具操作、历史搜索和网络代理设置，并修复跨 Runtime 的 IM 回复、Codex 子 Agent 归属、统一日志噪音及 macOS 窗口缩放稳定性。
+> LSAGENT 0.4.0 重构桌面导航与资源浏览：全局侧边栏让工作区、历史会话和产品能力在所有 Tab 间始终可达，Launcher 回归专注的新对话入口。版本同时优化输入框权限与工具操作、历史搜索和网络代理设置，并修复跨 Runtime 的 IM 回复、Codex 子 Agent 归属、统一日志噪音及 macOS 窗口缩放稳定性。
 
 ### Added
 
@@ -723,7 +723,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.3.4] - 2026-07-25
 
-> MyAgents 0.3.4 补齐跨入口连续交互：Launcher 可以直接拖入文件，桌面消息与 AI 回复也会在 Claude Code、Codex 和 Gemini 会话中正确同步到绑定的 IM。版本同时收口连续 IM 追问与定时任务会话创建竞态，忙碌会话不再拒绝后续消息，任务启动或停止也不会卡在会话出生阶段。
+> LSAGENT 0.3.4 补齐跨入口连续交互：Launcher 可以直接拖入文件，桌面消息与 AI 回复也会在 Claude Code、Codex 和 Gemini 会话中正确同步到绑定的 IM。版本同时收口连续 IM 追问与定时任务会话创建竞态，忙碌会话不再拒绝后续消息，任务启动或停止也不会卡在会话出生阶段。
 
 ### Added
 
@@ -739,7 +739,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.3.3] - 2026-07-24
 
-> MyAgents 0.3.3 聚焦 Managed Codex 与桌面可靠性：订阅型 Codex 会直接使用 HTTPS 启动并正确保持恢复回合状态，实际可用的 MCP 工具也会实时出现在工具目录中。版本同时修复会话删除、全文搜索、定时任务编辑、CLI 媒体发送、跨窗口配置刷新和复制反馈等问题。
+> LSAGENT 0.3.3 聚焦 Managed Codex 与桌面可靠性：订阅型 Codex 会直接使用 HTTPS 启动并正确保持恢复回合状态，实际可用的 MCP 工具也会实时出现在工具目录中。版本同时修复会话删除、全文搜索、定时任务编辑、CLI 媒体发送、跨窗口配置刷新和复制反馈等问题。
 
 ### Added
 
@@ -764,11 +764,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.3.2] - 2026-07-23
 
-> MyAgents 0.3.2 引入完整 Theme System，带来八套可切换主题并统一桌面、Space、终端、编辑器与浮窗视觉；Goal Mode 新增可验证的结束条件，Team Space Registered Agent 也升级为独立执行实例。版本同时收紧核心 System Skill、会话恢复、配置一致性与 IM 渠道边界。
+> LSAGENT 0.3.2 引入完整 Theme System，带来八套可切换主题并统一桌面、Space、终端、编辑器与浮窗视觉；Goal Mode 新增可验证的结束条件，Team Space Registered Agent 也升级为独立执行实例。版本同时收紧核心 System Skill、会话恢复、配置一致性与 IM 渠道边界。
 
 ### Added
 
-- **完整 Theme System 与八套主题**：新增 MyAgents Default、Default Black、Sage、Claude、Linear、Proof、Codex、Raycast，可分别选择主题与跟随系统 / 浅色 / 深色外观；主题会一致覆盖 Launcher、Chat、Settings、Team Space、终端、Monaco、Mermaid、代码高亮、Widget 与浮窗。Default Black 成为新用户产品默认，明确选择过主题的用户仍保留自己的选择。
+- **完整 Theme System 与八套主题**：新增 LSAGENT Default、Default Black、Sage、Claude、Linear、Proof、Codex、Raycast，可分别选择主题与跟随系统 / 浅色 / 深色外观；主题会一致覆盖 Launcher、Chat、Settings、Team Space、终端、Monaco、Mermaid、代码高亮、Widget 与浮窗。Default Black 成为新用户产品默认，明确选择过主题的用户仍保留自己的选择。
 - **Goal Mode 支持结束条件与进度**：创建目标时可设置最晚截止时间、最大执行次数和 AI 是否可以主动结束；状态栏与 CLI 会区分已结算轮次和当前执行轮次，并在触发条件时精确停止对应 Goal。
 - **Team Space Registered Agent 独立执行实例**：同一工作区可以登记多个 Agent，每个实例拥有自己的目标与指令、订阅和投递 Session；Cloud v2 投递会保持精确 Agent 身份，并支持新旧客户端兼容滚动发布。
 
@@ -791,7 +791,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.3.1] - 2026-07-17
 
-> MyAgents 0.3.1 聚焦连续对话与工具体验：飞书 Bot 的长回复重新流畅更新，MCP 异常不再阻塞 AI 回答，桌面与外部 Runtime 的活跃会话恢复更可靠；同时升级文件编辑和命令执行预览，补充通用网络代理范围，并加快使用统计加载。
+> LSAGENT 0.3.1 聚焦连续对话与工具体验：飞书 Bot 的长回复重新流畅更新，MCP 异常不再阻塞 AI 回答，桌面与外部 Runtime 的活跃会话恢复更可靠；同时升级文件编辑和命令执行预览，补充通用网络代理范围，并加快使用统计加载。
 
 ### Added
 
@@ -817,7 +817,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.3.0] - 2026-07-14
 
-> MyAgents 0.3.0 是一次重要版本升级：新增可持续推进长期目标的 Goal Mode，并把 Team Space 作为实验室功能正式开放；同时加入 Grok 订阅登录、统一任务与定时自动化、长期记忆维护升级，以及更顺滑的 Managed Codex Runtime 更新体验。
+> LSAGENT 0.3.0 是一次重要版本升级：新增可持续推进长期目标的 Goal Mode，并把 Team Space 作为实验室功能正式开放；同时加入 Grok 订阅登录、统一任务与定时自动化、长期记忆维护升级，以及更顺滑的 Managed Codex Runtime 更新体验。
 
 ### Added
 
@@ -870,11 +870,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.48] - 2026-07-05
 
-> 本版修复 Anthropic 订阅登录在新版 Claude SDK 下无法真正复用本机 OAuth 的问题：MyAgents 会把订阅账号交回 Claude Code 原生凭据系统管理，同时避免第三方 API Provider 环境污染订阅校验。
+> 本版修复 Anthropic 订阅登录在新版 Claude SDK 下无法真正复用本机 OAuth 的问题：LSAGENT 会把订阅账号交回 Claude Code 原生凭据系统管理，同时避免第三方 API Provider 环境污染订阅校验。
 
 ### Fixed
 
-- **Anthropic 订阅登录恢复可用**：完成官方登录后，MyAgents 会复用本机 Claude Code/桌面端的订阅凭据，不再因为额外接管 OAuth token 或错误注入 provider env 导致验证失败。
+- **Anthropic 订阅登录恢复可用**：完成官方登录后，LSAGENT 会复用本机 Claude Code/桌面端的订阅凭据，不再因为额外接管 OAuth token 或错误注入 provider env 导致验证失败。
 - **订阅验证不再串到第三方 Provider**：在当前会话使用第三方 API Provider 时，设置页的 Anthropic 订阅验证会显式切到官方订阅身份，避免误带 `ANTHROPIC_BASE_URL` / `ANTHROPIC_API_KEY`。
 - **登录失败时可手动继续**：当浏览器回跳未能自动完成时，设置页支持粘贴官方登录输出的授权码继续验证，减少卡在登录流程中的情况。
 
@@ -886,7 +886,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **Claude 订阅登录状态更准确**：点击登录并完成浏览器 OAuth 后，MyAgents 不再只根据 OAuth 完成状态判断成功，而是以实际订阅验证结果为准；验证失败时不会缓存成阻塞后续重试的状态。
+- **Claude 订阅登录状态更准确**：点击登录并完成浏览器 OAuth 后，LSAGENT 不再只根据 OAuth 完成状态判断成功，而是以实际订阅验证结果为准；验证失败时不会缓存成阻塞后续重试的状态。
 - **Claude 订阅错误信息更清楚**：设置页红色错误提示会展示 SDK 返回的真实 detail，便于区分登录过期、权限不足、网络错误等原因。
 - **Space Issue 详情抽屉显示优化**：加宽 Issue 详情抽屉，长内容查看时更舒展。
 
@@ -898,7 +898,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **网络代理支持按供应商选择**：Settings 的网络代理可以选择「全部供应商」或自定义供应商范围；未选中的供应商不会注入 MyAgents 代理，但仍保留系统代理、TUN 或启动环境中的默认网络行为。
+- **网络代理支持按供应商选择**：Settings 的网络代理可以选择「全部供应商」或自定义供应商范围；未选中的供应商不会注入 LSAGENT 代理，但仍保留系统代理、TUN 或启动环境中的默认网络行为。
 - **Agent 工作区归档能力**：不常用的 Agent 工作区可以归档，Launcher 和管理入口会更清楚地区分活跃工作区与已归档工作区。
 - **Runtime 诊断信息更完整**：错误横幅和诊断入口补充更多环境、代理和 Runtime 线索，便于排查本机 Provider / CLI 连接问题。
 
@@ -965,11 +965,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.43] - 2026-06-30
 
-> 本版继续收紧 Codex 订阅 Provider 与外部 Runtime 的身份边界：Codex 会话可以读取 MyAgents 用户 Skills，订阅型 Codex 在 Chat、任务、定时任务和 IM / Agent Channel 中更稳定地保持受管身份；同时修复 Windows 上 managed Codex 安装、模型解析和本地插件路径相关问题，并补齐若干菜单与历史操作细节。
+> 本版继续收紧 Codex 订阅 Provider 与外部 Runtime 的身份边界：Codex 会话可以读取 LSAGENT 用户 Skills，订阅型 Codex 在 Chat、任务、定时任务和 IM / Agent Channel 中更稳定地保持受管身份；同时修复 Windows 上 managed Codex 安装、模型解析和本地插件路径相关问题，并补齐若干菜单与历史操作细节。
 
 ### Added
 
-- **Codex 会话可使用 MyAgents 用户 Skills**：启用的用户级 Skills 会同步到工作区并注入 Codex Runtime，Codex 订阅和系统 Codex CLI 都能发现同一套工作区 Skills。
+- **Codex 会话可使用 LSAGENT 用户 Skills**：启用的用户级 Skills 会同步到工作区并注入 Codex Runtime，Codex 订阅和系统 Codex CLI 都能发现同一套工作区 Skills。
 
 ### Fixed
 
@@ -988,7 +988,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **界面语言支持更完整**：Settings 可选择跟随系统、中文或 English；Launcher、Chat、Settings、Task Center、Agent 设置、工具卡片、IM 渠道、悬浮球和托盘等界面文案会随语言切换。
-- **Codex 订阅 Provider**：新增 Codex（订阅）入口，MyAgents 可管理 Codex runtime 的安装、更新与 ChatGPT 订阅登录，并把它和普通 Provider 一样用于 Chat、任务、定时任务和 Agent 默认配置。
+- **Codex 订阅 Provider**：新增 Codex（订阅）入口，LSAGENT 可管理 Codex runtime 的安装、更新与 ChatGPT 订阅登录，并把它和普通 Provider 一样用于 Chat、任务、定时任务和 Agent 默认配置。
 - **订阅登录能力补齐**：Provider 设置中补充 Anthropic 订阅登录验证，并把 Codex 订阅入口放到 Anthropic 附近，减少订阅账户和 API Key 配置混用时的误选。
 - **官方图片理解 CLI 工具**：新增 `myagents vision`，可在已启用工具箱和读图模型配置后分析工作区内图片，支持短 prompt 与 workspace 内 prompt 文件。
 
@@ -1073,7 +1073,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **会话运行时架构收敛**：内置 SDK 与外部 Runtime 的会话读取、配置同步、注入 turn、队列和会话操作统一到 Session Engine 路径，减少 IM、定时任务、后台任务和桌面会话之间的状态漂移。
 - **大规模技术债清理**：拆分 Sidecar / Cron / IM 的 Rust owner 模块、builtin / external runtime 的会话状态 owner，以及 Settings、DirectoryPanel、SimpleChatInput 等前端巨型入口；公共 facade 保留外部协议，内部职责边界更清晰，后续排查和迭代成本更低。
-- **外部 Runtime CLI 检测更可靠**：应用内置或 MyAgents 管理的 Claude Code / Codex / Gemini CLI 能被更稳定地识别，不再过度依赖用户 shell 环境。
+- **外部 Runtime CLI 检测更可靠**：应用内置或 LSAGENT 管理的 Claude Code / Codex / Gemini CLI 能被更稳定地识别，不再过度依赖用户 shell 环境。
 - **产品说明与截图更新**：README 和产品截图刷新，便于新用户理解工作区、任务、模型供应商和悬浮入口等核心能力。
 
 ### Fixed
@@ -1414,11 +1414,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.22] - 2026-05-26
 
-> 本版继续收紧外部 Runtime 和长对话体验：Codex Runtime 的工具/权限/协议适配更稳，聊天列表在隐藏窗口后不再容易错位，AI 回复尾部淡出、用户消息气泡、Markdown 文件链接和 SessionID 复制这些高频细节也做了补齐。另外修复了 MyAgents 自己的 npm 安装隔离变量泄漏到用户 shell、触发 nvm 警告的问题。
+> 本版继续收紧外部 Runtime 和长对话体验：Codex Runtime 的工具/权限/协议适配更稳，聊天列表在隐藏窗口后不再容易错位，AI 回复尾部淡出、用户消息气泡、Markdown 文件链接和 SessionID 复制这些高频细节也做了补齐。另外修复了 LSAGENT 自己的 npm 安装隔离变量泄漏到用户 shell、触发 nvm 警告的问题。
 
 ### Added
 
-- **Markdown 里的工作区文件链接可直接预览**：AI 回复中出现当前工作区内的文件路径链接时，点击会在 MyAgents 的文件预览 / 分屏预览中打开，支持 `:42` / `#L42` 这类行号定位；不可预览的文件会交给系统默认应用打开，网页链接仍按原来的浏览器逻辑处理。
+- **Markdown 里的工作区文件链接可直接预览**：AI 回复中出现当前工作区内的文件路径链接时，点击会在 LSAGENT 的文件预览 / 分屏预览中打开，支持 `:42` / `#L42` 这类行号定位；不可预览的文件会交给系统默认应用打开，网页链接仍按原来的浏览器逻辑处理。
 - **对话菜单可复制 SessionID**：会话右上角菜单顶部现在显示当前 SessionID，并提供一键复制，方便在 issue、排查日志或跨会话协作时准确引用。
 
 ### Fixed
@@ -1430,7 +1430,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **IM / OpenClaw Bridge 派发更稳**：修复部分 IM fallback、history 渲染和 Bridge pending dispatch 失败路径，避免非 @ 群消息或插件回调失败时把渠道卡到长时间等待。
 - **Agent Channel 会话交接更可靠**：桌面会话交接到 IM 频道、频道间切换或新建频道会话后，不再容易把回复路由到旧会话或旧频道。
 - **TodoWrite 待办状态显示跟随实际结果**：TodoWrite 完成后，工具卡片、紧凑标签和 Agent 状态面板会显示最新待办状态，不再停留在调用输入里的旧进度。
-- **nvm 用户不再看到 MyAgents 注入的 npm prefix 警告**（[#247](https://github.com/hAcKlyc/MyAgents/issues/247)）：MyAgents 不再把 `npm_config_prefix=~/.myagents/npm-global` 泄漏到整个 AI shell 环境；需要安装 CLI 时改为命令级隔离安装，既不污染用户 nvm 环境，也保留 AI 自装工具的可用性。
+- **nvm 用户不再看到 LSAGENT 注入的 npm prefix 警告**（[#247](https://github.com/hAcKlyc/MyAgents/issues/247)）：LSAGENT 不再把 `npm_config_prefix=~/.myagents/npm-global` 泄漏到整个 AI shell 环境；需要安装 CLI 时改为命令级隔离安装，既不污染用户 nvm 环境，也保留 AI 自装工具的可用性。
 - **Task / AskUserQuestion 输入展示细节修复**：选择题和相关输入区域的布局、滚动同步在 resize 后更稳定，减少内容错位。
 
 ---
@@ -1544,8 +1544,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **全局快捷键唤起 MyAgents**：默认 `⌘⇧M`（Windows / Linux: `Ctrl+Shift+M`），按一下前台、再按一下隐藏到托盘（Raycast 风格 toggle）。可在 设置 → 通用 → 启动设置 改键或关闭。当前 tab / 焦点保持不变——快捷键纯粹是窗口显隐切换，不抢焦点也不强切到 launcher。
-- **Codex Runtime 自诊断面板 + 每 Agent 网络代理选择**（#194）：用 Codex Runtime 时如果遇到登录、MCP server、外部连接器（artifact-tool 等）问题，chat 顶栏会自动浮出一条诊断条让你直接看到「哪里挂了」，不用翻日志。每个 Agent 的「基础设置」也多了一项「网络代理」二选一：**MyAgents 代理**（默认，与桌面端 设置 → 网络代理 一致）和 **跟随终端**（等同于在你电脑的终端里手动启动这个 CLI 时看到的环境变量）。解决一类典型问题：用户终端里能调到的外部连接器，MyAgents 里因为代理不一致调不到。
+- **全局快捷键唤起 LSAGENT**：默认 `⌘⇧M`（Windows / Linux: `Ctrl+Shift+M`），按一下前台、再按一下隐藏到托盘（Raycast 风格 toggle）。可在 设置 → 通用 → 启动设置 改键或关闭。当前 tab / 焦点保持不变——快捷键纯粹是窗口显隐切换，不抢焦点也不强切到 launcher。
+- **Codex Runtime 自诊断面板 + 每 Agent 网络代理选择**（#194）：用 Codex Runtime 时如果遇到登录、MCP server、外部连接器（artifact-tool 等）问题，chat 顶栏会自动浮出一条诊断条让你直接看到「哪里挂了」，不用翻日志。每个 Agent 的「基础设置」也多了一项「网络代理」二选一：**LSAGENT 代理**（默认，与桌面端 设置 → 网络代理 一致）和 **跟随终端**（等同于在你电脑的终端里手动启动这个 CLI 时看到的环境变量）。解决一类典型问题：用户终端里能调到的外部连接器，LSAGENT 里因为代理不一致调不到。
 - **想法可归档**：想法列表的「更多」菜单和批量操作栏都加了归档/取消归档。归档后从默认视图隐藏但全文搜索仍可命中（邮箱式语义）。在已归档分段里也能直接新建想法（会自动切回活跃视图）。Launcher 最近想法行 / 输入框 `#` picker 默认不展示已归档项。
 - **链接右键菜单**：chat 消息 / AI 回复里的链接，右键弹自定义菜单「预览（内置浏览器）/ 拷贝链接 / 在系统浏览器中打开」——之前只能直接外部打开。「预览」在 split view 启用时会落到右侧浏览器面板。
 - **CLI 新增 runtime 诊断子命令**：`myagents runtime diagnose codex`（或 `myagents diagnose runtime codex`），返回结构化 JSON 可直接贴 GitHub issue。
@@ -1762,7 +1762,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **AI 小助理 inbox 加「历史」入口**：设置页右上角新增「历史」按钮，点选直接新开 Tab 进会话 (#120)。
-- **任意会话都能驱动 MyAgents 自身**：`/self-config` 升级为全局 `/myagents-cli`，Chat / IM Bot / Cron 都能用。
+- **任意会话都能驱动 LSAGENT 自身**：`/self-config` 升级为全局 `/myagents-cli`，Chat / IM Bot / Cron 都能用。
 
 ### Fixed
 
@@ -1981,13 +1981,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - **Windows 首次启动卡 10 秒**：旧 Sidecar 清理移到后台，主线程不再阻塞，打开应用瞬时可见 UI。
-- **外部 Runtime（Claude Code / Gemini）会话自动恢复**：当 CLI 那边清理掉会话 ID 后，MyAgents 能检测到并自动新开对话，不再死循环报错。
+- **外部 Runtime（Claude Code / Gemini）会话自动恢复**：当 CLI 那边清理掉会话 ID 后，LSAGENT 能检测到并自动新开对话，不再死循环报错。
 - **技能稳定性**：symlink / junction 形式的技能目录现在能正确识别并展示；skill 安装后 `/health` 不再短暂阻塞；sub-agent 扫描对齐 Claude Agent SDK 最新协议，非标准布局的 Agent 目录也能正确找到。
 - **Chat Tab 切换时偶现的 UI 状态错乱**：按 PRD v0.1.69 §4.3 对齐双写策略。
 - **CLI 错误信息友好化**：`myagents mcp show` 从原来的「Unknown admin route」恢复为正常命令；`cron --schedule` 错误提示在 CLI 边界清晰给出。
 
 ### Notes
-- GetNote MCP（社区第三方工具）的 `list_notes` 返回 tag 显示为 `[object Object]` 是**上游 MCP server 自己的序列化 bug**，与 MyAgents 无关，请到对应仓库报告。MyAgents 对 MCP 返回内容是原样透传的。
+- GetNote MCP（社区第三方工具）的 `list_notes` 返回 tag 显示为 `[object Object]` 是**上游 MCP server 自己的序列化 bug**，与 LSAGENT 无关，请到对应仓库报告。LSAGENT 对 MCP 返回内容是原样透传的。
 
 ---
 
@@ -2031,7 +2031,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **macOS 触摸板轻按首次点击失效**：之前在 macOS 上用触摸板 tap 某些按钮，物理按下正常但轻按首次无反应（隐蔽的焦点抢夺陷阱）。修复后所有按钮触摸板轻按稳定响应。
 - **启动页 Tab 切换按钮真的会切换**：之前 tooltip 说"点击切换模式"但点了没反应，现在 Tab 键 + 点击都能正常切换任务 / 对话模式。
 - **Bun-on-Windows 目录创建崩溃**：系统性修复 Windows 平台下 Bun 在多处零散出现的 `mkdirSync` 遇到已存在目录报 EEXIST 的问题。
-- **Claude Code 订阅登录隔离**：CC Runtime 现在完全由 CLI 自己管推理路由，MyAgents 不再尝试注入 provider，避免跨入口（Tab / 微信 / 定时任务）互相干扰订阅登录态。
+- **Claude Code 订阅登录隔离**：CC Runtime 现在完全由 CLI 自己管推理路由，LSAGENT 不再尝试注入 provider，避免跨入口（Tab / 微信 / 定时任务）互相干扰订阅登录态。
 - **验证供应商时的错误提示**：之前桥接连接失败统一显示"超时"，现在区分真正的超时和连接错误，给出具体原因。
 - **Runtime 切换防串线加固**：外部 Runtime 的会话标识以 session 为权威来源，切换 Runtime / 续接历史时不再发生 runtime 不匹配导致的状态污染。
 - **系统级 Skills 强制更新**：`task-alignment` / `task-implement` 作为系统 Skill 随版本强制更新，确保你本地的任务对齐和执行逻辑永远与产品同步。
@@ -2045,7 +2045,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Gemini / Codex 自动继承项目 CLAUDE.md 和 .claude/rules**：切到外部 Runtime 后，AI 也能读到你项目里写好的开发约束和规则文件，不再"失忆"。Codex 走原生配置发现，Gemini 写入合并后的系统提示，零额外配置。
 - **外部 Runtime 会话标题自动生成**：之前切到 Gemini / Claude Code / Codex 后，会话标题一直显示默认名。现在会用对应 Runtime 自动生成摘要标题，和内置 Runtime 体验一致。
 - **外部 Runtime 冷启动加速（Pre-warm）**：首次发消息前在后台预启动 Runtime 进程，隐藏 10-15 秒的冷启动延迟。
-- **Anthropic 模型别名锁定**：新版 SDK 移除了 `claude-sonnet-4-20250514` 等旧 ID 的内置映射，现在 MyAgents 在启动时主动注入 `sonnet → claude-sonnet-4-20250514` 等别名，子 Agent 指定 `model: "sonnet"` 不再报"模型不存在"。
+- **Anthropic 模型别名锁定**：新版 SDK 移除了 `claude-sonnet-4-20250514` 等旧 ID 的内置映射，现在 LSAGENT 在启动时主动注入 `sonnet → claude-sonnet-4-20250514` 等别名，子 Agent 指定 `model: "sonnet"` 不再报"模型不存在"。
 
 ### Fixed
 - **Gemini 长时间工具调用不再误报超时**：之前 Gemini 执行耗时工具（如网络搜索）超过 10 分钟会弹红色错误。现在取消了硬超时，改由无活动看门狗兜底，正常执行不受影响。
@@ -2061,7 +2061,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **内置 cuse 电脑操作 MCP(macOS / Windows)**:开箱即用的桌面操作工具,让 AI 能直接帮你点鼠标、打字、截屏、在应用之间切换,不再需要手动装任何命令行工具或配置 MCP。首次使用时 macOS 会弹窗申请屏幕录制、辅助功能、Apple Events 权限,授权一次以后持久生效。Linux 暂不支持(工具列表里会自动隐藏)。
-- **切到 Gemini / Claude Code / Codex 也能用定时任务、发图、生成图表卡片**:之前这三项能力是 MyAgents 内置 Runtime 专属,换到外部 Runtime 后就丢了。现在这些 Runtime 也可以创建心跳循环、让 Bot 发图片 / 视频 / 音频、生成可交互的数据图表卡片 —— 和内置 Runtime 体验一致,无缝切换。
+- **切到 Gemini / Claude Code / Codex 也能用定时任务、发图、生成图表卡片**:之前这三项能力是 LSAGENT 内置 Runtime 专属,换到外部 Runtime 后就丢了。现在这些 Runtime 也可以创建心跳循环、让 Bot 发图片 / 视频 / 音频、生成可交互的数据图表卡片 —— 和内置 Runtime 体验一致,无缝切换。
 - **AI 回答中断时显示原因和行动按钮**:之前 AI "突然停了" 只能干瞪眼。现在会显示具体原因,比如:
   - 对话轮数达上限 → 黄色提示条 + 「新开会话」按钮
   - 上下文装不下了 → 红色提示条 + 说明
@@ -2081,7 +2081,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.66] - 2026-04-15
 
 ### Added
-- **Gemini CLI 加入 Agent Runtime 阵容**:在原有的内置、Claude Code、Codex 之外,新增 Google Gemini CLI 作为第四个可选运行环境。只要你本机装好 `gemini` 并登录过,设置里一键切过去就能用 —— MyAgents 完全不管 API Key / OAuth,你原来怎么登录的还是怎么用。
+- **Gemini CLI 加入 Agent Runtime 阵容**:在原有的内置、Claude Code、Codex 之外,新增 Google Gemini CLI 作为第四个可选运行环境。只要你本机装好 `gemini` 并登录过,设置里一键切过去就能用 —— LSAGENT 完全不管 API Key / OAuth,你原来怎么登录的还是怎么用。
   - 支持 Gemini 3.1 Pro、Gemini 3 Flash、Gemini 2.5 Pro 等**当前账户可用的全部模型**,Settings 下拉列表是实时从 Gemini CLI 读出来的,不用手动维护
   - 工具调用(Shell / Read / Edit / Grep / Glob / WebFetch / WebSearch)、思考过程、Token 用量都正常显示,和 Claude Code / Codex 一致
   - 工具 badge 展示 Gemini 的**原始工具名**(比如 `run_shell_command`、`grep_search`),点开看到命令/参数/输出的完整细节,不再是干巴巴的 "Run command"
@@ -2090,7 +2090,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **聊天内文本查找 (⌘F / Ctrl+F)**:在对话里按快捷键唤起顶部查找栏,高亮所有匹配、方向键切换、回车跳转。作用域仅限当前已加载的消息,全历史搜索仍然用 ⌘K。
 
 ### Changed
-- **Agent 身份提示现在真实反映当前 Runtime**:AI 回答"你在哪运行?"时会正确说"MyAgents + Gemini CLI / Claude Code / Codex / 内置 SDK",而不是一律说"基于 Claude Agent SDK"。换 Runtime 后立刻生效。
+- **Agent 身份提示现在真实反映当前 Runtime**:AI 回答"你在哪运行?"时会正确说"LSAGENT + Gemini CLI / Claude Code / Codex / 内置 SDK",而不是一律说"基于 Claude Agent SDK"。换 Runtime 后立刻生效。
 - **Claude Agent SDK 升级至 0.2.107**:跟进上游修复与稳定性改进。
 
 ### Fixed
@@ -2820,7 +2820,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **统一系统提示词架构**：重构为三层 Prompt 架构（L1 基础身份 + L2 交互方式 + L3 场景指令），所有场景统一使用 append 模式
-  - AI 始终知道自己运行在 MyAgents 产品中（桌面聊天、IM Bot、Cron 任务）
+  - AI 始终知道自己运行在 LSAGENT 产品中（桌面聊天、IM Bot、Cron 任务）
   - 旧 SystemPromptConfig（preset/replace/append 三模式）替换为 InteractionScenario 类型
   - IM Bot 启动时传递 botName，AI 感知自身 Bot 名称
   - 模板内容内联为字符串常量（bun build 禁止 `__dirname`）
@@ -3449,7 +3449,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 为未知工具添加兜底图标 (Wrench)
 
 ### Technical
-- Windows 数据目录：`%APPDATA%\MyAgents\`
+- Windows 数据目录：`%APPDATA%\LSAGENT\`
 - 添加 `buildCrossPlatformEnv()` 统一子进程环境变量构建
 - 使用 `flushSync` 强制同步关键 UI 状态更新
 - 装饰性文本过滤使用多条件匹配，避免误伤正常内容

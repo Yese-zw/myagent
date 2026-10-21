@@ -7101,7 +7101,7 @@ describe('external SessionEngine with fake runtime', () => {
     await waitFor(() => harness.runtime.sentMessages.length === 1, 'first admission');
     const prompt = nativeStart.mock.calls[0]?.[0].systemPromptAppend;
     expect(prompt).toContain('桌面查看或输入不改变渠道绑定与发送模式');
-    expect(prompt).not.toContain('用户正通过 MyAgents 桌面客户端与你对话');
+    expect(prompt).not.toContain('用户正通过 LSAGENT 桌面客户端与你对话');
     expect(prompt).not.toContain('<myagents-generative-ui');
     await harness.engine.sendDesktopMessage(desktopRequest(sessionId, workspacePath, 'second'));
     await waitFor(() => harness.runtime.steeredMessages.length === 1 && broadcastEvents.some(item => item.event === 'queue:added' && (item.data as {deliveryMode?:string}).deliveryMode === 'turn'), 'rejected steer queued');

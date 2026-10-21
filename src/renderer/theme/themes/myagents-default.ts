@@ -215,11 +215,11 @@ const noHeroBackground = {
 
 export const myAgentsDefaultTheme: ThemeDefinition = {
   id: 'myagents-default',
-  displayName: 'MyAgents Classic',
-  description: 'MyAgents warm paper / warm night visual language',
+  displayName: 'LSAGENT Classic',
+  description: 'LSAGENT warm paper / warm night visual language',
   stylesheetText,
   hero: {
-    productName: 'MyAgents',
+    productName: 'LSAGENT',
     slogans: {
       'zh-CN': '每个人都应享受智能的推背感，欢迎来到言出法随的世界',
       'en-US': 'Your intent, amplified',

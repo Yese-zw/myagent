@@ -82,7 +82,7 @@ function git(cwd, args) {
 function commit(cwd, message) {
   git(cwd, [
     '-c',
-    'user.name=MyAgents Test',
+    'user.name=LSAGENT Test',
     '-c',
     'user.email=myagents-test@example.invalid',
     '-c',

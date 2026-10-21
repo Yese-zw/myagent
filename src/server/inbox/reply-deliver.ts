@@ -10,7 +10,7 @@
 //   2. 构造 PendingInboxMessage(kind=Reply, replyBack=false)
 //   3. POST 到 Rust /api/inbox/deliver(同一个跨 sidecar 通道)
 //   4. Rust 把 reply 推回 caller sidecar 的 /api/inbox/drain
-//   5. Caller sidecar drain handler 用 MyAgents Session Event Protocol v1
+//   5. Caller sidecar drain handler 用 LSAGENT Session Event Protocol v1
 //      的 send.result 注入 enqueueUserMessage
 //   6. Caller AI 在下一个 turn 看到系统推送结果
 
@@ -21,7 +21,6 @@ import { sanitizeInboxLabel } from './sanitize-label';
 import { deriveSessionLabel } from './derive-label';
 import { getSessionMetadata, getSessionData } from '../SessionStore';
 import type { InboxTurnMeta, PendingInboxMessage, DeliverOutcome } from './types';
-import { deliverNetworkReturn } from '../agent-network/return';
 import { listPendingSessionWatches } from './watch-registry';
 
 /// Optional payload pieces to combine into reply text. Caller (turn-end hook)
@@ -132,7 +131,7 @@ export async function deliverInboxReply(
   };
 
   if (inboxMeta.networkReturn) {
-    return await deliverNetworkReturn(inboxMeta.networkReturn, message.sessionEvent!) === 'delivered';
+    return false;
   }
 
   // Resolve caller workspace path for resume (caller may have gone idle)

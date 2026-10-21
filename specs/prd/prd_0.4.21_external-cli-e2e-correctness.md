@@ -13,7 +13,7 @@ review: "accepted by user on 2026-09-21；development in progress"
 
 ## 执行须知
 
-本文是 [PRD 0.4.21：MyAgents 本机外部 CLI 调用与 Workspace Agent 创建](./prd_0.4.21_external-cli-host.md) 的同版本纠偏交付。它不重做外部 Host，也不建立新的权限系统；它负责把当前分支已经提交、但尚未通过真实安装包验收的外部 CLI 能力修到可发布状态。
+本文是 [PRD 0.4.21：LSAGENT 本机外部 CLI 调用与 Workspace Agent 创建](./prd_0.4.21_external-cli-host.md) 的同版本纠偏交付。它不重做外部 Host，也不建立新的权限系统；它负责把当前分支已经提交、但尚未通过真实安装包验收的外部 CLI 能力修到可发布状态。
 
 开发前读取与实际改动匹配的文档：
 
@@ -50,7 +50,7 @@ review: "accepted by user on 2026-09-21；development in progress"
 
 ### 1.1 必赢场景
 
-一个没有 MyAgents 先验知识的本机外部 Agent，只拿到设置页复制的 Prompt 后，可以：
+一个没有 LSAGENT 先验知识的本机外部 Agent，只拿到设置页复制的 Prompt 后，可以：
 
 1. 读取版本化外部指南，并在 Host 未运行时通过顶层、group、exact leaf `--help` 得到真实用法；
 2. 注册既有目录为 Workspace Agent，发现 Runtime，并 start/send/get 一个 Product Session；

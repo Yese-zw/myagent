@@ -36,7 +36,7 @@ Renderer → Tauri 的普通命令属于控制面。Worker 使用私有 stdin/st
 
 ## 依赖复用边界
 
-算法、codec 和通用格式能力优先复用成熟依赖；版本以 `Cargo.lock` 和 native manifest 为准。模块只保留 MyAgents-specific owner、授权、生命周期、固定内部 profile 和依赖无法表达的 hard limit：
+算法、codec 和通用格式能力优先复用成熟依赖；版本以 `Cargo.lock` 和 native manifest 为准。模块只保留 LSAGENT-specific owner、授权、生命周期、固定内部 profile 和依赖无法表达的 hard limit：
 
 - 重采样统一经过 `rubato` adapter；适配层只负责 interleaved/planar 转换、尾部 duration 对齐与 buffer hard limit，capture callback 不执行 DSP；
 - attachment container/codec probe 与解码统一使用 `symphonia` 的产品白名单 features，不引入 FFmpeg 或第二个 runtime decoder；

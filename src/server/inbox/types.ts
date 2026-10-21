@@ -5,7 +5,13 @@
 // `src-tauri/src/inbox/types.rs`).
 
 import type { SessionEvent } from './session-event';
-import type { NetworkReturnReference } from '../../shared/agentNetworkReturn';
+
+/** Leftover wire field from removed AgentNet. Ignored by current delivery. */
+export interface NetworkReturnReference {
+  opId: string;
+  returnRouteId: string;
+  connectionId?: string;
+}
 
 /// Inbox message kind — request (initial dispatch), reply (turn-end pushback),
 /// or event (system-delivered watch/status event).

@@ -20,7 +20,7 @@ export interface SlashCommand {
 /**
  * Skill frontmatter projection used by the editor. Standard fields remain
  * round-trippable; `author` is a normalized compatibility view; the remaining
- * advanced fields are MyAgents/Claude extensions.
+ * advanced fields are LSAGENT/Claude extensions.
  */
 export interface SkillFrontmatter {
     name: string;

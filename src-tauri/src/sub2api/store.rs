@@ -147,7 +147,11 @@ fn write_atomic(path: &Path, bytes: &[u8]) -> Result<(), StoreError> {
         options.mode(0o600);
     }
     let mut file = options.open(&tmp).map_err(|_| StoreError::Io)?;
-    if file.write_all(bytes).and_then(|()| file.sync_all()).is_err() {
+    if file
+        .write_all(bytes)
+        .and_then(|()| file.sync_all())
+        .is_err()
+    {
         let _ = fs::remove_file(&tmp);
         return Err(StoreError::Io);
     }
@@ -324,12 +328,10 @@ mod tests {
         assert!(read_is_corrupt(&path));
         quarantine_corrupt(&path);
         assert!(!path.exists());
-        assert!(temp
-            .path()
-            .read_dir()
-            .unwrap()
-            .flatten()
-            .any(|entry| entry.file_name().to_string_lossy().starts_with("sub2api.corrupt-")));
+        assert!(temp.path().read_dir().unwrap().flatten().any(|entry| entry
+            .file_name()
+            .to_string_lossy()
+            .starts_with("sub2api.corrupt-")));
     }
 
     #[test]
@@ -338,7 +340,8 @@ mod tests {
         let path = temp.path().join("sub2api.json");
         fs::write(
             &path,
-            serde_json::to_vec(&serde_json::json!({ "schema_version": 99, "grant": null })).unwrap(),
+            serde_json::to_vec(&serde_json::json!({ "schema_version": 99, "grant": null }))
+                .unwrap(),
         )
         .unwrap();
         assert!(read_is_corrupt(&path));

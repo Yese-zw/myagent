@@ -1,6 +1,6 @@
 # Claude Plugin 加载架构
 
-> 本文描述 Claude Plugin 的安装、启用和 Runtime projection。MyAgents 拥有插件目录与启用状态；Builtin Runtime 把本地插件目录交给 Claude Agent SDK，Managed Codex 与 Integrated DSH 通过共享 Product Extension discovery 向各自原生协议转换可表达的组件。
+> 本文描述 Claude Plugin 的安装、启用和 Runtime projection。LSAGENT 拥有插件目录与启用状态；Builtin Runtime 把本地插件目录交给 Claude Agent SDK，Managed Codex 与 Integrated DSH 通过共享 Product Extension discovery 向各自原生协议转换可表达的组件。
 
 ## 系统边界
 
@@ -11,7 +11,7 @@ Claude Plugin 与 OpenClaw Plugin 是两套独立体系：
 | Claude Plugin | Claude 协议的 Skills、Commands、Agents、MCP、Hooks 等组件 | `myagents cc-plugin *`、`/api/cc-plugin/*` | Node Plugin Store + AppConfig |
 | OpenClaw Plugin | Agent Channel 的第三方渠道适配器 | `myagents plugin *`、Rust `/api/plugin/*` | Rust Plugin Bridge lifecycle |
 
-Builtin Runtime 不解析 Plugin 内部组件，也不复制 SDK 的 manifest、hook 或 MCP 语义。MyAgents 只校验受控安装目录并向 SDK 传递 `{ type: 'local', path }`。Managed Codex 与 Integrated DSH 是显式 projection 路径：各自的 Product Extension compiler 从可信安装目录读取组件，并逐项报告 converted、unsupported 或 conflict。
+Builtin Runtime 不解析 Plugin 内部组件，也不复制 SDK 的 manifest、hook 或 MCP 语义。LSAGENT 只校验受控安装目录并向 SDK 传递 `{ type: 'local', path }`。Managed Codex 与 Integrated DSH 是显式 projection 路径：各自的 Product Extension compiler 从可信安装目录读取组件，并逐项报告 converted、unsupported 或 conflict。
 
 ## Owner 与启用模型
 
@@ -102,7 +102,7 @@ Plugin 变更不能原地修改正在运行的 SDK Query。Builtin adapter 在�
 - Hooks、LSP、monitors、bin、SSE MCP 和不能忠实映射的 Agent 字段按组件报告 unsupported；
 - 单个组件失败不能冒充整包成功，也不能阻断其它可转换组件。
 
-其它 `system-cli` Runtime 不消费 MyAgents-owned Claude Plugin projection。
+其它 `system-cli` Runtime 不消费 LSAGENT-owned Claude Plugin projection。
 
 ### Integrated DSH
 

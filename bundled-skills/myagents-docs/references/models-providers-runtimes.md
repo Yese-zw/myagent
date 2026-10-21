@@ -14,7 +14,7 @@
 
 ### API Key Provider
 
-用户提供 API Key 和服务地址，MyAgents 按 Provider/模型声明使用 Anthropic、OpenAI Responses 或 Chat Completions 等接口。内置列表和模型会随版本变化，应在「模型供应商」或 `myagents model list` 查询，不依赖静态名称表。
+用户提供 API Key 和服务地址，LSAGENT 按 Provider/模型声明使用 Anthropic、OpenAI Responses 或 Chat Completions 等接口。内置列表和模型会随版本变化，应在「模型供应商」或 `myagents model list` 查询，不依赖静态名称表。
 
 适合：用户已有第三方 API 额度，或需要特定厂商模型。
 
@@ -26,13 +26,13 @@
 
 ### Grok 订阅（`xai-sub`）
 
-用户通过 xAI OAuth 登录，MyAgents 管理安全刷新凭据。可由 Claude Agent SDK 的 Responses 兼容路径或支持该 Provider 的 DeepSeek Harness 执行，不是外部 Grok CLI Runtime。两种 Runtime 的认证失败恢复能力不完全相同，不能承诺同轮自动恢复。
+用户通过 xAI OAuth 登录，LSAGENT 管理安全刷新凭据。可由 Claude Agent SDK 的 Responses 兼容路径或支持该 Provider 的 DeepSeek Harness 执行，不是外部 Grok CLI Runtime。两种 Runtime 的认证失败恢复能力不完全相同，不能承诺同轮自动恢复。
 
 登录成功和模型验证是两个状态：OAuth 完成后仍要验证账户权益和真实推理是否可用。401 通常要求重新登录；403 可能是权益问题；429 可能是额度或限流。
 
 ### Codex 订阅（`codex-sub`）
 
-这是 runtime-backed Provider。MyAgents 管理 Codex Runtime 资源和订阅登录；新 Session 的执行身份是 `runtime=codex`、`runtimeSource=managed-provider`。由自己的安装、版本、登录和 Provider readiness 决定，不要求安装系统 Codex。
+这是 runtime-backed Provider。LSAGENT 管理 Codex Runtime 资源和订阅登录；新 Session 的执行身份是 `runtime=codex`、`runtimeSource=managed-provider`。由自己的安装、版本、登录和 Provider readiness 决定，不要求安装系统 Codex。
 
 ### Antigravity 订阅（`antigravity-sub`）
 
@@ -44,9 +44,9 @@
 
 ### Claude Agent SDK（`builtin`）
 
-MyAgents 自带的一种集成执行引擎，无需用户另装外部 CLI，并能使用 MyAgents 管理的 Provider、MCP、子智能体与 Claude Plugin 等能力。
+LSAGENT 自带的一种集成执行引擎，无需用户另装外部 CLI，并能使用 LSAGENT 管理的 Provider、MCP、子智能体与 Claude Plugin 等能力。
 
-### MyAgents (DeepSeek Harness)（`dsh`）
+### LSAGENT (DeepSeek Harness)（`dsh`）
 
 应用内置的另一种集成运行环境，支持对话、文件与工具操作、子 Agent、权限审批、问答、历史恢复、回退和分叉。无需安装系统 Node 或独立 DSH CLI；它使用当前 Provider 的模型目录，不只用于 DeepSeek 模型。
 
@@ -58,7 +58,7 @@ MyAgents 自带的一种集成执行引擎，无需用户另装外部 CLI，并�
 
 ## `runtimeSource` 为什么重要
 
-`codex/system-cli` 与 `codex/managed-provider` 都写作 `runtime=codex`，但前者使用用户安装的 Codex 与用户 Codex Home，后者使用 MyAgents 管理的 Runtime 和订阅身份。它们不能互相恢复同一个 Runtime 会话，也不能用同一套登录/MCP 诊断结论。
+`codex/system-cli` 与 `codex/managed-provider` 都写作 `runtime=codex`，但前者使用用户安装的 Codex 与用户 Codex Home，后者使用 LSAGENT 管理的 Runtime 和订阅身份。它们不能互相恢复同一个 Runtime 会话，也不能用同一套登录/MCP 诊断结论。
 
 遇到 Codex 问题时至少确认：
 
@@ -78,28 +78,28 @@ MyAgents 自带的一种集成执行引擎，无需用户另装外部 CLI，并�
 
 ## MCP 在不同 Runtime 中的关系
 
-- builtin Session 使用 MyAgents MCP 配置，并在会话边界应用变化。
-- DSH 使用 MyAgents 管理的 MCP、Skills、命令与支持的产品扩展；每个组件的实际支持/admission 以现场状态为准，不承诺所有 SDK Plugin 组件都能等价执行。
-- `codex/system-cli` 的 MCP 由用户 Codex 自己的配置管理，可通过 Runtime diagnostics 查看，MyAgents 不把自己的 MCP 列表注入它。
-- `codex/managed-provider` 可以使用当前 Workspace 中安全且兼容的 MyAgents MCP，但并非每种 MCP 都适用；以当前 Session 实际显示的工具为准。
+- builtin Session 使用 LSAGENT MCP 配置，并在会话边界应用变化。
+- DSH 使用 LSAGENT 管理的 MCP、Skills、命令与支持的产品扩展；每个组件的实际支持/admission 以现场状态为准，不承诺所有 SDK Plugin 组件都能等价执行。
+- `codex/system-cli` 的 MCP 由用户 Codex 自己的配置管理，可通过 Runtime diagnostics 查看，LSAGENT 不把自己的 MCP 列表注入它。
+- `codex/managed-provider` 可以使用当前 Workspace 中安全且兼容的 LSAGENT MCP，但并非每种 MCP 都适用；以当前 Session 实际显示的工具为准。
 - Claude Code 的工具与扩展支持以当前 Runtime 实际显示的能力为准。
 
 ## 代理与环境
 
-MyAgents 自身的 Provider 请求、插件安装、远程 MCP 与外部 Runtime 是不同网络链路。外部 system-cli Runtime 可以选择跟随 MyAgents 代理或终端环境；订阅管理的 Runtime 跟随对应 Provider 设置。
+LSAGENT 自身的 Provider 请求、插件安装、远程 MCP 与外部 Runtime 是不同网络链路。外部 system-cli Runtime 可以选择跟随 LSAGENT 代理或终端环境；订阅管理的 Runtime 跟随对应 Provider 设置。
 
-“终端能用、MyAgents 里不行”不一定是 Runtime 没安装，可能是 PATH、代理、认证 home 或所选 Runtime 身份不同。Codex system-cli 可使用 Runtime diagnostics 对比实际 auth、MCP、apps 和 effective env；DSH 使用 `myagents diagnose runtime dsh` 读取资源、进程及有效配置，不启动新的 Session。
+“终端能用、LSAGENT 里不行”不一定是 Runtime 没安装，可能是 PATH、代理、认证 home 或所选 Runtime 身份不同。Codex system-cli 可使用 Runtime diagnostics 对比实际 auth、MCP、apps 和 effective env；DSH 使用 `myagents diagnose runtime dsh` 读取资源、进程及有效配置，不启动新的 Session。
 
 ## 正确预期与生效时机
 
 - 新建 Session 会采用当时选择的 Runtime identity；切换到不兼容 Runtime 通常应新开 Session，而不是原地恢复。
 - Model/Permission 是否能在当前 Session 即时切换取决于 Runtime 能力；产品会选择 live RPC、下轮生效或重启 Session。
-- 由 MyAgents 管理的 Runtime 更新不会为了升级而中断已验证的活跃 Session；下载完成后主要影响后续新 Session。
+- 由 LSAGENT 管理的 Runtime 更新不会为了升级而中断已验证的活跃 Session；下载完成后主要影响后续新 Session。
 - Provider 验证会实际消耗一次请求并可能受到网络、额度、权限和模型可用性的影响。
 
 ## 常见误解
 
-- “`codex --version` 能跑，所以 MyAgents Codex 一定健康”：只能证明终端路径，不能证明 MyAgents 看到的 auth/env/MCP。
+- “`codex --version` 能跑，所以 LSAGENT Codex 一定健康”：只能证明终端路径，不能证明 LSAGENT 看到的 auth/env/MCP。
 - “Grok 订阅是外部 Runtime”：不是，它是 Provider，可由 SDK 兼容桥或支持该 Provider 的 DSH 执行。
 - “Codex 订阅等于用户自己的 Codex CLI”：不是，两者的 runtimeSource、运行资源和登录状态由不同路径管理。
 - “Provider 验证超时就是 API Key 错”：超时也可能是网络；应结合真实状态与日志判断。

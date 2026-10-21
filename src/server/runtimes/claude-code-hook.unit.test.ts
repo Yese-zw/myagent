@@ -18,8 +18,8 @@ describe('owned Claude Code SessionStart forwarder', () => {
   });
 
   it('uses Git Bash compatible Windows paths without changing the interpreter', () => {
-    expect(buildSessionStartHookCommand('C:\\Users\\Name\\forwarder.cjs', 1234, 'C:\\Program Files\\MyAgents\\node.exe', 'win32'))
-      .toBe("'C:/Program Files/MyAgents/node.exe' 'C:/Users/Name/forwarder.cjs' 1234");
+    expect(buildSessionStartHookCommand('C:\\Users\\Name\\forwarder.cjs', 1234, 'C:\\Program Files\\LSAGENT\\node.exe', 'win32'))
+      .toBe("'C:/Program Files/LSAGENT/node.exe' 'C:/Users/Name/forwarder.cjs' 1234");
   });
 
   it.skipIf(process.platform === 'win32')('runs the actual shell command without PATH node or shell expansion', async () => {

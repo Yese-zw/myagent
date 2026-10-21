@@ -15,7 +15,7 @@ import {
 const MYAGENTS_USER_DIR = '.myagents';
 
 /**
- * Get the MyAgents user directory path.
+ * Get the LSAGENT user directory path.
  * All user configs (MCP, providers, projects, etc.) are stored here.
  */
 export function getMyAgentsUserDir(): string {
@@ -116,7 +116,7 @@ export function trySyncProjectUserConfigFiles(
  * Sync user-level skills and commands into a project's .claude/ as symlinks.
  *
  * This is the shared disk bridge used by builtin Claude SDK sessions and
- * external runtimes that want to consume the same MyAgents-managed project
+ * external runtimes that want to consume the same LSAGENT-managed project
  * protocol. It only mutates symlinks that point back into ~/.myagents and
  * never overwrites real project skill/command entries.
  */

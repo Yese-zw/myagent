@@ -39,7 +39,7 @@ const DEFAULT_VISION_PROMPT = [
 ].join(' ');
 
 const SYSTEM_PROMPT = [
-  'You are MyAgents Vision Helper.',
+  'You are LSAGENT Vision Helper.',
   'Your job is to inspect the provided images and produce precise textual observations for another AI agent.',
   'Do not invent details. If something is unclear, say so.',
 ].join('\n');
@@ -100,7 +100,7 @@ Usage:
   myagents vision analyze --image @myagents_files/screenshot.png --prompt "Read the error message"
   myagents vision readme
 
-The tool only accepts local image paths inside the current MyAgents workspace.
+The tool only accepts local image paths inside the current LSAGENT workspace.
 Use @myagents_files/... paths when the conversation shows attached images as
 workspace references. URLs are not supported.
 
@@ -114,7 +114,7 @@ export async function analyzeImages(input: VisionAnalyzeInput): Promise<VisionAn
   const workspacePath = input.workspacePath?.trim();
   if (!workspacePath) {
     throw new VisionToolError('No current workspace is available for image path resolution.', 400, {
-      message: 'Run this command from an active MyAgents session with a workspace.',
+      message: 'Run this command from an active LSAGENT session with a workspace.',
     });
   }
   const enabledIds = getEffectiveOfficialToolIdsForSession(

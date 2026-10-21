@@ -36,7 +36,7 @@ describe('classifyInlineCodeTarget', () => {
 describe('shortenPathForDisplay', () => {
   it('shortens macOS and Windows user profile paths', () => {
     expect(shortenPathForDisplay('/Users/zhihu/Documents/project/MyAgents')).toBe('~/Documents/project/MyAgents');
-    expect(shortenPathForDisplay('C:\\Users\\zhihu\\Documents\\project\\MyAgents')).toBe('~/Documents/project/MyAgents');
+    expect(shortenPathForDisplay('C:\\Users\\zhihu\\Documents\\project\\LSAGENT')).toBe('~/Documents/project/LSAGENT');
     expect(shortenPathForDisplay('D:/Users/zhihu/work/MyAgents')).toBe('~/work/MyAgents');
   });
 

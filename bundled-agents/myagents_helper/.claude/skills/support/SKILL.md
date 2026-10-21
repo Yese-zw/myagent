@@ -60,7 +60,6 @@ rg '\[boot\]' ./logs/unified-*.log | node .claude/skills/support/scripts/redact-
 | 主诉 | 读取 |
 |---|---|
 | DSH/Codex/Claude Code 不工作、终端能用但 MyAgents 不行、runtime/model/permission 异常 | `references/runtime.md` |
-| 跨设备 Agent 发现/调用/回传失败、@ Agent 不完整、Session state/watch/取消观察异常 | `references/agent-network.md` |
 | Provider 登录/验证/模型失败，MCP 启动、OAuth、握手或工具列表异常 | `references/provider-mcp.md` |
 | Telegram/钉钉/飞书/微信/QQ Agent 不在线、不收发消息，OpenClaw Plugin 异常 | `references/agent-channel-plugin.md` |
 | Task/定时/Cron 未执行或状态异常，Goal 不续跑/无法暂停/错误终态，Record/Session Inbox 异常 | `references/automation.md` |

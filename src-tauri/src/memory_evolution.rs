@@ -202,7 +202,7 @@ fn job_spec(
 
 fn maintenance_prompt(skill_name: &str, workspace_path: &str) -> String {
     format!(
-        "Use the {} skill to maintain long-term memory for this workspace.\n\nWorkspace: `{}`\n\nConstraints:\n- Only inspect and edit memory-related files unless the skill explicitly requires a small supporting read.\n- If this workspace is a git repository, commit only the memory-related files changed by this run.\n- Do not push.\n- First understand this workspace's existing memory architecture and follow its file roles and paths. Create missing files when necessary for the work, consistent with that architecture; different naming or layering does not require the MyAgents default file set.",
+        "Use the {} skill to maintain long-term memory for this workspace.\n\nWorkspace: `{}`\n\nConstraints:\n- Only inspect and edit memory-related files unless the skill explicitly requires a small supporting read.\n- If this workspace is a git repository, commit only the memory-related files changed by this run.\n- Do not push.\n- First understand this workspace's existing memory architecture and follow its file roles and paths. Create missing files when necessary for the work, consistent with that architecture; different naming or layering does not require the LSAGENT default file set.",
         skill_name, workspace_path
     )
 }
@@ -498,7 +498,7 @@ async fn backfill_system_maintenance_session_markers(
     }
 
     let myagents_dir = crate::app_dirs::myagents_data_dir()
-        .ok_or_else(|| "无法定位 MyAgents 数据目录".to_string())?;
+        .ok_or_else(|| "无法定位 LSAGENT 数据目录".to_string())?;
     let sessions_path = myagents_dir.join("sessions.json");
     let tmp_path = myagents_dir.join("sessions.json.tmp");
     let lock_path = myagents_dir.join("sessions.lock");
@@ -882,7 +882,7 @@ mod tests {
             let docs = task::task_docs_dir(&id).unwrap();
             std::fs::create_dir_all(&docs).unwrap();
             let path = docs.join("task.md");
-            let old = "If required memory substrate files are missing, create them from the MyAgents defaults before continuing.";
+            let old = "If required memory substrate files are missing, create them from the LSAGENT defaults before continuing.";
             std::fs::write(&path, old).unwrap();
             let control = crate::task_scheduler::acquire_task_control(&id).await;
             reconcile_prompt_before_start(&store, &existing, &control)
@@ -897,7 +897,7 @@ mod tests {
                 };
                 assert_eq!(current, maintenance_prompt(skill, &existing.workspace_path));
                 assert!(current.contains("Create missing files when necessary"));
-                assert!(!current.contains("create them from the MyAgents defaults"));
+                assert!(!current.contains("create them from the LSAGENT defaults"));
             } else {
                 assert_eq!(current, old);
                 assert!(store

@@ -97,7 +97,7 @@ pub struct PendingInboxMessage {
     #[serde(default)]
     pub in_reply_to: Option<String>,
 
-    /// Structured MyAgents Session Event Protocol v1 payload. Node sidecar
+    /// Structured LSAGENT Session Event Protocol v1 payload. Node sidecar
     /// renders this into `<myagents-session-event>` before injecting it into
     /// the target runtime. Optional for backwards compatibility with older
     /// request/reply payloads.

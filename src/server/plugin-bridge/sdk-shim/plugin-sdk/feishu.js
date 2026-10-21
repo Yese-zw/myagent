@@ -1,4 +1,4 @@
-// OpenClaw plugin-sdk/feishu shim for MyAgents Plugin Bridge
+// OpenClaw plugin-sdk/feishu shim for LSAGENT Plugin Bridge
 // Complete shim of all ~44 runtime symbols exported by openclaw/src/plugin-sdk/feishu.ts
 // Source of truth: openclaw/src/plugin-sdk/feishu.ts (82-line re-export file)
 // See: specs/research/openclaw_sdk_shim_analysis.md

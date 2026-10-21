@@ -813,7 +813,7 @@ function tabCorrelationHeaders(
   sessionId?: string | null,
 ): Record<string, string> {
   return {
-    'X-MyAgents-Tab-Id': tabId,
+    'X-LSAGENT-Tab-Id': tabId,
     ...(sessionId ? { [LOG_SESSION_HEADER]: sessionId } : {}),
   };
 }

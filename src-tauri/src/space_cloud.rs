@@ -17,7 +17,6 @@ use crate::network_diagnostics::{error_category, response_request_id, RequestDia
 use crate::workspace_files::path_safety::open_regular_file_no_follow;
 use crate::{ulog_info, ulog_warn};
 
-pub(crate) mod agent_network;
 pub(crate) mod attachments;
 pub(crate) mod cli;
 pub(crate) mod delivery;
@@ -66,12 +65,12 @@ const SPACE_BASE_URL_ENV: Option<&str> = option_env!("MYAGENTS_SPACE_BASE_URL");
 const SPACE_DEV_BASE_URL_ENV: Option<&str> = option_env!("MYAGENTS_SPACE_DEV_BASE_URL");
 const SPACE_PUBLIC_CLIENT_ID_ENV: Option<&str> = option_env!("MYAGENTS_SPACE_PUBLIC_CLIENT_ID");
 const SPACE_LEGACY_CLIENT_ID_ENV: Option<&str> = option_env!("MYAGENTS_SPACE_CLIENT_ID");
-const SPACE_PUBLIC_CLIENT_ID_HEADER: &str = "X-MyAgents-Space-Client-Id";
-const SPACE_CLIENT_VERSION_HEADER: &str = "X-MyAgents-Client-Version";
-const SPACE_DEVICE_ID_HEADER: &str = "X-MyAgents-Device-Id";
-const SPACE_PLATFORM_HEADER: &str = "X-MyAgents-Platform";
-const SPACE_OS_VERSION_HEADER: &str = "X-MyAgents-OS-Version";
-const SPACE_CONTEXT_HEADER: &str = "X-MyAgents-Space-Context";
+const SPACE_PUBLIC_CLIENT_ID_HEADER: &str = "X-LSAGENT-Space-Client-Id";
+const SPACE_CLIENT_VERSION_HEADER: &str = "X-LSAGENT-Client-Version";
+const SPACE_DEVICE_ID_HEADER: &str = "X-LSAGENT-Device-Id";
+const SPACE_PLATFORM_HEADER: &str = "X-LSAGENT-Platform";
+const SPACE_OS_VERSION_HEADER: &str = "X-LSAGENT-OS-Version";
+const SPACE_CONTEXT_HEADER: &str = "X-LSAGENT-Space-Context";
 const SESSION_FILE: &str = "session.json";
 const MAX_PROFILE_AVATAR_BYTES: u64 = 5 * 1024 * 1024;
 const MAX_SPACE_AVATAR_BYTES: u64 = MAX_PROFILE_AVATAR_BYTES;
@@ -341,7 +340,7 @@ impl AuthenticatedSpaceSession {
     fn from_account(account: SpaceSession, session_path: PathBuf) -> Result<Self, String> {
         let session_token = account
             .authenticated_token()
-            .ok_or_else(|| "SPACE_REAUTH_REQUIRED: MyAgents Space login is required.".to_string())?
+            .ok_or_else(|| "SPACE_REAUTH_REQUIRED: LSAGENT Space login is required.".to_string())?
             .to_string();
         let session_binding_id = account.session_binding_id();
         Ok(Self {
@@ -1221,7 +1220,7 @@ fn with_space_client_context_headers(
         .header(ACCEPT_LANGUAGE, crate::i18n::current_locale().as_str())
         .header(
             USER_AGENT,
-            format!("MyAgents/{client_version} ({platform})"),
+            format!("LSAGENT/{client_version} ({platform})"),
         );
     if let Some(device_id) = SPACE_CLIENT_DEVICE_CONTEXT.device_id.as_deref() {
         request = request.header(SPACE_DEVICE_ID_HEADER, device_id);
@@ -1616,7 +1615,7 @@ async fn parse_authorized_cloud_data(
                     session_binding_id: Some(session.session_binding_id().to_string()),
                     ..SpaceCommandError::local(
                         "SPACE_SESSION_STATE_WRITE_FAILED",
-                        "MyAgents could not persist the Space login state.",
+                        "LSAGENT could not persist the Space login state.",
                     )
                 });
             }
@@ -1633,7 +1632,7 @@ async fn parse_authorized_cloud_data(
             );
             return Err(SpaceCommandError {
                 code: "SPACE_REAUTH_REQUIRED".to_string(),
-                message: "MyAgents Space login is required.".to_string(),
+                message: "LSAGENT Space login is required.".to_string(),
                 cloud_code: None,
                 http_status: Some(status.as_u16()),
                 request_id: None,
@@ -1701,7 +1700,7 @@ async fn parse_authorized_cloud_data(
         return Err(SpaceCommandError {
             code,
             message: if reauth_required {
-                "MyAgents Space login is required.".to_string()
+                "LSAGENT Space login is required.".to_string()
             } else {
                 message
             },
@@ -2117,7 +2116,7 @@ fn require_session() -> Result<AuthenticatedSpaceSession, String> {
     let configured_base_url = space_base_url()?;
     let path = session_path()?;
     let session = read_session_from_path(&path)?
-        .ok_or_else(|| "NOT_AUTHENTICATED: Not logged in to MyAgents Space.".to_string())?;
+        .ok_or_else(|| "NOT_AUTHENTICATED: Not logged in to LSAGENT Space.".to_string())?;
     if !space_base_urls_equal(&session.base_url, &configured_base_url) {
         return Err(
             "Space session belongs to a different Space service. Please log in again.".to_string(),
@@ -2555,7 +2554,6 @@ mod tests;
 /// owner. Every account projection clears synchronously before remote refresh.
 pub(crate) fn account_auth_boundary_changed<R: tauri::Runtime>(app: &tauri::AppHandle<R>) {
     let _ = app.emit("space-account:changed", "auth");
-    crate::agent_network::actor::auth_boundary_changed(app);
     if let Some(center) = app.try_state::<notifications::ManagedNotificationCenter>() {
         notifications::auth_boundary_changed(app, center.inner());
     }

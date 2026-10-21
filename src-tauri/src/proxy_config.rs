@@ -262,7 +262,7 @@ pub fn read_proxy_settings_for_provider(provider_id: &str) -> Option<ProxySettin
     read_proxy_settings().filter(|settings| proxy_enabled_for_provider(settings, provider_id))
 }
 
-/// Snapshot proxy env vars before MyAgents overwrites them for a child process.
+/// Snapshot proxy env vars before LSAGENT overwrites them for a child process.
 /// Node sidecar uses this to restore the real inherited baseline for providers
 /// excluded by a custom proxy scope.
 pub fn inherited_proxy_env_json() -> String {
@@ -275,7 +275,7 @@ pub fn inherited_proxy_env_json() -> String {
     serde_json::to_string(&snapshot).unwrap_or_else(|_| "{}".to_string())
 }
 
-/// Preserve inherited bypass rules while adding MyAgents' mandatory localhost
+/// Preserve inherited bypass rules while adding LSAGENT' mandatory localhost
 /// exclusions. Lowercase follows the precedence used by Undici/curl when both
 /// casings are present.
 pub fn inherited_no_proxy_with_localhost() -> String {
@@ -315,7 +315,7 @@ fn mark_proxy_injected(cmd: &mut Command) {
     cmd.env(PROXY_INHERITED_ENV_JSON, inherited_proxy_env_json());
 }
 
-/// Apply MyAgents proxy policy to a child process `Command`.
+/// Apply LSAGENT proxy policy to a child process `Command`.
 ///
 /// This is the **only** approved way to configure proxy env vars for subprocesses.
 /// Using manual `cmd.env("HTTP_PROXY", ...)` or `cmd.env_remove(...)` is forbidden —
@@ -347,7 +347,7 @@ pub fn apply_to_subprocess(cmd: &mut Command) -> bool {
                 cmd.env_remove("ALL_PROXY");
                 cmd.env_remove("all_proxy");
                 // Flag + pre-injection baseline so TypeScript can distinguish
-                // explicit MyAgents proxy injection from inherited system env.
+                // explicit LSAGENT proxy injection from inherited system env.
                 mark_proxy_injected(cmd);
                 true
             }
@@ -365,7 +365,7 @@ pub fn apply_to_subprocess(cmd: &mut Command) -> bool {
             }
         }
     } else {
-        // No MyAgents proxy configured: inherit system network behavior.
+        // No LSAGENT proxy configured: inherit system network behavior.
         // CRITICAL: Still inject NO_PROXY to protect Bun's localhost fetch calls
         // from being routed through any inherited system proxy.
         ulog_debug!("[proxy_config] owner=general path=inherited");
@@ -377,7 +377,7 @@ pub fn apply_to_subprocess(cmd: &mut Command) -> bool {
 }
 
 /// Provider-aware variant for provider-owned subprocesses. It injects the
-/// MyAgents proxy only when the selected provider is in scope; otherwise it
+/// LSAGENT proxy only when the selected provider is in scope; otherwise it
 /// leaves inherited system proxy behavior intact and only protects localhost.
 pub fn apply_to_subprocess_for_provider(cmd: &mut Command, provider_id: &str) -> bool {
     if let Some(proxy_settings) = read_proxy_settings_for_provider(provider_id) {
@@ -401,7 +401,7 @@ pub fn apply_to_subprocess_for_provider(cmd: &mut Command, provider_id: &str) ->
             Err(e) => {
                 ulog_error!(
                     "[proxy_config] Invalid proxy configuration for provider {}: {}. \
-                     Provider subprocess will start without MyAgents proxy.",
+                     Provider subprocess will start without LSAGENT proxy.",
                     provider_id,
                     e
                 );

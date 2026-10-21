@@ -3,7 +3,7 @@ import { buildFallbackPath, getFallbackPaths, mergeSearchPaths } from './shell';
 import pathCases from '../../shared/fixtures/runtime-search-path.json';
 
 describe('external runtime shell PATH fallback', () => {
-  it('includes MyAgents-managed CLI locations on Windows', () => {
+  it('includes LSAGENT-managed CLI locations on Windows', () => {
     const env = {
       USERPROFILE: 'C:\\Users\\tester',
       LOCALAPPDATA: 'C:\\Users\\tester\\AppData\\Local',
@@ -16,11 +16,11 @@ describe('external runtime shell PATH fallback', () => {
     const paths = getFallbackPaths({
       platform: 'win32',
       env,
-      bundledNodeDir: 'C:\\Users\\tester\\AppData\\Local\\MyAgents\\nodejs',
+      bundledNodeDir: 'C:\\Users\\tester\\AppData\\Local\\LSAGENT\\nodejs',
     });
 
     expect(paths).toContain(
-      'C:\\Users\\tester\\AppData\\Local\\MyAgents\\nodejs',
+      'C:\\Users\\tester\\AppData\\Local\\LSAGENT\\nodejs',
     );
     expect(paths).toContain('C:\\Users\\tester\\.myagents\\npm-global');
     expect(paths).toContain('C:\\Users\\tester\\.myagents\\bin');
@@ -40,11 +40,11 @@ describe('external runtime shell PATH fallback', () => {
         LOCALAPPDATA: 'C:\\Users\\tester\\AppData\\Local',
         Path: 'C:\\Windows\\System32',
       },
-      bundledNodeDir: 'C:\\Users\\tester\\AppData\\Local\\MyAgents\\nodejs',
+      bundledNodeDir: 'C:\\Users\\tester\\AppData\\Local\\LSAGENT\\nodejs',
     });
 
     expect(
-      fallback.indexOf('C:\\Users\\tester\\AppData\\Local\\MyAgents\\nodejs'),
+      fallback.indexOf('C:\\Users\\tester\\AppData\\Local\\LSAGENT\\nodejs'),
     ).toBeGreaterThan(fallback.indexOf('C:\\Windows\\System32'));
   });
 

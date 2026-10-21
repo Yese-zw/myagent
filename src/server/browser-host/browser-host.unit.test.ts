@@ -76,7 +76,7 @@ describe('PlaywrightBrowserHost', () => {
     const server = { listRoots: vi.fn() } as unknown as Server;
     bindAuthorizedWorkspaceRoot(server, '/workspace/authorized');
     await expect(server.listRoots()).resolves.toEqual({
-      roots: [{ uri: 'file:///workspace/authorized', name: 'MyAgents workspace' }],
+      roots: [{ uri: 'file:///workspace/authorized', name: 'LSAGENT workspace' }],
     });
   });
 

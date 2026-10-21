@@ -757,12 +757,12 @@ export async function handleMcpTest(payload: {
           sessionScoped: true,
           hostGeneration: capability.hostGeneration,
         },
-        hint: 'MyAgents Browser Host is ready for the current Product Session. __browser_host__ is an internal projection marker, not a PATH executable.',
+        hint: 'LSAGENT Browser Host is ready for the current Product Session. __browser_host__ is an internal projection marker, not a PATH executable.',
       };
     } catch (error) {
       return {
         success: false,
-        error: `MyAgents Browser Host is unavailable for the current Product Session: ${error instanceof Error ? error.message : String(error)}`,
+        error: `LSAGENT Browser Host is unavailable for the current Product Session: ${error instanceof Error ? error.message : String(error)}`,
         data: {
           id,
           type: 'application-host',
@@ -772,7 +772,7 @@ export async function handleMcpTest(payload: {
         recoveryHint: {
           recoveryCommand: 'myagents mcp test myagents-browser',
           message:
-            'Run this check from an active MyAgents Agent Session after the application Browser Host is ready.',
+            'Run this check from an active LSAGENT Agent Session after the application Browser Host is ready.',
         },
       };
     }
@@ -1172,7 +1172,7 @@ async function notifyAppConfigChanged(
   if (result.ok !== true) {
     const label = section === 'model' ? 'Model' : 'MCP';
     throw new Error(
-      `${label} configuration was saved, but app-wide refresh failed after ${action} '${id}': ${String(result.error ?? 'unknown Management API error')}. Restart MyAgents or retry the command to refresh every open window.`,
+      `${label} configuration was saved, but app-wide refresh failed after ${action} '${id}': ${String(result.error ?? 'unknown Management API error')}. Restart LSAGENT or retry the command to refresh every open window.`,
     );
   }
 }
@@ -1299,17 +1299,17 @@ export async function handleModelVerify(payload: {
         return {
           success: false,
           code: 'SUBSCRIPTION_AUTH_OWNER_REQUIRED',
-          error: `Provider '${id}' is authenticated by its external runtime, not by a MyAgents API key.`,
+          error: `Provider '${id}' is authenticated by its external runtime, not by a LSAGENT API key.`,
           recoveryHint: {
             message:
-              'Open Settings → Model Providers → Codex (订阅), then complete the MyAgents-managed login there.',
+              'Open Settings → Model Providers → Codex (订阅), then complete the LSAGENT-managed login there.',
           },
         };
       }
       return {
         success: false,
         code: 'SUBSCRIPTION_AUTH_OWNER_REQUIRED',
-        error: `Provider '${id}' uses a host-managed subscription login, not a MyAgents API key.`,
+        error: `Provider '${id}' uses a host-managed subscription login, not a LSAGENT API key.`,
         recoveryHint: {
           recoveryCommand: 'myagents model list --json',
           message:
@@ -1704,23 +1704,20 @@ export async function handleAgentList(
           channels: (agent.channels ?? []).map(channel => projectConfiguredChannel(channel, channelIdentities)),
         };
       });
-    const { discoverAgents } = await import('./agent-network/discovery');
+    const { discoverAgents } = await import('./agent-discovery');
     const discovery = lifecycle === 'archived' ? {items:[], networkStatus:'signedOut' as const, complete:true, authGeneration:0, principalId:null, networkId:null} : await discoverAgents(agents);
-    const localDiscovery = new Map(discovery.items.filter(item => item.isLocal).map(item => [item.selector, item]));
-    // The network candidate budget must not truncate the original local CLI
-    // registry. Only the compact composer projection applies that budget.
+    const localDiscovery = new Map(discovery.items.map(item => [item.selector, item]));
     const combined: Array<Record<string, unknown>> = lifecycle === 'archived' ? agents : [
       ...agents.filter(agent => !agent.archived).map(agent => ({ ...agent,
         ...(localDiscovery.get(agent.agentId) ?? { selector: agent.agentId, isLocal: true,
           deviceId: null, deviceName: null, platform: null, description: null, source: null }),
       })),
-      ...discovery.items.filter(item => !item.isLocal).map(item => ({ ...item, agentId: item.selector })),
     ];
     if (lifecycle === 'all') for (const agent of agents.filter(agent => agent.archived)) combined.push(agent);
     return {
-      success: true, data: payload.network ? combined.filter(item=>item.connectionId===payload.network || item.networkName===payload.network || (item.source as {networkId?:string}|undefined)?.networkId===payload.network) : combined, networkStatus: discovery.networkStatus, complete: discovery.complete,
+      success: true, data: combined, networkStatus: discovery.networkStatus, complete: discovery.complete,
       authGeneration: discovery.authGeneration, principalId: discovery.principalId, networkId: discovery.networkId,
-      networks: "networks" in discovery ? discovery.networks : [],
+      networks: [],
       ...(registry.diagnostics.length ? {
         diagnostics: registry.diagnostics.map(item => ({
           ...item,
@@ -1737,8 +1734,8 @@ export async function handleAgentList(
 
 export async function handleAgentDiscovery(payload: { localOnly?: boolean } = {}): Promise<AdminResponse> {
   try {
-    const { getAgentDiscovery } = await import('./agent-network/discovery');
-    return { success: true, data: await getAgentDiscovery(payload.localOnly === true) };
+    const { getAgentDiscovery } = await import('./agent-discovery');
+    return { success: true, data: await getAgentDiscovery() };
   } catch (error) { return agentWorkspaceIdentityFailure(error); }
 }
 
@@ -1747,7 +1744,7 @@ export async function handleAgentDiscovery(payload: { localOnly?: boolean } = {}
 export async function handleAgentNetworkCatalog(): Promise<AdminResponse> {
   try {
     const registry = await resolvePersistedAgentWorkspaceRegistry();
-    const items: import('@myagents/agent-network-protocol').CatalogItem[] = registry.identities
+    const items = registry.identities
       .filter(identity => isProjectVisibleToUser(identity.project))
       .map(({ agent, project, workspacePath }) => ({
         localAgentId: agent.id, localWorkspaceId: project.id, name: agent.name,
@@ -1782,7 +1779,7 @@ export async function handleAgentResolveConflict(payload: {
         { timeoutMs: AGENT_LIFECYCLE_LOOPBACK_TIMEOUT_MS });
       if (stopped.ok !== true) throw new Error(String(stopped.error ?? 'Could not stop the Agent. No ownership changes were applied.'));
     });
-    return { success: true, hint: 'Workspace ownership repaired. Restart MyAgents before continuing existing sessions.' };
+    return { success: true, hint: 'Workspace ownership repaired. Restart LSAGENT before continuing existing sessions.' };
   } catch (error) {
     return agentWorkspaceIdentityFailure(error);
   }
@@ -3079,7 +3076,7 @@ Commands:
   cancel <job-id>            Cancel one queued or running job
   list                       List this Session's recent jobs
 
-Session ID and Workspace are bound automatically by MyAgents. Never pass or infer caller scope.
+Session ID and Workspace are bound automatically by LSAGENT. Never pass or infer caller scope.
 Run myagents speech <command> --help for the exact contract.`,
   'speech/transcribe': `myagents speech transcribe --file <input> — Submit one attachment transcription
 
@@ -3096,7 +3093,7 @@ OPTIONS
   --json                   Emit one machine-readable JSON document
 
 IDENTITY / PATH SAFETY
-  Caller scope is injected by MyAgents and cannot be overridden. Links, special files, directories, and URLs are rejected. The source and output must remain inside the authoritative Workspace.
+  Caller scope is injected by LSAGENT and cannot be overridden. Links, special files, directories, and URLs are rejected. The source and output must remain inside the authoritative Workspace.
 
 FIXED LIMITS
   One file, at most 4 GiB and 8 hours. Supported containers/codecs are probed from file content. Runtime deadline is max(30 minutes, twice the media duration).
@@ -3306,7 +3303,7 @@ Commands:
   analyze                  Analyze one or more local workspace image paths
 
 Options for 'analyze':
-  --image <path>           Image path inside the current MyAgents workspace (repeatable)
+  --image <path>           Image path inside the current LSAGENT workspace (repeatable)
   --prompt-file <path>     Workspace-relative text file with the inspection request
   --prompt '<text>'        Short literal request authored by the agent
   --json                   Output machine-readable JSON
@@ -3377,7 +3374,7 @@ See 'myagents task readme' for the canonical automation + exit flow.`,
 
   goal: `myagents goal — Manage the current session Goal Mode
 
-Goal Mode turns the current MyAgents session into a long-running objective. MyAgents
+Goal Mode turns the current LSAGENT session into a long-running objective. LSAGENT
 keeps starting the next turn with the current session context until the Goal is
 complete, blocked, or canceled by the user.
 
@@ -3564,7 +3561,7 @@ WHEN TO CALL
 EFFECT
   Refreshes memberships from Cloud and returns id, slug, name, spaceKind, and role.
 REQUIRED CONTEXT
-  A signed-in MyAgents Space session. This discovery command needs no --space.
+  A signed-in LSAGENT Space session. This discovery command needs no --space.
 OPTIONS
   --json  Return {items:[{id,slug,name,spaceKind,role}]} for reliable selection.
 ACTOR AND PERMISSIONS
@@ -3990,7 +3987,7 @@ Commands:
                                   Validate a Trigger without running it
   trigger test <taskId> [--checkpoint-file <json>] [--expect quiet|activate]
   trigger test --spec-file <json> --workspacePath <abs> [--checkpoint-file <json>]
-                                  Really run the command, but do not commit MyAgents
+                                  Really run the command, but do not commit LSAGENT
                                   state, create an event, or activate AI
   reset-checkpoint <taskId>       Clear the platform-managed Detector checkpoint
   archive <taskId>                User-only recoverable long-lived archive state
@@ -4066,7 +4063,7 @@ Options for 'create-attached':
   --sourceClaimId <id>    Space Issue claim id
   --sourceSpaceId <id>    Space id
   --sourceDeliveryId <id> Issue delivery id
-  Must run inside a MyAgents AI session; current session id comes from
+  Must run inside a LSAGENT AI session; current session id comes from
   MYAGENTS_SESSION_ID and is not guessed by the CLI.
 
 Options for 'update' <taskId>:
@@ -4089,7 +4086,7 @@ Options for 'update' <taskId>:
 Detector safety:
   --trigger-file / --spec-file are regular non-symlink UTF-8 JSON files.
   Command args remain a JSON array and are never shell-split. trigger test is
-  a real process execution: MyAgents does not commit checkpoint/event state or
+  a real process execution: LSAGENT does not commit checkpoint/event state or
   activate AI, but the script's own external side effects still happen.
   check-now uses the persisted checkpoint and commits the normal outcome.
 
@@ -4175,7 +4172,7 @@ Related:
   'task/create-attached': taskLeafHelp({
     usage:
       'myagents task create-attached --name <name> --sourceIssueId <id> — Attach current Session work',
-    when: 'Only for a claimed Space Issue already executing in the current MyAgents Session.',
+    when: 'Only for a claimed Space Issue already executing in the current LSAGENT Session.',
     effect:
       'Creates a Running attached-session Task linked to the Space Issue and current canonical Session.',
     options:
@@ -4393,14 +4390,14 @@ Related:
 
   'task/trigger/test': taskLeafHelp({
     usage:
-      'myagents task trigger test <taskId>|--spec-file <json> — Execute a Detector without committing MyAgents state',
+      'myagents task trigger test <taskId>|--spec-file <json> — Execute a Detector without committing LSAGENT state',
     when: 'During fixture validation or diagnosis before a real check-now.',
     effect:
-      'Really executes the command using a snapshot/fixture checkpoint but does not commit MyAgents checkpoint, health, events, or AI activation.',
+      'Really executes the command using a snapshot/fixture checkpoint but does not commit LSAGENT checkpoint, health, events, or AI activation.',
     options:
       '  <taskId>             Test the persisted Trigger\n  --spec-file <path>   Or test an unpersisted Trigger with --workspacePath\n  --checkpoint-file    Optional checkpoint value JSON object or null, without revision/value wrapper\n  --expect quiet|activate',
     mutation:
-      'No MyAgents state or AI mutation. Script file/network/database side effects are real and are not rolled back.',
+      'No LSAGENT state or AI mutation. Script file/network/database side effects are real and are not rolled back.',
     output: 'Structured quiet/activate result or harness failure diagnostics.',
     example:
       'myagents task trigger test --spec-file trigger.test.json --workspacePath /abs/workspace --expect quiet --json',
@@ -4410,7 +4407,7 @@ Related:
 
   'task/reset-checkpoint': taskLeafHelp({
     usage:
-      'myagents task reset-checkpoint <taskId> — Clear MyAgents-managed Detector checkpoint',
+      'myagents task reset-checkpoint <taskId> — Clear LSAGENT-managed Detector checkpoint',
     when: 'Only when the persisted cursor must intentionally restart from null.',
     effect:
       'Clears the platform checkpoint and advances its revision; preserves check history and script-owned state.',
@@ -4567,7 +4564,7 @@ on 'myagents task create-direct / update'.
 
 Read recorded visible Session history: myagents session get <sessionId>
 Find Session IDs with myagents session list --agent <agentId>; see session get --help.
-This reads MyAgents records, not the platform's complete chat history.
+This reads LSAGENT records, not the platform's complete chat history.
 
 Identity: channelId (botId in the global listing) identifies a connection.
 platform is the registered protocol; pluginId identifies the installed plugin.
@@ -4620,7 +4617,7 @@ Published scripts may continue to use list/create. New Agent workflows use
 Use to render inline charts / SVG / dashboards in desktop Chat replies.
 IM bot sessions don't render widgets.`,
 
-  skill: `myagents skill — Manage MyAgents skills (user skills live under ~/.myagents/skills/)
+  skill: `myagents skill — Manage LSAGENT skills (user skills live under ~/.myagents/skills/)
 
 Commands:
   list [--verbose]           List skills; include normal admission details with --verbose [--workspace <path>]
@@ -5020,7 +5017,7 @@ OUTPUT
   correlates with the later send.result requestEventId. No completion is implied.
 
 IDENTITY / PERMISSIONS
-  Must be called from a real MyAgents Session. The target Agent owns runtime,
+  Must be called from a real LSAGENT Session. The target Agent owns runtime,
   model, permission, provider, MCP, plugin, and tool defaults; caller overrides
   are rejected.
 
@@ -5224,9 +5221,9 @@ function resolveSpeechAdminCaller(): SpeechAdminCaller | AdminResponse {
       success: false,
       code: 'SPEECH_SESSION_REQUIRED',
       error:
-        'Speech recognition requires an active MyAgents Session with an authoritative Workspace.',
+        'Speech recognition requires an active LSAGENT Session with an authoritative Workspace.',
       suggestion:
-        'Run the command from the MyAgents chat Session that should own the job.',
+        'Run the command from the LSAGENT chat Session that should own the job.',
       suggestedCommand: 'myagents speech --help',
     };
   }
@@ -5631,7 +5628,7 @@ function currentGoalContext(): {
     return {
       workspacePath: sessionContext.workspacePath ?? defaultCronWorkspace(),
       error:
-        'No current session. Run this command from inside a MyAgents AI session.',
+        'No current session. Run this command from inside a LSAGENT AI session.',
     };
   }
   return {
@@ -6152,7 +6149,7 @@ export async function handleTaskCreateAttached(
     return {
       success: false,
       error:
-        'currentSessionId is required; run this command from inside a MyAgents AI session',
+        'currentSessionId is required; run this command from inside a LSAGENT AI session',
     };
   }
   const resp = await managementApi(
@@ -6594,7 +6591,7 @@ export async function handleRecordDelete(payload: { id: string }): Promise<Admin
 //
 // These handlers expose Pattern 1 (context-injected) MCP tools to the `myagents`
 // CLI so the AI running on external runtimes (Claude Code / Codex)
-// can reach MyAgents-specific capabilities through plain shell tool calls
+// can reach LSAGENT-specific capabilities through plain shell tool calls
 // instead of a Claude-Agent-SDK-only MCP protocol. See prd_0.1.67.
 //
 // Authorization model: Sidecar is session-scoped (1 Sidecar = 1 session), so
@@ -6743,7 +6740,7 @@ CANONICAL COMMANDS
   runs <taskId> [--limit N]         Read recent AI execution history
   run-now <taskId>                  Bypass Detector; does not change schedule/checkpoint
   check-now <taskId>                Real Detector check; commits state and may activate AI
-  trigger validate/test ...         Validate without committing MyAgents state
+  trigger validate/test ...         Validate without committing LSAGENT state
   reset-checkpoint <taskId>         Clear only platform-managed Detector checkpoint
   rerun <taskId>                    Re-dispatch a terminal Task
   exit --reason <text>              End the current eligible scheduled Task from inside it
@@ -6784,12 +6781,12 @@ LIFECYCLE
   after run; Cron waits for the next wall-clock tick; scheduled waits for dispatchAt.
 
 SAFETY
-  Never use system cron/crontab/at/launchctl/schtasks for a MyAgents Task.
+  Never use system cron/crontab/at/launchctl/schtasks for a LSAGENT Task.
   The App must remain online. Archive is recoverable; delete is not and has no
   undelete/retention promise. Delete does not remove user workspace scripts.
   AI callers obtain confirmation in conversation before task delete/remove.
   Existing explicit authorization suffices; the CLI does not open a UI dialog.
-  trigger test runs the external command for real; only MyAgents state is not
+  trigger test runs the external command for real; only LSAGENT state is not
   committed, so isolate fixtures and external side effects.`;
 
 const README_CRON = `myagents cron — Compatibility scheduled-task commands
@@ -6802,11 +6799,11 @@ NOTE
 WHAT
   Create, list, stop, and delete scheduled AI tasks (cron / interval / one-shot).
   Inspect one task with the canonical 'myagents task get <taskId>' command.
-  Tasks run inside MyAgents regardless of which runtime the current chat uses.
+  Tasks run inside LSAGENT regardless of which runtime the current chat uses.
   A task can deliver results to an IM channel.
 
 TIME SEMANTICS
-  MyAgents stores execution facts as absolute instants (UTC internally), but
+  LSAGENT stores execution facts as absolute instants (UTC internally), but
   recurring wall-clock schedules are defined by cron expression + IANA timezone.
 
   For recurring "every day at 09:00" style tasks, the default create path is:
@@ -6933,19 +6930,19 @@ EXIT FROM INSIDE A TASK
   to mark the task complete and stop future executions.
 
 DO NOT
-  Use system cron / crontab / at / launchctl — they can't see MyAgents state.
+  Use system cron / crontab / at / launchctl — they can't see LSAGENT state.
   Only the \`myagents task\` canonical surface or compatible \`myagents cron\`
-  commands can create tasks inside MyAgents.`;
+  commands can create tasks inside LSAGENT.`;
 
 const README_IM = `myagents im — Channel messaging
 
 Read recorded visible Session history with myagents session get <sessionId>.
 Find IDs with myagents session list --agent <agentId>; see myagents session get --help
-for pagination. This reads MyAgents records, not the platform's complete chat history.
+for pagination. This reads LSAGENT records, not the platform's complete chat history.
 Connection identity is channelId (legacy global alias: botId). platform is the
 registered protocol, pluginId the installation identity; platform=null means unknown.
 
-Use the current command execution tool to run the MyAgents CLI:
+Use the current command execution tool to run the LSAGENT CLI:
   myagents im send-message --input-file <absolute JSON path>
   myagents im send-message --input-json '<JSON>'
   myagents im send-message --input-file -
@@ -6996,7 +6993,7 @@ Other commands:
 const README_WIDGET = `myagents widget — Generative UI widget design guidelines
 
 WHAT
-  Returns the MyAgents widget design system (color palette, component specs, layout rules) and the output format you MUST use to embed an interactive widget in a chat reply. Widgets render inline in the conversation — charts, SVG diagrams, interactive explainers, dashboards.
+  Returns the LSAGENT widget design system (color palette, component specs, layout rules) and the output format you MUST use to embed an interactive widget in a chat reply. Widgets render inline in the conversation — charts, SVG diagrams, interactive explainers, dashboards.
 
 WHEN TO CALL
   Before outputting your first <generative-ui-widget> tag in a desktop chat reply. Reach for a widget whenever ${WIDGET_TRIGGER_GUIDANCE}
@@ -7133,7 +7130,7 @@ export async function handleSpaceIssueCreate(
   return spaceManagementResponse(
     '/api/space/issue-create',
     payload,
-    'Issue created in MyAgents Space.',
+    'Issue created in LSAGENT Space.',
   );
 }
 
@@ -7143,7 +7140,7 @@ export async function handleSpaceIssueUpdate(
   return spaceManagementResponse(
     '/api/space/issue-update',
     payload,
-    'Issue updated in MyAgents Space. Re-read it before the next stateful action.',
+    'Issue updated in LSAGENT Space. Re-read it before the next stateful action.',
   );
 }
 
@@ -7165,7 +7162,7 @@ export async function handleSpaceIssueComment(
   return spaceManagementResponse(
     '/api/space/issue-comment',
     payload,
-    'Comment posted to MyAgents Space.',
+    'Comment posted to LSAGENT Space.',
   );
 }
 
@@ -8021,7 +8018,7 @@ async function raceWithTimeout<T>(
 }
 
 /**
- * List every runtime MyAgents knows about with its install status.
+ * List every runtime LSAGENT knows about with its install status.
  *
  * Detection is best-effort and actually gated at `RUNTIME_DETECT_TIMEOUT_MS`
  * per runtime — each runtime's `detect()` spawns `<cli> --version`, and a

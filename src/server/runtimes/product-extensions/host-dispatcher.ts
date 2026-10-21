@@ -60,7 +60,7 @@ function codexDynamicToolName(serverId: string, toolName: string): string {
   const safeServer = serverId.replace(/[^A-Za-z0-9_-]/g, '_');
   const safeTool = toolName.replace(/[^A-Za-z0-9_-]/g, '_');
   // Codex reserves `mcp` and `mcp__*` for MCP tools that it owns natively.
-  // These tools are proxied by MyAgents through `thread/start.dynamicTools`,
+  // These tools are proxied by LSAGENT through `thread/start.dynamicTools`,
   // so their wire identity must live in a separate namespace.
   return `myagents__mcp__${safeServer}__${safeTool}`;
 }
@@ -156,7 +156,7 @@ async function mapMcpResult(
         type: 'text',
         text: 'inline' in spilled
           ? item.text
-          : `${spilled.preview}\n\n[完整结果已保存为 MyAgents ref: ${spilled.id}]`,
+          : `${spilled.preview}\n\n[完整结果已保存为 LSAGENT ref: ${spilled.id}]`,
       });
       continue;
     }
@@ -187,7 +187,7 @@ async function mapMcpResult(
         type: 'text',
         text: 'inline' in spilled
           ? resourceText
-          : `${spilled.preview}\n\n[完整结果已保存为 MyAgents ref: ${spilled.id}]`,
+          : `${spilled.preview}\n\n[完整结果已保存为 LSAGENT ref: ${spilled.id}]`,
       });
       continue;
     }

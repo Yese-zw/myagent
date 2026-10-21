@@ -39,8 +39,8 @@ export function releaseAssetUrl(tag, asset) {
 }
 
 export function parseReleaseManifest(bytes, version) {
-  if (!versionPattern.test(version)) throw new Error("MyAgents-dsh version must be stable X.Y.Z");
-  if (bytes.length > 64 * 1024) throw new Error("MyAgents-dsh Release manifest is too large");
+  if (!versionPattern.test(version)) throw new Error("LSAGENT-dsh version must be stable X.Y.Z");
+  if (bytes.length > 64 * 1024) throw new Error("LSAGENT-dsh Release manifest is too large");
   const manifest = JSON.parse(bytes.toString("utf8"));
   const tag = `v${version}`;
   if (manifest.schemaVersion !== 1 || manifest.repository !== releaseRepository
@@ -48,7 +48,7 @@ export function parseReleaseManifest(bytes, version) {
     || !sourcePattern.test(manifest.sourceCommit ?? "")
     || !manifest.assets || typeof manifest.assets !== "object" || Array.isArray(manifest.assets)
     || JSON.stringify(Object.keys(manifest.assets).sort()) !== JSON.stringify([...releaseTargets].sort())) {
-    throw new Error(`MyAgents-dsh Release manifest does not describe ${tag} and all four targets`);
+    throw new Error(`LSAGENT-dsh Release manifest does not describe ${tag} and all four targets`);
   }
   for (const target of releaseTargets) {
     const asset = manifest.assets[target];
@@ -57,7 +57,7 @@ export function parseReleaseManifest(bytes, version) {
       || !shaPattern.test(asset.runtimeManifestSha256 ?? "")
       || !shaPattern.test(asset.compatibilitySha256 ?? "")
       || !Number.isSafeInteger(asset.size) || asset.size <= 0 || asset.claim !== "verified") {
-      throw new Error(`MyAgents-dsh Release manifest has no verified ${target} archive`);
+      throw new Error(`LSAGENT-dsh Release manifest has no verified ${target} archive`);
     }
   }
   return manifest;
@@ -109,7 +109,7 @@ export function deriveReleaseLock(releaseLock, handoffRoot, target, manifest, ma
     || selected.lock.handoff.sourceCommit !== manifest.sourceCommit
     || selected.lock.handoff.runtimeManifestSha256 !== asset.runtimeManifestSha256
     || selected.lock.handoff.compatibilitySha256 !== asset.compatibilitySha256) {
-    throw new Error(`MyAgents-dsh Release handoff identity differs from the ${target} manifest`);
+    throw new Error(`LSAGENT-dsh Release handoff identity differs from the ${target} manifest`);
   }
   selected.lock.release = { version: manifest.version, tag: manifest.tag,
     sourceCommit: manifest.sourceCommit, manifestSha256, archiveSha256: asset.sha256 };
@@ -157,8 +157,8 @@ function digest(buffer) {
 }
 
 export async function acquireRelease(repoRoot, version, target, download) {
-  if (!versionPattern.test(version)) throw new Error("No stable MyAgents-dsh version in dsh-release.json");
-  if (!releaseTargets.includes(target)) throw new Error(`Unsupported MyAgents-dsh Release target: ${target}`);
+  if (!versionPattern.test(version)) throw new Error("No stable LSAGENT-dsh version in dsh-release.json");
+  if (!releaseTargets.includes(target)) throw new Error(`Unsupported LSAGENT-dsh Release target: ${target}`);
   const tag = `v${version}`;
   const cacheRoot = resolve(repoRoot, "src-tauri/resources/dsh-release-cache");
   mkdirSync(cacheRoot, { recursive: true });

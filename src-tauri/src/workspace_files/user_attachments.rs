@@ -147,7 +147,7 @@ async fn prepare_one_user_image_attachment(
     let Some(data_dir) = myagents_data_dir() else {
         return Err(make_err(
             "storage_unavailable",
-            "MyAgents data directory is unavailable".to_string(),
+            "LSAGENT data directory is unavailable".to_string(),
         ));
     };
     let session_dir = data_dir.join("attachments").join(session_id);

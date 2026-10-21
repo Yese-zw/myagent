@@ -1,4 +1,4 @@
-//! Full-text search engine for MyAgents.
+//! Full-text search engine for LSAGENT.
 //!
 //! Provides two independent search capabilities:
 //! 1. **Session search** — searches across all session titles and message content

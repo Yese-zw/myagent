@@ -1737,7 +1737,7 @@ async fn create_bot_instance_with_pending_cron_events<R: Runtime>(
                             if let Err(e) = send_immediate_reply(
                                 adapter_for_reply.as_ref(),
                                 &msg,
-                                "❌ 绑定码无效或已过期，请在 MyAgents 设置中重新获取二维码。",
+                                "❌ 绑定码无效或已过期，请在 LSAGENT 设置中重新获取二维码。",
                             ).await {
                                 ulog_warn!("[im-cmd] send_message (bind invalid) failed: {}", e);
                             }
@@ -1772,7 +1772,7 @@ async fn create_bot_instance_with_pending_cron_events<R: Runtime>(
                         if let Err(e) = send_immediate_reply(
                             adapter_for_reply.as_ref(),
                             &msg,
-                            "👋 你好！我是 MyAgents Bot。\n\n\
+                            "👋 你好！我是 LSAGENT Bot。\n\n\
                              可用命令：\n\
                              /help — 查看所有命令\n\
                              /new — 开始新对话\n\

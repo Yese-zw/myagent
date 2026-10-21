@@ -1,6 +1,8 @@
 import {
   BellIcon,
   CheckCheckIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
   CopyIcon,
   ExternalIcon,
   LoaderIcon,
@@ -9,6 +11,7 @@ import {
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import Markdown from '@/components/Markdown';
 import { copyPlainText } from '@/utils/clipboard';
 import type { AppRoute } from '../../shared/appRoute';
 import {
@@ -44,6 +47,7 @@ interface NotificationCenterFlyoutProps {
   onRefresh: () => void;
   onLoadMore: () => Promise<void>;
   onMarkAllRead: () => Promise<void>;
+  onMarkSub2apiRead?: (announcementId: number) => Promise<void>;
   onOpenAppRoute: (route: AppRoute) => Promise<boolean> | boolean;
   onClose: () => void;
 }
@@ -53,11 +57,13 @@ export default function NotificationCenterFlyout({
   onRefresh,
   onLoadMore,
   onMarkAllRead,
+  onMarkSub2apiRead,
   onOpenAppRoute,
   onClose,
 }: NotificationCenterFlyoutProps) {
   const { t, i18n } = useTranslation('app');
   const [activatingId, setActivatingId] = useState<string | null>(null);
+  const [detailId, setDetailId] = useState<string | null>(null);
   const [markingAll, setMarkingAll] = useState(false);
   const [activationError, setActivationError] = useState<{
     id: string;
@@ -67,9 +73,21 @@ export default function NotificationCenterFlyout({
     () => snapshot.hasUnread || snapshot.items.some((item) => !item.isRead),
     [snapshot.hasUnread, snapshot.items],
   );
+  const canMarkAll = hasUnreadItems && (
+    Boolean(snapshot.feedCutoff)
+    || snapshot.items.some((item) => item.kind === 'sub2api_announcement' && !item.isRead)
+  );
+  const openAnnouncement = snapshot.items.find((item): item is Extract<NotificationItem, { kind: 'sub2api_announcement' }> => (
+    item.id === detailId && item.kind === 'sub2api_announcement'
+  ));
 
   const activate = async (item: NotificationItem) => {
     if (activatingId) return;
+    if (item.kind === 'sub2api_announcement') {
+      setDetailId(item.id);
+      if (!item.isRead) await onMarkSub2apiRead?.(item.announcementId);
+      return;
+    }
     setActivatingId(item.id);
     setActivationError(null);
     try {
@@ -97,7 +115,7 @@ export default function NotificationCenterFlyout({
   };
 
   const markAll = async () => {
-    if (markingAll || !hasUnreadItems) return;
+    if (markingAll || !canMarkAll) return;
     setMarkingAll(true);
     try {
       await onMarkAllRead();
@@ -112,23 +130,42 @@ export default function NotificationCenterFlyout({
       className="flex h-full min-h-0 flex-col"
       data-notification-center-flyout
     >
-      <header className="flex h-12 shrink-0 items-center justify-between border-b border-[var(--line)] px-4">
-        <h2 className="text-sm font-semibold tracking-tight text-[var(--ink)]">
-          {t('notificationCenter.title')}
-        </h2>
-        <button
-          type="button"
-          onClick={() => void markAll()}
-          disabled={!hasUnreadItems || markingAll || !snapshot.feedCutoff}
-          className="inline-flex h-8 items-center gap-1.5 rounded-md px-2 text-xs font-medium text-[var(--ink-muted)] transition-colors hover:bg-[var(--hover-bg)] hover:text-[var(--ink)] disabled:cursor-default disabled:opacity-35"
-        >
-          {markingAll ? <LoaderIcon className="h-3.5 w-3.5 animate-spin" /> : <CheckCheckIcon className="h-3.5 w-3.5" />}
-          {t('notificationCenter.markAllRead')}
-        </button>
+      <header className="flex h-12 shrink-0 items-center justify-between gap-3 border-b border-[var(--line)] px-4">
+        {openAnnouncement ? (
+          <button
+            type="button"
+            onClick={() => setDetailId(null)}
+            className="inline-flex h-8 min-w-0 items-center gap-1 rounded-md pr-2 text-sm font-semibold text-[var(--ink)] hover:bg-[var(--hover-bg)]"
+          >
+            <ChevronLeftIcon className="h-4 w-4 shrink-0" />
+            <span className="truncate">{openAnnouncement.title}</span>
+          </button>
+        ) : (
+          <h2 className="text-sm font-semibold tracking-tight text-[var(--ink)]">
+            {t('notificationCenter.title')}
+          </h2>
+        )}
+        {!openAnnouncement && (
+          <button
+            type="button"
+            onClick={() => void markAll()}
+            disabled={!canMarkAll || markingAll}
+            className="inline-flex h-8 shrink-0 items-center gap-1.5 rounded-md px-2 text-xs font-medium text-[var(--ink-muted)] transition-colors hover:bg-[var(--hover-bg)] hover:text-[var(--ink)] disabled:cursor-default disabled:opacity-35"
+          >
+            {markingAll ? <LoaderIcon className="h-3.5 w-3.5 animate-spin" /> : <CheckCheckIcon className="h-3.5 w-3.5" />}
+            {t('notificationCenter.markAllRead')}
+          </button>
+        )}
       </header>
 
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain" role="feed">
-        {snapshot.loadState === 'loading' && snapshot.items.length === 0 ? (
+        {openAnnouncement ? (
+          <div className="px-4 py-3 text-sm text-[var(--ink)]">
+            {openAnnouncement.content.trim()
+              ? <Markdown compact>{openAnnouncement.content}</Markdown>
+              : <p className="text-sm text-[var(--ink-muted)]">{t('notificationCenter.emptyAnnouncement')}</p>}
+          </div>
+        ) : snapshot.loadState === 'loading' && snapshot.items.length === 0 ? (
           <div className="flex h-52 items-center justify-center text-[var(--ink-muted)]">
             <LoaderIcon className="h-5 w-5 animate-spin" aria-label={t('notificationCenter.loading')} />
           </div>
@@ -164,13 +201,13 @@ export default function NotificationCenterFlyout({
               const failed = activationError?.id === item.id;
               const headline = item.kind === 'announcement'
                 ? localizedAnnouncement(item, i18n.language)
-                : t('notificationCenter.taskCommentHeadline', {
-                  actor: item.agent.displayName,
-                  task: item.taskName,
-                });
-              const detail = item.kind === 'task_agent_comment'
-                ? item.excerpt
-                : null;
+                : item.kind === 'sub2api_announcement'
+                  ? item.title
+                  : t('notificationCenter.taskCommentHeadline', {
+                    actor: item.agent.displayName,
+                    task: item.taskName,
+                  });
+              const detailText = item.kind === 'announcement' ? null : item.excerpt;
               return (
                 <article key={item.id} aria-label={item.isRead ? t('notificationCenter.read') : t('notificationCenter.unread')}>
                   <button
@@ -189,16 +226,18 @@ export default function NotificationCenterFlyout({
                         </span>
                         {isActivating
                           ? <LoaderIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 animate-spin text-[var(--ink-muted)]" />
-                          : item.target.kind === 'external_url'
-                            ? <ExternalIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--ink-faint)] opacity-0 transition-opacity group-hover:opacity-100" />
-                            : null}
+                          : item.kind === 'sub2api_announcement'
+                            ? <ChevronRightIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--ink-faint)]" />
+                            : item.target.kind === 'external_url'
+                              ? <ExternalIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--ink-faint)] opacity-0 transition-opacity group-hover:opacity-100" />
+                              : null}
                       </span>
-                      {detail && (
+                      {detailText && (
                         <span
                           className={`mt-0.5 line-clamp-3 text-xs leading-[18px] ${item.isRead ? 'text-[var(--ink-muted)]/75' : 'text-[var(--ink-secondary)]'}`}
                           data-notification-detail
                         >
-                          {detail}
+                          {detailText}
                         </span>
                       )}
                       <span className="mt-1 block text-xs tabular-nums text-[var(--ink-faint)]">
@@ -228,7 +267,7 @@ export default function NotificationCenterFlyout({
         )}
       </div>
 
-      {(snapshot.hasMore || snapshot.isLoadingMore || (snapshot.errorCode && snapshot.items.length > 0)) && (
+      {!openAnnouncement && (snapshot.hasMore || snapshot.isLoadingMore || (snapshot.errorCode && snapshot.items.length > 0)) && (
         <footer className="shrink-0 border-t border-[var(--line)] p-2">
           <button
             type="button"

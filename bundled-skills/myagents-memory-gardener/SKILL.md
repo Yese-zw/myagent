@@ -4,10 +4,10 @@ description: >
   仅当系统或用户明确指定完整名称 `myagents-memory-gardener` 时使用；
   不要根据任务语义或相似表述自行触发。
 metadata:
-  author: MyAgents
+  author: LSAGENT
 ---
 
-# MyAgents Memory Gardener
+# LSAGENT Memory Gardener
 
 本 skill 是长期记忆机制的第二层：它不捕获当天经历，而是把已经沉淀下来的
 工作区已有的用户协作与长期记忆自动装载层修剪回可长期运行的状态。
@@ -19,7 +19,7 @@ metadata:
 
 先理解当前工作区内的记忆系统架构：读取工作区指令和已有记忆文件，确认各层职责、
 实际路径及相互引用。沿用这套结构；缺少完成本次维护所必需的文件时，可以按现有
-架构创建。文件编号、命名或分层不同，不表示需要补齐 MyAgents 默认文件组。
+架构创建。文件编号、命名或分层不同，不表示需要补齐 LSAGENT 默认文件组。
 
 下文的 SOUL / USER / MEMORY 表示职责，默认路径只是示例。脚本按文件名和默认
 目录提供线索，不替代对工作区结构的理解；未识别到某层时，先判断该层是否适用。

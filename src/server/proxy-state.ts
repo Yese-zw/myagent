@@ -37,7 +37,7 @@ let generalRequestDispatcher: { key: string; dispatcher: Dispatcher } | null = n
 
 /**
  * Select a direct or protocol-specific proxy child with the canonical
- * NO_PROXY matcher. MyAgents' localhost invariant includes the whole 127/8
+ * NO_PROXY matcher. LSAGENT' localhost invariant includes the whole 127/8
  * range, which Undici's conventional hostname matcher does not cover.
  */
 class GeneralRequestDispatcher extends Dispatcher {
@@ -400,7 +400,7 @@ function envHttpProxyOptions(env: Record<string, string | undefined>): {
 }
 
 /**
- * Dispatcher for generic MyAgents-owned network requests. The selected source
+ * Dispatcher for generic LSAGENT-owned network requests. The selected source
  * is either the live app-proxy overlay or the immutable startup environment;
  * it never reinterprets the process env after Rust/Node have overlaid it.
  */
@@ -466,7 +466,7 @@ export function getProxyForUrl(url: string): string | undefined {
 }
 
 /**
- * Resolve only the proxy explicitly configured by MyAgents for general
+ * Resolve only the proxy explicitly configured by LSAGENT for general
  * requests. Security-sensitive callers use this to distinguish the trusted
  * app overlay from the inherited baseline.
  */

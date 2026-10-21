@@ -169,7 +169,7 @@ pub fn should_force_wake_lock() -> bool {
 /// two callers interleave to leave state/disk/tray/UI disagreeing.
 fn toggle_lock_inner(guard: &mut Option<WakeLock>, enabled: bool) {
     match (enabled, guard.is_some()) {
-        (true, false) => match WakeLock::acquire("MyAgents force wake-lock") {
+        (true, false) => match WakeLock::acquire("LSAGENT force wake-lock") {
             Ok(lock) => {
                 *guard = Some(lock);
                 ulog_info!("[force-wake-lock] acquired (user opted in)");

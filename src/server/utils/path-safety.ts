@@ -73,7 +73,7 @@ export const __blacklistForCrossCheck = {
   winSensitiveSubdirs: WIN_SENSITIVE_SUBDIRS,
 } as const;
 
-/** Trusted root for MyAgents-owned tool attachments (relative to $HOME). */
+/** Trusted root for LSAGENT-owned tool attachments (relative to $HOME). */
 export const TOOL_ATTACHMENT_ROOT_REL = '.myagents/generated/tool-attachments';
 
 export interface PathSafetyOk {
@@ -183,7 +183,7 @@ function checkBlacklist(canonical: string): PathSafetyResult {
 }
 
 /**
- * Validate that `target` is inside the MyAgents-owned attachment root
+ * Validate that `target` is inside the LSAGENT-owned attachment root
  * (`~/.myagents/generated/tool-attachments/...`). Used by `saveToolAttachment`
  * to refuse writes outside the trusted root.
  */

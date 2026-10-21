@@ -1,10 +1,10 @@
 # 产品定位与能力地图
 
-## MyAgents 是什么
+## LSAGENT 是什么
 
-MyAgents 是开源、桌面端、本地优先的个人 Agent 工作台。它把对话、真实工作区、文件、终端、浏览器、模型、工具、任务、长期记忆和多种交互入口放在同一套产品里。Chat 是入口之一，不是产品的全部。
+LSAGENT 是开源、桌面端、本地优先的个人 Agent 工作台。它把对话、真实工作区、文件、终端、浏览器、模型、工具、任务、长期记忆和多种交互入口放在同一套产品里。Chat 是入口之一，不是产品的全部。
 
-从用户视角理解，产品包含三个以本地客户端为核心的部分：Agent 工作台、用户与 Agent 共用的产品能力、Record 上下文收集；并通过 Agent 网络与 MyAgents Space 两项云端能力扩展协作范围。
+从用户视角理解，产品包含三个以本地客户端为核心的部分：Agent 工作台、用户与 Agent 共用的产品能力、Record 上下文收集；并通过 Agent 网络与 LSAGENT Space 两项云端能力扩展协作范围。
 
 ## 产品心智模型
 
@@ -26,7 +26,7 @@ MyAgents 是开源、桌面端、本地优先的个人 Agent 工作台。它把�
 云端协作能力
   ├─ Agent 网络（同账号设备间的在线 Agent-to-Agent 通信）
   │   └─ 已入网设备 / 开放的 Agent / Session 请求与回传；目标设备执行
-  └─ MyAgents Space（以 Space 成员身份组织的轻量协作服务）
+  └─ LSAGENT Space（以 Space 成员身份组织的轻量协作服务）
       └─ Member / Issue / Goal / Shared Skill / Shared Tool / Registered Agent
 ```
 
@@ -50,17 +50,17 @@ MyAgents 是开源、桌面端、本地优先的个人 Agent 工作台。它把�
 
 管理 Provider、MCP、Agent、Channel、Skills、插件、代理、实验功能、语言和应用行为。动态可用项以当前版本设置页和 CLI discovery 为准。
 
-### MyAgents 账号与通知
+### LSAGENT 账号与通知
 
 展开全局侧栏最底一行左侧是账号、右侧是通知，上方保留小助理与设置。未登录点击账号会打开 Space 的现有登录页；已登录点击打开账号菜单，菜单顶部账号信息可编辑资料，另有账号套餐和退出登录。该入口供 Space 与 AgentNet 共用，不需要进入 Space 编辑资料；收起侧栏后底部只保留通知。
 
 ### AI 小助理
 
-负责 MyAgents 功能答疑、代为配置、诊断本地问题和整理反馈。普通使用问题先查产品知识；实际异常再进入 support 诊断。
+负责 LSAGENT 功能答疑、代为配置、诊断本地问题和整理反馈。普通使用问题先查产品知识；实际异常再进入 support 诊断。
 
 ### 桌面宠物 / 悬浮窗
 
-提供轻量桌面入口，可以绑定工作区并复用 MyAgents 的会话能力。它不是另一套独立产品状态；复杂工作仍可以回到主窗口继续。
+提供轻量桌面入口，可以绑定工作区并复用 LSAGENT 的会话能力。它不是另一套独立产品状态；复杂工作仍可以回到主窗口继续。
 
 ### IM Agent / Channel
 
@@ -68,7 +68,7 @@ MyAgents 是开源、桌面端、本地优先的个人 Agent 工作台。它把�
 
 ### Agent 网络
 
-从侧栏「更多 → Agent 网络」进入，复用 MyAgents 账号登录。选择设备入网，再开放希望被调用的 Agent；同账号其它设备上的 Agent 可发现并发起即时协作。它不提供离线排队或团队 Issue 管理，详见 `agent-network.md`。
+从侧栏「更多 → Agent 网络」进入，复用 LSAGENT 账号登录。选择设备入网，再开放希望被调用的 Agent；同账号其它设备上的 Agent 可发现并发起即时协作。它不提供离线排队或团队 Issue 管理，详见 `agent-network.md`。
 
 ### 协作空间 / Team Space
 

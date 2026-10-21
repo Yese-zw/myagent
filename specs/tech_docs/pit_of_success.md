@@ -118,7 +118,7 @@
 <a id="process_cmd"></a>
 ## `process_cmd` (`src-tauri/src/process_cmd.rs`)
 
-**Problem.** Windows 上 GUI 应用（Tauri）直接启动子进程（node.exe Sidecar / Plugin Bridge / npm install）会弹出黑色控制台窗口。长生命周期 Node 进程还会创建 SDK / MCP 后代；如果所有者只保存直接 `Child`，正常退出时只能按 argv 猜测哪些后代属于 MyAgents，既可能漏掉后代，也可能误杀同机的外部进程。在 Windows 上先启动再调用 `taskkill /T`，还会留下 wrapper 提前退出、Job Object 尚未绑定的竞态窗口。
+**Problem.** Windows 上 GUI 应用（Tauri）直接启动子进程（node.exe Sidecar / Plugin Bridge / npm install）会弹出黑色控制台窗口。长生命周期 Node 进程还会创建 SDK / MCP 后代；如果所有者只保存直接 `Child`，正常退出时只能按 argv 猜测哪些后代属于 LSAGENT，既可能漏掉后代，也可能误杀同机的外部进程。在 Windows 上先启动再调用 `taskkill /T`，还会留下 wrapper 提前退出、Job Object 尚未绑定的竞态窗口。
 
 **Surface.** `crate::process_cmd::new(program)` 返回已注入 Windows `CREATE_NO_WINDOW` 的 `Command`；`crate::process_cmd::spawn_tree(&mut command)` 为会创建后代的长生命周期进程返回 `ChildTree`；`ChildTree::kill_and_wait()` force-stop exact tree 并最多等待 10 秒确认退出；`crate::process_cmd::settle_tree(child, natural_grace)` 先允许调用方定义的 cooperative / natural grace，再统一落到同一个 bounded force-stop。
 
@@ -428,7 +428,7 @@ ConfigProvider 的 `config/projects/providers/apiKeys/verifyStatus` 属于一个
 
 **Surface.**
 - `withLogContext({ sessionId, tabId, turnId, runtime, requestId, ownerId }, fn)` (`src/server/logger-context.ts`) —— 进入 ALS frame
-- HTTP 中间件从 `X-MyAgents-Tab-Id` / `x-myagents-log-session-id` 头自动起 frame；Renderer 通用请求入口只补日志关联，不写 CLI 执行身份。CLI 日志沿用 `x-myagents-session-id` 回退，其 scope 准入独立校验
+- HTTP 中间件从 `X-LSAGENT-Tab-Id` / `x-myagents-log-session-id` 头自动起 frame；Renderer 通用请求入口只补日志关联，不写 CLI 执行身份。CLI 日志沿用 `x-myagents-session-id` 回退，其 scope 准入独立校验
 - SDK turn 用 module-level 的 ambient TLS（`Map<sessionId|ownerId, LogContext>`，**不是** singleton）—— 因为 persistent `messageGenerator` 会 yield 出 ALS frame
 - Runtime adapter 在事件处理路径外层包 `withLogContext({ runtime })`
 - `LogEntry` schema 增 6 个可选 correlation 字段；`console.*` capture 自动注入
@@ -528,7 +528,7 @@ ConfigProvider 的 `config/projects/providers/apiKeys/verifyStatus` 属于一个
 
 **Problem.** SDK 对不认识的 model id 按默认上下文窗口 fallback。更大窗口的模型若不经过 provider-scoped capability lookup，会错误显示、提前 auto-compact，并按错误窗口截断附件。`CLAUDE_CODE_AUTO_COMPACT_WINDOW` 只能下调阈值，不能修正这类上限。
 
-**Surface.** wrap 策略统一为 contextLength **>200K 即加 `[1m]` 后缀**（不是只 ≥1M）。SDK 窗口先解锁到 1M，再由 env cap 钳回真实值；builtin 的自动压缩阈值统一为 `90% × min(1M, registry)`。SDK `normalizeModelStringForAPI` 在 wire 上剥 `[1m]`，上游 API 看不到后缀。已知装饰性偏差：SDK `/context` 头条会显 1M，MyAgents 自己的占用圆环显 registry 真值。
+**Surface.** wrap 策略统一为 contextLength **>200K 即加 `[1m]` 后缀**（不是只 ≥1M）。SDK 窗口先解锁到 1M，再由 env cap 钳回真实值；builtin 的自动压缩阈值统一为 `90% × min(1M, registry)`。SDK `normalizeModelStringForAPI` 在 wire 上剥 `[1m]`，上游 API 看不到后缀。已知装饰性偏差：SDK `/context` 头条会显 1M，LSAGENT 自己的占用圆环显 registry 真值。
 
 - `applyProviderContextWindowSuffix(model, providerId)`：调用点已知 active provider 时的首选入口。裸 model id 先查该 provider 自己的 model row；没有对应 row 时再 fallback flat registry，已有 row 但 capability 字段缺失时保持 unknown，不能跨 Provider 补字段；调用方显式传入的 `[1m]` 原样保留。
 - `applyContextWindowSuffix(model)`：只有调用点确实不知道 provider 时才用的 flat fallback。

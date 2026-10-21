@@ -45,7 +45,7 @@ describe('Session Event Protocol v1 renderer', () => {
     expect(prompt).toContain('source_kind="external-cli"');
     expect(prompt).toContain('authenticated local program');
     expect(prompt).toContain('no source Session');
-    expect(prompt).not.toContain('Another MyAgents session');
+    expect(prompt).not.toContain('Another LSAGENT session');
   });
 
   it('neutralizes structural protocol tags inside payload', () => {
@@ -99,7 +99,7 @@ describe('Session Event Protocol v1 renderer', () => {
       registeredAgentId: 'ra-1',
       eventId: 'evt-space-1',
       sourceSessionId: 'myagents-space',
-      sourceLabel: 'MyAgents Space',
+      sourceLabel: 'LSAGENT Space',
       targetSessionId: 'session-space',
       createdAt: '2026-06-24T09:00:00.000Z',
       deliveryId: 'del_123',

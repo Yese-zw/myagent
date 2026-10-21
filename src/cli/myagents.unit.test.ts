@@ -2,8 +2,6 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSyn
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { agentReference, sessionReference, REMOTE_DEADLINES } from '@myagents/agent-network-protocol';
-
 import {
   formatCronInstantForDisplay,
   formatCronTaskScheduleForDisplay,
@@ -86,9 +84,6 @@ describe('Session observation CLI', () => {
     ['session', 'state', [], { sessionId: true }],
     ['session', 'state', [], { sessionId: ' ' }],
     ['session', 'unwatch', [' '], {}],
-    ['agent', 'network-diagnose', [], { limit: true }],
-    ['agent', 'network-diagnose', [], { limit: 'not-a-number' }],
-    ['agent', 'network-diagnose', [], { cursor: true }],
   ] as const)('rejects incomplete observation values for %s %s before any HTTP request', (group, action, rest, flags) => {
     const exit = vi.spyOn(process, 'exit').mockImplementation((code) => { throw new Error(`exit:${code}`); });
     const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
@@ -103,8 +98,6 @@ describe('Session observation CLI', () => {
       expect(validateInternalCliInvocation(command, {})).toBeUndefined();
     }
     expect(buildRequestBody('session','state',['sid'],{})).toEqual({ sessionId: 'sid' });
-    expect(buildRequestBody('agent','network-diagnose',[],{limit:'3',cursor:'next'})).toEqual({limit:3,cursor:'next'});
-    expect(buildRequestBody('agent','network-diagnose',[],{})).toEqual({limit:100,cursor:undefined});
     expect(buildRequestBody('session','watches',[],{})).toEqual({});
     expect(buildRequestBody('session','unwatch',[],{all:true})).toEqual({all:true});
     expect(buildRequestBody('session','unwatch',['watch'],{})).toEqual({watchId:'watch'});
@@ -245,22 +238,10 @@ describe('public external CLI declaration', () => {
       expect(fetchMock).toHaveBeenCalledTimes(2);
     } finally { fetchMock.mockRestore(); }
   });
-  it('uses one shared remote budget without changing local start/send budgets', () => {
-    const ref = { serviceId: '00000000-0000-0000-0000-000000000001',
-      networkId: '00000000-0000-0000-0000-000000000002', mountId: '00000000-0000-0000-0000-000000000003' };
-    const agent = agentReference(ref);
-    const session = sessionReference({ ...ref, localSessionId: 'session-a' });
-    for (const [route, key, value] of [['agent/show', 'agentId', agent], ['session/list', 'agentId', agent],
-      ['session/start', 'agentId', agent], ['session/get', 'sessionId', session], ['session/send', 'toSessionId', session],
-      ['session/watch', 'targetSessionId', session]]) {
-      const method = route.replace('/', '.') as keyof typeof REMOTE_DEADLINES;
-      expect(cliRequestTimeoutMs(route, { [key]: value })).toBe(REMOTE_DEADLINES[method].cli);
-      expect(REMOTE_DEADLINES[method].cli).toBeGreaterThan(REMOTE_DEADLINES[method].admin);
-      expect(REMOTE_DEADLINES[method].admin).toBeGreaterThan(REMOTE_DEADLINES[method].connector);
-    }
+  it('keeps local start/send budgets', () => {
     expect(cliRequestTimeoutMs('session/start', { agentId: 'local' })).toBe(195_000);
     expect(cliRequestTimeoutMs('session/send', { toSessionId: 'local' })).toBe(40_000);
-    expect(() => cliRequestTimeoutMs('session/get', { sessionId: agent })).toThrow();
+    expect(cliRequestTimeoutMs('session/get', { sessionId: 'local' })).toBe(20_000);
   });
 
   it('provides exact offline help for every canonical command and alias', () => {
@@ -300,37 +281,12 @@ describe('myagents CLI port authority', () => {
 });
 
 describe('CLI help and Session list output', () => {
-  it('routes capability discovery by intent for both local and network collaboration', () => {
+  it('routes capability discovery by intent', () => {
     expect(TOP_HELP).toContain('Choose by intent');
     expect(TOP_HELP).toContain('Durable work, scheduling and run tracking: task readme');
     expect(TOP_HELP).toContain('session start (fresh) or send (reuse)');
-    expect(TOP_HELP).toContain('agent network-diagnose --json');
-    expect(TOP_HELP).toContain('other devices');
-  });
-  it('prints complete usable remote selectors with separate metadata columns', () => {
-    const ref = {
-      serviceId: '00000000-0000-4000-8000-000000000010',
-      networkId: '00000000-0000-4000-8000-000000000011',
-      mountId: '00000000-0000-4000-8000-000000000012',
-    };
-    const selectors = ['00000000-0000-4000-8000-000000000001', '00000000-0000-4000-8000-000000000002']
-      .map(localSessionId => sessionReference({ ...ref, localSessionId }));
-    const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
-    try {
-      printResult('session', 'list', { success: true, data: [
-        ...selectors.map(sessionId => ({ sessionId, lastActiveAt: '2026-10-04T01:36:00Z', runtime: 'codex', title: 'Remote' })),
-        { sessionId: 'local-session', lastActiveAt: '2026-10-04T01:36:00Z', runtime: 'builtin', title: 'Local' },
-      ] }, false);
-      const lines = log.mock.calls.map(call => String(call[0]));
-      for (const selector of selectors) {
-        expect(lines.some(line => line.startsWith(`${selector}  `))).toBe(true);
-        expect(buildRequestBody('session', 'state', [selector], {})).toEqual({ sessionId: selector });
-      }
-      const rows = lines.slice(1);
-      expect(new Set(rows.map(row => row.indexOf('2026-10-04T01:36:00Z'))).size).toBe(1);
-    } finally {
-      log.mockRestore();
-    }
+    expect(TOP_HELP).not.toContain('agent network-diagnose');
+    expect(TOP_HELP).not.toContain('other devices');
   });
 
   it.each(['status', 'version', 'reload'])('accepts -h and --help for %s', command => {
@@ -884,7 +840,7 @@ describe('myagents CLI Task Detector contracts', () => {
   };
 
   it('warns in help that Detector test runs real external side effects', () => {
-    expect(TOP_HELP).toContain('Test does not commit MyAgents checkpoint/Activation state');
+    expect(TOP_HELP).toContain('Test does not commit LSAGENT checkpoint/Activation state');
     expect(TOP_HELP).toContain('external side effects are not rolled back');
   });
 
@@ -1180,7 +1136,7 @@ describe('myagents CLI Task Detector contracts', () => {
       printResult('task', 'check-now', check, false);
       printResult('task', 'reset-checkpoint', reset, false);
       expect(log.mock.calls.flat()).toContain('✓ Trigger spec is valid');
-      expect(log.mock.calls.flat()).toContain('✓ Detector test completed (MyAgents state was not committed)');
+      expect(log.mock.calls.flat()).toContain('✓ Detector test completed (LSAGENT state was not committed)');
       expect(log.mock.calls.flat()).toContain('  decision: activate');
       expect(log.mock.calls.flat()).toContain('✓ Detector check completed');
       expect(log.mock.calls.flat()).toContain('  outcome: quiet');
@@ -1447,7 +1403,7 @@ describe('myagents CLI Space issue contracts', () => {
     const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
     try {
       printResult('space', 'whoami', { success: true, data: {
-        space: { slug: 'myagents', name: 'MyAgents' },
+        space: { slug: 'myagents', name: 'LSAGENT' },
         actor: { type: 'registered_agent', id: 'agent-1', name: 'Mino', source: 'registered_agent_session',
           owner: { name: 'Ethan', role: 'owner' } },
       } }, false);
@@ -2097,22 +2053,18 @@ describe('myagents CLI Agent / Session collaboration contracts', () => {
     });
   });
 
-  it('keeps remote selectors copyable without widening the table or inventing local state', () => {
+  it('keeps long local Agent IDs copyable without inventing extra state', () => {
     const log = vi.spyOn(console, 'log').mockImplementation(() => {});
-    const remoteId = 'ma-agent:1:' + 'a'.repeat(120);
+    const localId = 'local-agent-' + 'a'.repeat(80);
     try {
       printAgentList([
         { agentId: 'local-agent', name: 'Local', enabled: true, archived: false, channelCount: 2 },
-        { agentId: remoteId, name: 'Remote', isLocal: false, networkName: 'Office', deviceName: 'Laptop' },
+        { agentId: localId, name: 'Long', enabled: true, archived: false, channelCount: 0 },
       ]);
       const lines = log.mock.calls.map(call => String(call[0]));
       expect(lines[0].length).toBeLessThan(100);
-      expect(lines.find(line => line.includes('Remote'))).not.toContain('disabled');
-      expect(lines.find(line => line.includes('Remote'))).not.toMatch(/\bactive\b/);
       expect(lines.join('\n')).not.toContain('undefined');
-      expect(lines).toContain('  Agent ID: ' + remoteId);
-      expect(lines.join('\n')).toContain('Office');
-      expect(lines.join('\n')).toContain('Laptop');
+      expect(lines).toContain('  Agent ID: ' + localId);
     } finally { log.mockRestore(); }
   });
 

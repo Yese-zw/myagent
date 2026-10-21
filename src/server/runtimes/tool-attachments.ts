@@ -195,7 +195,7 @@ async function saveBase64Source(
 
 /**
  * Positive allow-list for external-path attachments. Allows references to:
- *   - the MyAgents trusted root (own writes)
+ *   - the LSAGENT trusted root (own writes)
  *   - Codex's own caches under ~/.codex/ (savedPath from imageGeneration)
  *   - Managed Codex output under ~/.myagents/ (with auth.json still blacklisted)
  *   - the OS user's typical "documents" dirs (when Codex saves a generated

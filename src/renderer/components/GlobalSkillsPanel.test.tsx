@@ -42,11 +42,11 @@ vi.mock('./CommandDetailPanel', async () => {
 
 const requiredSkill: SkillItem = {
   name: 'myagents-cli',
-  description: 'MyAgents product operations',
+  description: 'LSAGENT product operations',
   scope: 'user',
   path: '/tmp/myagents-cli/SKILL.md',
   folderName: 'myagents-cli',
-  author: 'MyAgents',
+  author: 'LSAGENT',
   systemOwned: true,
   required: true,
   enabled: true,
@@ -98,7 +98,7 @@ describe('GlobalSkillsPanel required skill controls', () => {
     expect(screen.getAllByRole('switch')).toHaveLength(1);
 
     const typeIcon = requiredCard?.querySelector('[data-capability-type-icon="skill"]');
-    const author = screen.getByText('MyAgents');
+    const author = screen.getByText('LSAGENT');
     const systemStatus = screen.getByText('系统');
     expect(typeIcon?.nextElementSibling).toContainElement(requiredTitle);
     expect(requiredTitle.nextElementSibling).toBe(author);

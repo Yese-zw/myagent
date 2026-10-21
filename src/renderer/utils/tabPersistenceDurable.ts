@@ -22,7 +22,7 @@
 // the only caller that could overlap the write — the aborted-restart cleanup —
 // now AWAITs its clear (App.tsx handleRestartAndUpdate), so the three operations
 // (persist-before-restart / clear-on-abort / load-and-clear-on-boot) never
-// interleave. This holds only while MyAgents is single-window/single-renderer;
+// interleave. This holds only while LSAGENT is single-window/single-renderer;
 // if multi-window ever lands, move these ops behind a lock or into a Rust command
 // with locked read-clear-write semantics.
 

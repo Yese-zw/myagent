@@ -113,4 +113,4 @@ if (failures.length > 0) {
   process.exit(1);
 }
 
-console.log(`License contract verified: MyAgents ${expectedVersion} (${expectedLicense})`);
+console.log(`License contract verified: LSAGENT ${expectedVersion} (${expectedLicense})`);

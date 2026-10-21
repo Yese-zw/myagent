@@ -150,7 +150,7 @@ describe('Markdown local file links', () => {
     expect(mocks.openExternal).not.toHaveBeenCalled();
   });
 
-  it('opens workspace absolute path links in the MyAgents file preview instead of the system default app', async () => {
+  it('opens workspace absolute path links in the LSAGENT file preview instead of the system default app', async () => {
     const { onFilePreviewExternal } = renderMarkdown(
       `[Message.tsx](${WORKSPACE}/src/renderer/components/Message.tsx)`,
     );
@@ -382,7 +382,7 @@ describe('Markdown local file links', () => {
     expect(mocks.openExternal).not.toHaveBeenCalled();
   });
 
-  it('opens previewable workspace links through the floating-ball MyAgents preview bridge', async () => {
+  it('opens previewable workspace links through the floating-ball LSAGENT preview bridge', async () => {
     renderFloatingMarkdown(
       `[Message.tsx](${WORKSPACE}/src/renderer/components/Message.tsx:42)`,
     );

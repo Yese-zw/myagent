@@ -62,7 +62,36 @@ describe('native sub2api account form', () => {
     await user.clear(screen.getByLabelText('Confirm password'));
     await user.type(screen.getByLabelText('Confirm password'), 'example-password');
     await user.click(screen.getByRole('button', { name: 'Register' }));
-    await waitFor(() => expect(mocks.authenticate).toHaveBeenCalledWith(expect.objectContaining({ email: 'new@example.com', verifyCode: '123456' }), true));
+    await waitFor(() => expect(mocks.authenticate).toHaveBeenCalledWith(expect.objectContaining({ email: 'new@example.com', verifyCode: '123456', affCode: '', invitationCode: '' }), true));
+  });
+
+  it('lets register send an optional affiliate invitation code', async () => {
+    const user = userEvent.setup();
+    render(<Sub2apiAccountDialog {...props()} />);
+    await user.click(await screen.findByRole('tab', { name: 'Register' }));
+    expect(screen.getByText('Optional')).toBeInTheDocument();
+    await user.type(screen.getByLabelText('Email'), 'new@example.com');
+    await user.type(screen.getByLabelText('Password', { exact: true }), 'example-password');
+    await user.type(screen.getByLabelText('Confirm password'), 'example-password');
+    await user.type(screen.getByLabelText('Email verification code'), '123456');
+    await user.type(screen.getByLabelText(/Invitation code/), '  FRIEND1  ');
+    await user.click(screen.getByRole('button', { name: 'Register' }));
+    await waitFor(() => expect(mocks.authenticate).toHaveBeenCalledWith(expect.objectContaining({ invitationCode: '', affCode: 'FRIEND1' }), true));
+  });
+
+  it('requires the invitation code when the server enables it', async () => {
+    const user = userEvent.setup();
+    render(<Sub2apiAccountDialog {...props()} settings={{ ...settings, invitation_code_enabled: true }} />);
+    await user.click(await screen.findByRole('tab', { name: 'Register' }));
+    expect(screen.queryByText('Optional')).not.toBeInTheDocument();
+    await user.type(screen.getByLabelText('Email'), 'new@example.com');
+    await user.type(screen.getByLabelText('Password', { exact: true }), 'example-password');
+    await user.type(screen.getByLabelText('Confirm password'), 'example-password');
+    await user.type(screen.getByLabelText('Email verification code'), '123456');
+    expect(screen.getByRole('button', { name: 'Register' })).toBeDisabled();
+    await user.type(screen.getByLabelText(/Invitation code/), 'NEEDTHIS');
+    await user.click(screen.getByRole('button', { name: 'Register' }));
+    await waitFor(() => expect(mocks.authenticate).toHaveBeenCalledWith(expect.objectContaining({ invitationCode: 'NEEDTHIS', affCode: '' }), true));
   });
 
   it('lets register pick a supported email domain from the input dropdown', async () => {
@@ -84,7 +113,7 @@ describe('native sub2api account form', () => {
     await user.type(screen.getByLabelText('Confirm password'), 'example-password');
     await user.type(screen.getByLabelText('Email verification code'), '123456');
     await user.click(screen.getByRole('button', { name: 'Register' }));
-    await waitFor(() => expect(mocks.authenticate).toHaveBeenCalledWith(expect.objectContaining({ email: 'new-user@outlook.com', verifyCode: '123456' }), true));
+    await waitFor(() => expect(mocks.authenticate).toHaveBeenCalledWith(expect.objectContaining({ email: 'new-user@outlook.com', verifyCode: '123456', affCode: '' }), true));
   });
 
   it('requires explicit agreement and does not silently accept service terms', async () => {

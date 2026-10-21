@@ -40,7 +40,7 @@ export interface AdminInboxResponse {
   fromLabel?: string;
   /** UUID of the dispatched message — used by debug logs / reply correlation */
   messageId?: string;
-  /** Whether MyAgents will push the target turn result back to the caller. */
+  /** Whether LSAGENT will push the target turn result back to the caller. */
   replyBack?: boolean;
   /** Error code when delivered=false:
    *  'session_not_found' | 'delivery_failed' | 'admission_unconfirmed' |

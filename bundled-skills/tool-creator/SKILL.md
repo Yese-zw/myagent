@@ -1,11 +1,11 @@
 ---
 name: tool-creator
-description: 把用户的可复用需求封装成标准化的 Agent-CLI 工具，并用 `myagents tool add` 注册进 MyAgents 工具注册表——注册后所有未来会话（builtin / DSH / Claude Code / Codex 全 runtime）的 AI 都会在 system prompt 里自动发现它。触发场景：(1) 用户说「把 XX 封装成工具」「做成一个工具」「注册个工具」「写个 CLI」「以后能直接用」；(2) 用户描述一个会反复出现的自动化需求——文档/文件批量处理、调用某个云 API、用某个多模态大模型做图像/视频理解等，即使没说"工具"两个字；(3) 你发现自己第二次为同类需求写几乎一样的脚本——这时要主动提议把它升格为注册工具，不要等用户开口。反向边界：一次性任务就地解决、不铸工具；接入现成的 MCP server 用 `myagents mcp`，不归这里。
+description: 把用户的可复用需求封装成标准化的 Agent-CLI 工具，并用 `myagents tool add` 注册进 LSAGENT 工具注册表——注册后所有未来会话（builtin / DSH / Claude Code / Codex 全 runtime）的 AI 都会在 system prompt 里自动发现它。触发场景：(1) 用户说「把 XX 封装成工具」「做成一个工具」「注册个工具」「写个 CLI」「以后能直接用」；(2) 用户描述一个会反复出现的自动化需求——文档/文件批量处理、调用某个云 API、用某个多模态大模型做图像/视频理解等，即使没说"工具"两个字；(3) 你发现自己第二次为同类需求写几乎一样的脚本——这时要主动提议把它升格为注册工具，不要等用户开口。反向边界：一次性任务就地解决、不铸工具；接入现成的 MCP server 用 `myagents mcp`，不归这里。
 ---
 
 # Tool Creator — 创建并注册 Agent-CLI 工具
 
-你正在 MyAgents 里运行。MyAgents 有一个**工具注册表**（`~/.myagents/tools/`）：注册进去的 CLI 工具会被投放到 PATH（`~/.myagents/bin/`），它的 description 会自动注入所有未来会话的 system prompt——**未来的 AI（包括别的 runtime 上的）会自己想起它、查它的用法、调用它**。用户也能在设置页「工具箱」里看到并管理它。
+你正在 LSAGENT 里运行。LSAGENT 有一个**工具注册表**（`~/.myagents/tools/`）：注册进去的 CLI 工具会被投放到 PATH（`~/.myagents/bin/`），它的 description 会自动注入所有未来会话的 system prompt——**未来的 AI（包括别的 runtime 上的）会自己想起它、查它的用法、调用它**。用户也能在设置页「工具箱」里看到并管理它。
 
 这个 skill 教你两件事：**写出一个对 Agent 友好的合格 CLI 工具**，以及**把它注册进去**。
 
@@ -58,7 +58,7 @@ description: 把用户的可复用需求封装成标准化的 Agent-CLI 工具�
 
 ### 技术栈
 
-内置 Node v24 单文件 + `node:util` 的 `parseArgs`，**零第三方依赖**。这不是偏好是约束：MyAgents 已内置 Node 并打通全部 PATH，单文件意味着没有 node_modules、拷目录即分发、跨平台问题已被产品解决过一遍。确实绕不开外部二进制时声明进 `deps` 并做启动自检（见生死线 8）。
+内置 Node v24 单文件 + `node:util` 的 `parseArgs`，**零第三方依赖**。这不是偏好是约束：LSAGENT 已内置 Node 并打通全部 PATH，单文件意味着没有 node_modules、拷目录即分发、跨平台问题已被产品解决过一遍。确实绕不开外部二进制时声明进 `deps` 并做启动自检（见生死线 8）。
 
 ### 八条生死线
 

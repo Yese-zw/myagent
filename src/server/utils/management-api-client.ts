@@ -16,7 +16,7 @@ export function managementRequestHeaders(): Record<string, string> {
     'Content-Type': 'application/json',
     ...(internalToken ? { [INTERNAL_CLI_TOKEN_HEADER]: internalToken } : {}),
     ...(SIDECAR_GENERATION
-      ? { 'X-MyAgents-Sidecar-Generation': SIDECAR_GENERATION }
+      ? { 'X-LSAGENT-Sidecar-Generation': SIDECAR_GENERATION }
       : {}),
   };
 }

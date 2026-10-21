@@ -6,7 +6,7 @@
 |---|---|
 | MCP | 让模型在回合里调用结构化工具或访问外部服务 |
 | Skill | 教 Agent 稳定地执行一套方法、流程或领域任务 |
-| 官方 CLI Tool | MyAgents 内置、跨 Runtime 可调用的产品工具，例如图片理解 |
+| 官方 CLI Tool | LSAGENT 内置、跨 Runtime 可调用的产品工具，例如图片理解 |
 | 用户 CLI Tool | 用户封装的本地非交互命令，注册后进入 Agent 可发现能力（实验室） |
 | Claude Plugin | 一包包含 Skills、Agents、MCP、Hooks 等 Claude 生态组件 |
 | OpenClaw Plugin | 给 Agent Channel 增加新的 IM 平台或渠道能力 |
@@ -16,7 +16,7 @@
 
 ## MCP
 
-MyAgents 支持 STDIO、HTTP、SSE 类型的 MCP，也带有若干预置或内置能力。MCP 可以在全局启用，也可以针对 Workspace 启用。
+LSAGENT 支持 STDIO、HTTP、SSE 类型的 MCP，也带有若干预置或内置能力。MCP 可以在全局启用，也可以针对 Workspace 启用。
 
 典型使用过程：
 
@@ -30,7 +30,7 @@ MyAgents 支持 STDIO、HTTP、SSE 类型的 MCP，也带有若干预置或内�
 
 Claude Agent SDK 与托管 Codex 的会话内工具状态可显示失败原因，并在空闲时重连失败 MCP；重连不等于修改全局配置，也不需要先删除整个 Session。
 
-外部 Runtime 不一定消费 MyAgents MCP，具体见 `models-providers-runtimes.md`。
+外部 Runtime 不一定消费 LSAGENT MCP，具体见 `models-providers-runtimes.md`。
 
 ### 应用托管浏览器与 Playwright
 
@@ -40,7 +40,7 @@ Claude Agent SDK 与托管 Codex 的会话内工具状态可显示失败原因�
 
 ## Skills
 
-Skill 是给 Agent 的可复用工作方法，核心是 `SKILL.md`，还可以带 references、scripts 和 assets。MyAgents 支持：
+Skill 是给 Agent 的可复用工作方法，核心是 `SKILL.md`，还可以带 references、scripts 和 assets。LSAGENT 支持：
 
 - 系统 Skill：随应用版本维护，用户不应把它当普通个人 Skill 修改
 - 用户级 Skill：在所有工作区可用
@@ -54,7 +54,7 @@ Skill 可从 GitHub 仓库、支持的压缩包或本地来源安装。安装成
 
 ## 官方与用户 CLI Tool
 
-### MyAgents 官方 CLI
+### LSAGENT 官方 CLI
 
 `myagents` 是产品管理入口，用于查询和操作 Provider、MCP、Task、Agent、Space 等能力。它不是用户 CLI Tool 注册表的一部分。
 
@@ -72,7 +72,7 @@ macOS/Windows 随应用提供 Cuse Skill 与桌面操作 CLI，可在全局 Skil
 
 ### 用户 CLI Tool（实验室）
 
-用户可以把符合 Agent-CLI 契约的非交互工具注册到 MyAgents。启用后，新 Session 能看到工具描述并从 PATH 调用。该能力受「CLI 工具注册表」实验开关控制；关闭时不会自动发现或管理用户工具，但官方 `myagents` CLI 不受影响。
+用户可以把符合 Agent-CLI 契约的非交互工具注册到 LSAGENT。启用后，新 Session 能看到工具描述并从 PATH 调用。该能力受「CLI 工具注册表」实验开关控制；关闭时不会自动发现或管理用户工具，但官方 `myagents` CLI 不受影响。
 
 适合：已经有稳定命令，希望多个 Runtime 和工作区都能调用。复杂的模型工具协议或持续服务更适合 MCP。
 
@@ -80,7 +80,7 @@ macOS/Windows 随应用提供 Cuse Skill 与桌面操作 CLI，可在全局 Skil
 
 ### Claude Plugin
 
-遵循 Anthropic Claude Plugin 目录协议，可以包含 Skills、Agents、MCP 和 Hooks。MyAgents 在 Claude Agent SDK 中提供这套集成；DSH 与托管 Codex 可接入其中支持的产品扩展组件，具体 admission 以现场列表为准，不能保证整包 Hooks/Agents 等都有同等能力。启停后按 Runtime 的扩展更新边界生效。系统 Claude Code/Codex 自己管理其插件，不自动读取这里的 Claude Plugin。
+遵循 Anthropic Claude Plugin 目录协议，可以包含 Skills、Agents、MCP 和 Hooks。LSAGENT 在 Claude Agent SDK 中提供这套集成；DSH 与托管 Codex 可接入其中支持的产品扩展组件，具体 admission 以现场列表为准，不能保证整包 Hooks/Agents 等都有同等能力。启停后按 Runtime 的扩展更新边界生效。系统 Claude Code/Codex 自己管理其插件，不自动读取这里的 Claude Plugin。
 
 ### OpenClaw Plugin
 

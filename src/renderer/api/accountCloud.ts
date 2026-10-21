@@ -6,7 +6,7 @@ function isTauri(): boolean {
 
 async function inv<T>(cmd: string, args?: Record<string, unknown>): Promise<T> {
   if (!isTauri()) {
-    throw new Error(`MyAgents account requires Tauri runtime: ${cmd}`);
+    throw new Error(`LSAGENT account requires Tauri runtime: ${cmd}`);
   }
   const { invoke } = await import("@tauri-apps/api/core");
   return invoke<T>(cmd, args);

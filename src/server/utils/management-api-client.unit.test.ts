@@ -44,7 +44,7 @@ describe('resolveManagedOAuthCredential', () => {
     const [url, options] = mocks.cancellableFetch.mock.calls[0] as [string, RequestInit];
     expect(url).toBe('http://127.0.0.1:31415/api/grok/bearer');
     expect(options.headers).toMatchObject({
-      'X-MyAgents-Sidecar-Generation': '7',
+      'X-LSAGENT-Sidecar-Generation': '7',
       'x-myagents-internal-cli-token': 'internal-capability',
     });
     expect(JSON.parse(String(options.body))).toEqual({

@@ -183,8 +183,8 @@ describe('ExternalCliSettingsSection', () => {
 
     const copied = mocks.copyPlainText.mock.calls.at(-1)?.[0] as string;
     expect(copied).toBe(
-      '请先阅读本机文件 "/Users/test/.myagents/external-myagents-cli/SKILL.md"，并严格按照其中的公开 CLI 契约操作 MyAgents。\n\n' +
-        '本机 MyAgents CLI 完整路径是："/Users/test/.myagents/bin/myagents"\n\n' +
+      '请先阅读本机文件 "/Users/test/.myagents/external-myagents-cli/SKILL.md"，并严格按照其中的公开 CLI 契约操作 LSAGENT。\n\n' +
+        '本机 LSAGENT CLI 完整路径是："/Users/test/.myagents/bin/myagents"\n\n' +
         '请将 MYAGENTS_API_TOKEN 注入到环境变量：`export MYAGENTS_API_TOKEN="mae_real_secret_must_not_leak"`',
     );
     expect(copied).not.toContain('<token>');
@@ -203,7 +203,7 @@ describe('ExternalCliSettingsSection', () => {
     const warning = await screen.findByText(
       /A local program holding MYAGENTS_API_TOKEN/,
     );
-    const accessHeading = screen.getByText('MyAgents CLI external access');
+    const accessHeading = screen.getByText('LSAGENT CLI external access');
     const promptHeading = screen.getByText('Prompt for another AI');
 
     expect(warning.closest('section')).toBe(accessHeading.closest('section'));

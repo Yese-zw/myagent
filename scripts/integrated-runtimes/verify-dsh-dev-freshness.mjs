@@ -93,13 +93,13 @@ export function verifyDshDevelopmentFreshness({
   if (bundledHead !== sourceHead) {
     throw new Error(
       `[dsh-dev-freshness] bundled Runtime is stale: artifact source ${bundledHead}, ` +
-        `current MyAgents-dsh source ${sourceHead}. Build and verify a new immutable ` +
+        `current LSAGENT-dsh source ${sourceHead}. Build and verify a new immutable ` +
         "Runtime handoff, then prepare the Dev build with that handoff.",
     );
   }
   if (git(canonicalSourceRoot, ["status", "--porcelain=v1", "--untracked-files=all"]) !== "") {
     throw new Error(
-      "[dsh-dev-freshness] MyAgents-dsh has uncommitted source changes that cannot be " +
+      "[dsh-dev-freshness] LSAGENT-dsh has uncommitted source changes that cannot be " +
         "present in the bundled immutable Runtime. Commit and rebuild the handoff first.",
     );
   }

@@ -48,7 +48,7 @@ src-tauri/target/x86_64-unknown-linux-gnu/debug/myagents
 
 开发版启用 debug 行为（包括禁止真实自动更新），使用本 checkout 的开发代码和资源；保留整个 checkout，不能把单独一个 debug 可执行文件当成可分发安装包。有桌面会话时脚本启动应用；无 `DISPLAY`/`WAYLAND_DISPLAY` 时仅打印启动路径，不把无桌面误判为编译失败。
 
-脚本不会杀死已有 MyAgents 或其它开发会话。若已运行安装版，先正常退出，再启动开发版；应用现有 single-instance owner 负责实例准入。开发版仍使用应用正常用户数据目录，重要数据先自行备份。
+脚本不会杀死已有 LSAGENT 或其它开发会话。若已运行安装版，先正常退出，再启动开发版；应用现有 single-instance owner 负责实例准入。开发版仍使用应用正常用户数据目录，重要数据先自行备份。
 
 ## `.deb` 安装包
 
@@ -70,7 +70,7 @@ Linux 的 Tauri 平台配置只生成 deb，关闭 updater artifacts，因此普
 sudo apt install ./MyAgents_<version>_amd64.deb
 ```
 
-文件名以实际输出为准。通过桌面菜单启动 MyAgents，或运行 `/usr/bin/myagents`。应用随包携带 Node/npm，用户无需安装系统 Node。若已投影 `~/.myagents/bin/myagents` CLI，裸 `myagents` 可能指向 CLI；不要把 CLI 与桌面可执行文件混为一谈。
+文件名以实际输出为准。通过桌面菜单启动 LSAGENT，或运行 `/usr/bin/myagents`。应用随包携带 Node/npm，用户无需安装系统 Node。若已投影 `~/.myagents/bin/myagents` CLI，裸 `myagents` 可能指向 CLI；不要把 CLI 与桌面可执行文件混为一谈。
 
 升级当前测试包采用同样的 `apt install ./新版.deb` 覆盖安装。尚未发布 Linux 更新清单，也未建立 APT 源；Rust 和 Renderer 均禁用 Linux 应用内更新检查、下载与安装，设置页提供发布页链接及手动升级说明。关闭 updater artifacts 本身不会禁用运行期更新。卸载用 `sudo apt remove myagents`，用户工作区与 `~/.myagents` 数据由用户保留/管理。
 

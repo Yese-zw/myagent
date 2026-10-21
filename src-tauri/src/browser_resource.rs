@@ -203,7 +203,7 @@ fn required_artifact() -> Option<OfficialBrowserArtifact> {
 fn runtime_root() -> Result<PathBuf, String> {
     crate::app_dirs::myagents_data_dir()
         .map(|path| path.join("runtimes").join("browser"))
-        .ok_or_else(|| "[browser-resource] Cannot determine MyAgents data directory".to_string())
+        .ok_or_else(|| "[browser-resource] Cannot determine LSAGENT data directory".to_string())
 }
 
 fn installed_json_path() -> Result<PathBuf, String> {

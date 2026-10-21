@@ -642,7 +642,7 @@ mod imp {
                             (Some(m), Some(w)) => Some(mouse_in_window(w, *m)),
                             _ => comp.as_ref().map(|_| false),
                         };
-                        // Peek is intentionally nonactivating: MyAgents is
+                        // Peek is intentionally nonactivating: LSAGENT is
                         // normally inactive while the user works in another
                         // app. Therefore app_active is diagnostic context, not
                         // a hover gate; the geometry hit-test remains the
@@ -974,7 +974,7 @@ mod imp {
         if app.get_webview_window(BALL_LABEL).is_none() {
             let win = WebviewWindowBuilder::new(app, BALL_LABEL, WebviewUrl::default())
                 .scroll_bar_style(crate::webview_policy::scroll_bar_style())
-                .title("MyAgents Ball")
+                .title("LSAGENT Ball")
                 .inner_size(BALL_WIN, BALL_WIN)
                 .resizable(false)
                 .decorations(false)
@@ -1002,7 +1002,7 @@ mod imp {
         if app.get_webview_window(SHIELD_LABEL).is_none() {
             let win = WebviewWindowBuilder::new(app, SHIELD_LABEL, WebviewUrl::default())
                 .scroll_bar_style(crate::webview_policy::scroll_bar_style())
-                .title("MyAgents Floating Shield")
+                .title("LSAGENT Floating Shield")
                 .inner_size(1.0, 1.0)
                 .resizable(false)
                 .decorations(false)
@@ -1021,7 +1021,7 @@ mod imp {
         if app.get_webview_window(COMPANION_LABEL).is_none() {
             let win = WebviewWindowBuilder::new(app, COMPANION_LABEL, WebviewUrl::default())
                 .scroll_bar_style(crate::webview_policy::scroll_bar_style())
-                .title("MyAgents Companion")
+                .title("LSAGENT Companion")
                 .inner_size(COMPANION_W, COMPANION_H)
                 .resizable(false) // JS-driven resize via cmd_fb_set_companion_size
                 .decorations(false)
@@ -1461,7 +1461,7 @@ mod imp {
         );
         // 渐隐到 0 后由 fade task 收尾 orderOut（hide_when_done）。
         // hide()/orderOut is sufficient for pure nonactivating panels. Pin now
-        // activates MyAgents so IME/text services attach to WKWebView, so the
+        // activates LSAGENT so IME/text services attach to WKWebView, so the
         // fade-out completion explicitly yields activation back to the app that
         // was frontmost before pin. (Do NOT call resign_key_window directly;
         // AppKit docs reserve it as a system callback.)
@@ -1565,7 +1565,7 @@ mod imp {
         match active_win_pos_rs::get_active_window() {
             // Clicking the ball can make OUR panel the "active window" in the
             // CGWindow sense even though the app never activates — the user
-            // saw "正在看 MyAgents — MyAgents Ball" in the title row. Filter
+            // saw "正在看 LSAGENT — LSAGENT Ball" in the title row. Filter
             // out our own process and fall back to NSWorkspace's frontmost
             // application (which nonactivating panels never become).
             Ok(win) if win.process_id != std::process::id() as u64 => FrontmostInfo {
@@ -1647,7 +1647,7 @@ mod imp {
         let app = ws.frontmostApplication()?;
         let name = app.localizedName()?;
         let name = name.to_string();
-        if name.is_empty() || name == "MyAgents" {
+        if name.is_empty() || name == "LSAGENT" {
             None
         } else {
             Some(name)
@@ -2142,7 +2142,7 @@ mod imp {
         if app.get_webview_window(BALL_LABEL).is_none() {
             let win = WebviewWindowBuilder::new(app, BALL_LABEL, WebviewUrl::default())
                 .scroll_bar_style(crate::webview_policy::scroll_bar_style())
-                .title("MyAgents Ball")
+                .title("LSAGENT Ball")
                 .inner_size(BALL_WIN, BALL_WIN)
                 .resizable(false)
                 .decorations(false)
@@ -2167,7 +2167,7 @@ mod imp {
         if app.get_webview_window(COMPANION_LABEL).is_none() {
             let win = WebviewWindowBuilder::new(app, COMPANION_LABEL, WebviewUrl::default())
                 .scroll_bar_style(crate::webview_policy::scroll_bar_style())
-                .title("MyAgents Companion")
+                .title("LSAGENT Companion")
                 .inner_size(COMPANION_W, COMPANION_H)
                 .resizable(false)
                 .decorations(false)
@@ -2778,7 +2778,7 @@ mod imp {
             let name = PathBuf::from(os)
                 .file_stem()
                 .map(|s| s.to_string_lossy().to_string());
-            name.filter(|s| !s.is_empty() && s != "MyAgents")
+            name.filter(|s| !s.is_empty() && s != "LSAGENT")
         }
     }
 

@@ -7,11 +7,11 @@ import {
   accountErrorMessage,
 } from "@/api/accountCloud";
 import { useToast } from "@/components/Toast";
-import { trackAccountAuth } from "@/features/agent-network/accountAnalytics";
+import { trackAccountAuth } from "@/features/account/accountAnalytics";
 const AUTH_POLL_DELAY_MS = 3000;
 const AUTH_POLL_TIMEOUT_MS = 10 * 60 * 1000;
 
-/** The official account login flow is shared by Team and Agent Network.
+/** The official account login flow is shared by Team and Space.
  * Consumers decide what to load after login; this hook never boots feature data. */
 export function useMyAgentsLogin(
   isActive: boolean,
@@ -74,7 +74,7 @@ export function useMyAgentsLogin(
           if (cancelled) return;
           if (result.status === "done") {
             stopAuth();
-            toast.success(t("agentNetwork.login.success"));
+            toast.success(t("accountLogin.success"));
             await onAuthenticated();
             trackAccountAuth("success", true);
             void accountAuthAck(authFlow.token).catch((error) => {
@@ -87,7 +87,7 @@ export function useMyAgentsLogin(
           }
           if (result.status === "failed") {
             stopAuth();
-            toast.error(String(result.error ?? t("agentNetwork.login.failed")));
+            toast.error(String(result.error ?? t("accountLogin.failed")));
             trackAccountAuth("failure", false, result.error ?? "failed");
             void accountAuthAck(authFlow.token).catch((error) => {
               console.warn(
@@ -104,7 +104,7 @@ export function useMyAgentsLogin(
             Date.now() < authFlow.expiresAt
           ) {
             authPollWarningShownRef.current = true;
-            toast.warning(t("agentNetwork.login.slow"));
+            toast.warning(t("accountLogin.slow"));
           }
         }
         const elapsed = Date.now() - startedAt;
@@ -113,7 +113,7 @@ export function useMyAgentsLogin(
 
       if (!cancelled) {
         stopAuth();
-        toast.error(t("agentNetwork.login.timeout"));
+        toast.error(t("accountLogin.timeout"));
         trackAccountAuth("failure", false, "timeout");
       }
     };
@@ -150,7 +150,7 @@ export function useMyAgentsLogin(
         expiresAt:
           Date.now() + Math.min(serverExpiresInMs, AUTH_POLL_TIMEOUT_MS),
       });
-      toast.info(t("agentNetwork.login.browserOpened"));
+      toast.info(t("accountLogin.browserOpened"));
     } catch (error) {
       setAuthBusy(false);
       trackAccountAuth("failure", false, error);

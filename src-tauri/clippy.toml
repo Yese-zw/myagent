@@ -1,4 +1,4 @@
-# MyAgents Rust lint policy
+# LSAGENT Rust lint policy
 #
 # Pit-of-success rule: ALL async tasks created in src-tauri MUST use
 # `tauri::async_runtime::spawn`. Calling `tokio::spawn` directly works in most

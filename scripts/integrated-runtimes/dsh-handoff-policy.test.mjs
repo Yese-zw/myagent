@@ -346,7 +346,7 @@ test("resource permissions never follow a link outside the staging copy", {
 
 test("Dev freshness binds the bundled Runtime to one clean source commit", () => {
   withTemporaryDirectory((root) => {
-    const sourceRoot = resolve(root, "MyAgents-dsh");
+    const sourceRoot = resolve(root, "LSAGENT-dsh");
     const runtimeRoot = resolve(root, "runtime");
     mkdirSync(sourceRoot, { recursive: true });
     mkdirSync(resolve(runtimeRoot, "runtime-artifact"), { recursive: true });

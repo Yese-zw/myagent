@@ -76,15 +76,15 @@ describe('general request proxy decision', () => {
 });
 
 describe('provider-owned proxy decision', () => {
-  it('does not use MyAgents proxy when disabled', () => {
+  it('does not use LSAGENT proxy when disabled', () => {
     expect(shouldUseMyAgentsProxyForProvider(proxy(undefined, false), 'deepseek')).toBe(false);
   });
 
-  it('uses MyAgents proxy for all providers by default', () => {
+  it('uses LSAGENT proxy for all providers by default', () => {
     expect(shouldUseMyAgentsProxyForProvider(proxy(), 'deepseek')).toBe(true);
   });
 
-  it('uses MyAgents proxy only for selected custom providers', () => {
+  it('uses LSAGENT proxy only for selected custom providers', () => {
     const settings = proxy({ mode: 'custom', providerIds: ['anthropic-sub'] });
     expect(shouldUseMyAgentsProxyForProvider(settings, 'anthropic-sub')).toBe(true);
     expect(shouldUseMyAgentsProxyForProvider(settings, 'deepseek')).toBe(false);

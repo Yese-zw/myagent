@@ -168,6 +168,37 @@ describe('NotificationCenterFlyout', () => {
     expect(unreadItem.querySelector('svg')).not.toBeInTheDocument();
   });
 
+  it('opens a sub2api announcement in place and marks it read', async () => {
+    const onMarkSub2apiRead = vi.fn(async () => undefined);
+    const onClose = vi.fn();
+    renderFlyout({
+      onClose,
+      onMarkSub2apiRead,
+      snapshot: snapshot({
+        items: [{
+          id: 'sub2api-announcement:8',
+          kind: 'sub2api_announcement',
+          announcementId: 8,
+          createdAt: '2026-10-21T12:00:00.000Z',
+          isRead: false,
+          title: '维护公告',
+          content: '今晚 **升级** 网关。',
+          excerpt: '今晚 升级 网关。',
+        }],
+        feedCutoff: null,
+        hasUnread: true,
+      }),
+    });
+
+    expect(screen.getByRole('button', { name: String(i18n.t('app:notificationCenter.markAllRead')) })).toBeEnabled();
+    fireEvent.click(screen.getByRole('button', { name: /维护公告/ }));
+    expect(await screen.findByText(/升级/)).toBeInTheDocument();
+    expect(onMarkSub2apiRead).toHaveBeenCalledWith(8);
+    expect(onClose).not.toHaveBeenCalled();
+    expect(mocks.invoke).not.toHaveBeenCalled();
+    expect(screen.queryByRole('button', { name: String(i18n.t('app:notificationCenter.markAllRead')) })).not.toBeInTheDocument();
+  });
+
   it('marks all read against the loaded feed cutoff without activating a row', async () => {
     const onMarkAllRead = vi.fn(async () => undefined);
     renderFlyout({ onMarkAllRead });

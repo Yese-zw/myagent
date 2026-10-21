@@ -284,7 +284,7 @@ function configurePreparation(options) {
       ? appleSigningIdentity || 'adhoc-development-build'
       : targetLock.platform === 'windows'
         ? windowsCertificateSha1?.toLowerCase() || 'development-build'
-        : 'MyAgents-resource-manifest-v1';
+        : 'LSAGENT-resource-manifest-v1';
   buildFingerprint = computeBuildFingerprint({
     projectRoot,
     metadata: {
@@ -783,7 +783,7 @@ export async function prepareSpeechInference(options, documentResult) {
       (path) =>
         basename(path) ===
         `${targetLock.platform === 'windows' ? '' : 'lib'}myagents-speech-adapter${sharedLibraryExtension}`,
-      'MyAgents speech adapter shared library',
+      'LSAGENT speech adapter shared library',
     );
 
     execFileSync(
@@ -933,14 +933,14 @@ export async function prepareSpeechInference(options, documentResult) {
       mediaWorker: nativeFile(
         workerDestination,
         'AGPL-3.0-only',
-        `MyAgents/${appVersion}`,
-        'current MyAgents source tree',
+        `LSAGENT/${appVersion}`,
+        'current LSAGENT source tree',
       ),
       adapter: nativeFile(
         adapterDestination,
         'AGPL-3.0-only',
-        `MyAgents/${appVersion}; adapter ABI ${speechLock.adapterAbiVersion}`,
-        'current MyAgents source tree',
+        `LSAGENT/${appVersion}; adapter ABI ${speechLock.adapterAbiVersion}`,
+        'current LSAGENT source tree',
       ),
       sherpaOnnx: nativeFile(
         sherpaDestination,

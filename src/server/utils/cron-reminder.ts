@@ -67,7 +67,7 @@ function activationEventLines(activation: TaskActivationPayload | undefined): st
 
 export function buildCronTaskReminder(input: CronReminderInput): string {
   const lines = [
-    'You are running inside a MyAgents scheduled task execution.',
+    'You are running inside a LSAGENT scheduled task execution.',
     'The user-visible text after this reminder is the task prompt for this execution.',
     '',
     ...[
@@ -95,7 +95,7 @@ export function buildCronTaskReminder(input: CronReminderInput): string {
   if (input.aiCanExit) {
     lines.push(
       '',
-      'If this MyAgents scheduled task goal is complete and future executions should stop, run:',
+      'If this LSAGENT scheduled task goal is complete and future executions should stop, run:',
       '  myagents task exit --reason "<brief reason>"',
       '',
       'The command is bound to the current cron execution context; do not pass a task id.',

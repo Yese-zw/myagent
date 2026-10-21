@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { INTERNAL_CLI_TOKEN_ENV, INTERNAL_CLI_TOKEN_HEADER } from '../../shared/externalCliCapabilities';
-import type { NetworkReturnReference } from '../../shared/agentNetworkReturn';
+import type { NetworkReturnReference } from '../inbox/types';
 import {
   clearPendingSessionWatchesForTest,
   listPendingSessionWatches,
@@ -93,36 +93,17 @@ describe('composed Session watch owner routes', () => {
     expect(mocks.engine.getLiveSessionState).not.toHaveBeenCalled();
   });
 
-  it.each(['session', 'development-union'] as const)('%s cleans the exact network reference and permits rewatch of the same turn', async role => {
+  it.each(['session', 'development-union'] as const)('%s rejects AgentNet watch register and cleanup', async role => {
     const { dispatch } = composed(role);
-    const register = (watchId: string, networkReturn: NetworkReturnReference) => dispatch(post('/api/session-watch/register', {
-      watchId, watcherSessionId: 'caller', targetSessionId: 'target', observerScope: 'device-1', networkReturn,
+    const register = await dispatch(post('/api/session-watch/register', {
+      watchId: 'original', watcherSessionId: 'caller', targetSessionId: 'target', observerScope: 'device-1', networkReturn: reference,
     }));
-    expect(await (await register('original', reference)).json()).toMatchObject({ accepted: true, watchId: 'original', coalesced: false });
-    expect(await (await register('duplicate', replacement)).json()).toMatchObject({ watchId: 'original', coalesced: true });
-    const remove = (watchId: string, networkReturn: NetworkReturnReference) => dispatch(post('/api/session-watch/network-remove', {
-      watchId, targetSessionId: 'target', networkReturn,
+    expect(register.status).toBe(400);
+    const remove = await dispatch(post('/api/session-watch/network-remove', {
+      watchId: 'original', targetSessionId: 'target', networkReturn: reference,
     }));
-    for (const wrong of [replacement, { ...reference, opId: replacement.opId }, { ...reference, returnRouteId: replacement.returnRouteId }]) {
-      const response = await remove('original', wrong);
-      expect(response.status).toBe(200);
-      expect(await response.json()).toEqual({ accepted: true, removed: false });
-    }
-    expect(await (await remove('original', reference)).json()).toEqual({ accepted: true, removed: true });
-    // After the original owner cleanup completes, a new route must not coalesce
-    // with the removed watch, even while the same execution turn is running.
-    expect(await (await register('rewatch', replacement)).json()).toMatchObject({ accepted: true, watchId: 'rewatch', coalesced: false });
-    expect(await (await remove('original', reference)).json()).toEqual({ accepted: true, removed: false });
-    expect(await (await remove('rewatch', reference)).json()).toEqual({ accepted: true, removed: false });
-    expect(listPendingSessionWatches()).toHaveLength(1);
-    expect(listPendingSessionWatches()[0].networkReturn).toEqual(replacement);
-    expect(await (await remove('rewatch', replacement)).json()).toEqual({ accepted: true, removed: true });
-    // A reused ID is protected by the exact original operation and route too.
-    expect(await (await register('original', replacement)).json()).toMatchObject({ accepted: true, coalesced: false });
-    expect(await (await remove('original', reference)).json()).toEqual({ accepted: true, removed: false });
-    expect(listPendingSessionWatches()[0].networkReturn).toEqual(replacement);
-    pending('local', 'caller');
-    expect(await (await remove('local', reference)).json()).toEqual({ accepted: true, removed: false });
+    expect(remove.status).toBe(400);
+    expect(await remove.json()).toEqual({ accepted: false });
   });
 
   it.each(['/api/session-watch/manage', '/api/session-watch/network-remove'])('%s requires original owner and internal credentials', async path => {

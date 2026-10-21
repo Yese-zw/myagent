@@ -1,6 +1,6 @@
 # Integrated DSH 接入架构
 
-> 本文描述当前客户端如何接入 MyAgents-dsh：进程与数据 owner、协议准入、配置、交互、历史恢复和联合 mutation。安装版本、方法、字段及能力以 Release 选择、effective lock、生成契约和实现为准；发布记录与验收流水账不属于本文。
+> 本文描述当前客户端如何接入 LSAGENT-dsh：进程与数据 owner、协议准入、配置、交互、历史恢复和联合 mutation。安装版本、方法、字段及能力以 Release 选择、effective lock、生成契约和实现为准；发布记录与验收流水账不属于本文。
 
 ## 1. 职责与进程
 

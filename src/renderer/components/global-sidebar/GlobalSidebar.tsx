@@ -2,7 +2,6 @@ import { selectUsableAgentWorkspaceRecords } from '../../../shared/agentWorkspac
 import { isImeComposingEvent } from '@/utils/imeKeyboard';
 import {
   AlertIcon,
-  RadioIcon,
   CheckIcon,
   ChevronDownIcon,
   EyeIcon,
@@ -42,6 +41,7 @@ import { MyAgentsLogotype } from '@/components/brand/MyAgentsLogotype';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import FeedbackPopover from '@/components/FeedbackPopover';
 import Sub2apiAccountEntry from '@/features/account/Sub2apiAccountEntry';
+import Sub2apiBalanceCard from '@/features/account/Sub2apiBalanceCard';
 import { SidebarResizeHandle } from './SidebarResizeHandle';
 import { APP_SHELL_POPOVER_CHROME } from '@/components/global-sidebar/appShellPopoverChrome';
 import OverlayBackdrop from '@/components/OverlayBackdrop';
@@ -127,7 +127,7 @@ const AUTO_RAIL_QUERY = '(max-width: 1080px)';
 const EMPTY_TAGS: SessionTag[] = [];
 const SIDEBAR_TRANSITION_MS = 200;
 const WORKSPACE_BRANCH_TRANSITION_MS = 200;
-const MYAGENTS_WEBSITE_URL = 'https://myagents.io';
+const MYAGENTS_WEBSITE_URL = 'https://lingsiai.vip';
 const FLYOUT_FOCUS_ENTRY_SELECTOR = [
   'button:not([disabled])',
   'a[href]',
@@ -180,7 +180,8 @@ interface GlobalSidebarProps {
   onOpenTaskCenter: () => void;
   onCreateTask: () => void;
   onOpenAccount?: () => void;
-  onOpenAgentNetwork?: () => void;
+  onOpenRecharge?: () => void;
+  onOpenInvite?: () => void;
   onOpenAppRoute?: (route: AppRoute) => Promise<boolean> | boolean;
   onOpenCapabilities: (section?: CapabilitySection) => void;
   onOpenSettings: (section: 'general' | 'agent') => void;
@@ -464,7 +465,8 @@ export default memo(function GlobalSidebar({
   onOpenTaskCenter,
   onCreateTask,
   onOpenAccount,
-  onOpenAgentNetwork,
+  onOpenRecharge,
+  onOpenInvite,
   onOpenAppRoute,
   onOpenCapabilities,
   onOpenSettings,
@@ -1179,7 +1181,7 @@ export default memo(function GlobalSidebar({
               aria-hidden={!expanded}
               data-global-sidebar-brand-name
             >
-              <MyAgentsLogotype variant="compact" className="global-sidebar-brand-logotype" title="MyAgents" />
+              <MyAgentsLogotype variant="compact" className="global-sidebar-brand-logotype" title="LSAGENT" />
             </span>
           </button>
           {searchAvailable && (
@@ -1251,14 +1253,6 @@ export default memo(function GlobalSidebar({
             icon={<CapabilitiesIcon className="h-4 w-4" />}
             label={t('globalSidebar.capabilities')}
             onClick={() => onOpenCapabilities()}
-          />
-          <SidebarNavButton
-            expanded={expanded}
-            active={activeView === 'agentnetwork'}
-            disabled={!onOpenAgentNetwork}
-            icon={<RadioIcon className="h-4 w-4" />}
-            label={t('globalSidebar.agentNetwork')}
-            onClick={() => onOpenAgentNetwork?.()}
           />
           <SidebarMore key={activeView ?? 'launcher'} expanded={expanded} activeView={activeView}
             onBot={() => onOpenSettings('agent')} />
@@ -1334,6 +1328,7 @@ export default memo(function GlobalSidebar({
           className={`shrink-0 pb-2 ${expanded ? 'pl-3 pr-[var(--global-sidebar-action-inset)] pt-0' : 'global-sidebar-rail-stack pt-3'}`}
           data-global-sidebar-footer-actions
         >
+          {onOpenRecharge && <Sub2apiBalanceCard expanded={expanded} onRecharge={onOpenRecharge} onInvite={onOpenInvite} />}
           <div
             ref={feedbackTriggerRef}
             className={`-mr-3 pr-3 ${expanded ? '' : 'flex justify-center'}`}
@@ -1448,6 +1443,7 @@ export default memo(function GlobalSidebar({
             onRefresh={notificationCenter.refresh}
             onLoadMore={notificationCenter.loadMore}
             onMarkAllRead={notificationCenter.markAllRead}
+            onMarkSub2apiRead={notificationCenter.markSub2apiRead}
             onOpenAppRoute={onOpenAppRoute ?? (() => false)}
             onClose={() => closeNotificationCenter()}
           />

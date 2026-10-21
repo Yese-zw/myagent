@@ -257,7 +257,7 @@ pub const GLOBAL_SIDECAR_ID: &str = "__global__";
 // This marker is added to all sidecar commands for reliable process identification
 const SIDECAR_MARKER: &str = "--myagents-sidecar";
 const SESSION_DELETE_AUTHORITY_ENV: &str = "MYAGENTS_SESSION_DELETE_AUTHORITY";
-const SESSION_DELETE_AUTHORITY_HEADER: &str = "X-MyAgents-Session-Delete-Authority";
+const SESSION_DELETE_AUTHORITY_HEADER: &str = "X-LSAGENT-Session-Delete-Authority";
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum SidecarProcessRole {
