@@ -26,22 +26,6 @@ const announcement = {
   target: { kind: 'external_url' as const, url: 'http://example.com/detail' },
 };
 
-const comment = {
-  id: 'notice-2',
-  kind: 'space_issue_comment' as const,
-  createdAt: '2026-08-16T08:01:00.000Z',
-  isRead: false,
-  commentId: 'comment-1',
-  actor: { type: 'user' as const, id: 'user-2', displayName: 'Ethan' },
-  spaceId: 'space-1',
-  issue: { id: 'issue-7', number: 7, title: '通知链路' },
-  excerpt: '我补充了一条评论',
-  target: {
-    kind: 'app_route' as const,
-    route: { version: 1 as const, name: 'space.issue' as const, params: { spaceId: 'space-1', issueId: 'issue-7' } },
-  },
-};
-
 const taskComment = {
   id: 'task-comment:comment-9',
   kind: 'task_agent_comment' as const,
@@ -62,11 +46,11 @@ function snapshot(overrides: Partial<NotificationSnapshot> = {}): NotificationSn
   return {
     loadState: 'ready',
     authState: 'authenticated',
-    items: [announcement, comment],
+    items: [announcement],
     hasUnread: true,
     hasMore: false,
     isLoadingMore: false,
-    feedCutoff: { createdAt: comment.createdAt, id: comment.id },
+    feedCutoff: { createdAt: announcement.createdAt, id: announcement.id },
     lastSyncedAt: '2026-08-16T08:02:00.000Z',
     errorCode: null,
     ...overrides,
@@ -133,16 +117,6 @@ describe('NotificationCenterFlyout', () => {
     expect(props.onClose).not.toHaveBeenCalled();
     fireEvent.click(copy);
     expect(mocks.copy).toHaveBeenCalledWith(announcement.target.url);
-  });
-
-  it('opens the exact Space issue route after recording the click-read', async () => {
-    mocks.invoke.mockResolvedValueOnce({ notificationId: comment.id, target: comment.target });
-    const onOpenAppRoute = vi.fn(async () => true);
-    const { props } = renderFlyout({ onOpenAppRoute });
-
-    fireEvent.click(screen.getByRole('button', { name: /Ethan/ }));
-    await waitFor(() => expect(onOpenAppRoute).toHaveBeenCalledWith(comment.target.route));
-    expect(props.onClose).toHaveBeenCalledOnce();
   });
 
   it('renders a local Agent task comment and opens its exact typed route', async () => {

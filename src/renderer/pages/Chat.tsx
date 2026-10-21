@@ -6753,11 +6753,7 @@ export default function Chat({
                         ? runtimeModel
                         : selectedModel
               }
-              onBuiltinModelSelect={
-                inputUsesExternalRuntimeControls
-                  ? undefined
-                  : handleBuiltinModelSelect
-              }
+              onBuiltinModelSelect={handleBuiltinModelSelect}
               onModelChange={
                 inputUsesExternalRuntimeControls
                   ? handleRuntimeModelChange

@@ -1,4 +1,5 @@
 import { ANTIGRAVITY_SUBSCRIPTION_PROVIDER_ID, CODEX_SUBSCRIPTION_PROVIDER_ID, type Provider } from './config-types';
+import { MYAGENTS_PROVIDER_ID } from './packaged-gateway';
 import {
   getProviderExecutionConstraint,
   isDshModelSelectable,
@@ -21,6 +22,7 @@ export function projectProvidersForRuntime(
 ): Provider[] {
   if (runtime !== 'dsh') return [...providers];
   return providers.flatMap((provider) => {
+    if (provider.id === MYAGENTS_PROVIDER_ID) return [provider];
     // Managed Provider Runtimes remain first-class choices in the Product
     // picker. Selecting one crosses a Session boundary and never asks DSH to
     // execute the provider/model pair itself.
@@ -36,6 +38,7 @@ export function isProviderModelCompatibleWithRuntime(
   provider: Provider | undefined,
   model: string | undefined,
 ): boolean {
+  if (provider?.id === MYAGENTS_PROVIDER_ID) return true;
   if (runtime !== 'dsh') return true;
   if (isRuntimeBackedProviderId(provider?.id)) return !!model;
   return !!provider && isDshModelSelectable(provider, model);

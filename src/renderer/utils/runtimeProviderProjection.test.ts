@@ -68,4 +68,12 @@ describe('runtime Provider projection', () => {
     expect(projectProvidersForRuntime([managedCodex], 'dsh')).toEqual([managedCodex]);
     expect(isProviderModelCompatibleWithRuntime('dsh', managedCodex, 'gpt-5.4-codex')).toBe(true);
   });
+
+  it('keeps the packaged gateway catalog on every runtime', () => {
+    const gateway = provider('myagents', 'claude-sonnet', ['claude-sonnet', 'gpt-5.4']);
+    expect(projectProvidersForRuntime([gateway], 'dsh')).toEqual([gateway]);
+    expect(projectProvidersForRuntime([gateway], 'codex')).toEqual([gateway]);
+    expect(isProviderModelCompatibleWithRuntime('codex', gateway, 'claude-sonnet')).toBe(true);
+    expect(isProviderModelCompatibleWithRuntime('dsh', gateway, 'gpt-5.4')).toBe(true);
+  });
 });

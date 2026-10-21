@@ -164,20 +164,13 @@ export default function NotificationCenterFlyout({
               const failed = activationError?.id === item.id;
               const headline = item.kind === 'announcement'
                 ? localizedAnnouncement(item, i18n.language)
-                : item.kind === 'task_agent_comment'
-                  ? t('notificationCenter.taskCommentHeadline', {
-                    actor: item.agent.displayName,
-                    task: item.taskName,
-                  })
-                  : t('notificationCenter.commentHeadline', {
-                    actor: item.actor.displayName,
-                    issue: item.issue.number ? `#${item.issue.number} ${item.issue.title}` : item.issue.title,
-                  });
-              const detail = item.kind === 'space_issue_comment'
-                ? (item.excerpt?.trim() || t('notificationCenter.attachmentOnly'))
-                : item.kind === 'task_agent_comment'
-                  ? item.excerpt
-                  : null;
+                : t('notificationCenter.taskCommentHeadline', {
+                  actor: item.agent.displayName,
+                  task: item.taskName,
+                });
+              const detail = item.kind === 'task_agent_comment'
+                ? item.excerpt
+                : null;
               return (
                 <article key={item.id} aria-label={item.isRead ? t('notificationCenter.read') : t('notificationCenter.unread')}>
                   <button

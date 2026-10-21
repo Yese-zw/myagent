@@ -1,6 +1,7 @@
-//! Identity activation is serialized by App scope. OS persistence precedes
-//! issuer activation; the issuer's public state plus new-key PoP recovers a
-//! lost activation ACK without replaying activation or storing a second pointer.
+//! Identity activation is serialized by App scope. Local file persistence
+//! precedes issuer activation; the issuer's public state plus new-key PoP
+//! recovers a lost activation ACK without replaying activation or storing a
+//! second pointer.
 use super::account::NetworkAccountSession;
 use super::crypto::{
     certificate_chain, certificate_fingerprint, CryptoError, DevicePrivateKey, KeyScope,

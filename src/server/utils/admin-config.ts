@@ -88,6 +88,8 @@ import {
   runtimeSourceForBinding,
   runtimeTypeForBinding,
 } from '../../shared/integrated-runtimes/identity';
+import { buildPackagedGatewayProvider, MYAGENTS_PROVIDER_ID, withoutPackagedGatewayDisabled } from '../../shared/packaged-gateway';
+import { readPackagedGatewayApiKey } from './packaged-gateway-credential';
 
 // ---------------------------------------------------------------------------
 // Paths
@@ -1071,9 +1073,16 @@ export function getAllEffectiveProviders(
   // consume that same catalog instead of maintaining a second provider list,
   // otherwise a valid `agent set ... providerId codex-sub` is rejected while
   // the in-app picker accepts it.
-  const providerConfig = c as unknown as AppConfig;
+  const providerConfig = withoutPackagedGatewayDisabled(c as unknown as AppConfig);
+  const packaged = buildPackagedGatewayProvider(
+    providerConfig.presetCustomModels?.[MYAGENTS_PROVIDER_ID] ?? [],
+  );
   const providersWithManagedCodex = withManagedCodexProviderCatalog(
-    [...presetProviders, ...customProviders] as unknown as Provider[],
+    [
+      packaged,
+      ...presetProviders.filter(provider => provider.id !== MYAGENTS_PROVIDER_ID),
+      ...customProviders.filter(provider => provider.id !== MYAGENTS_PROVIDER_ID),
+    ] as unknown as Provider[],
     providerConfig,
     runtimeModels,
   );
@@ -1290,7 +1299,8 @@ export function resolveProviderEnv(
   // 401 instead of an actionable "no API key" error.
   const apiKey = isManagedOauth
     ? undefined
-    : (c.providerApiKeys ?? {})[providerId];
+    : (c.providerApiKeys ?? {})[providerId]?.trim()
+      || (providerId === MYAGENTS_PROVIDER_ID ? readPackagedGatewayApiKey() : undefined);
   if (!isManagedOauth && (!apiKey || !apiKey.trim())) return undefined;
 
   // Extract provider config fields (same shape as frontend Chat.tsx builds)

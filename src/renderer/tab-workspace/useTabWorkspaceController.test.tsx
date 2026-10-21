@@ -61,8 +61,8 @@ describe('useTabWorkspaceController', () => {
     const before = hook.result.current.controller.getSnapshot();
     let outcome = '';
     act(() => {
-      outcome = hook.result.current.controller.open('space', {
-        title: 'Space',
+      outcome = hook.result.current.controller.open('account', {
+        title: 'Account',
       }).kind;
     });
     expect(outcome).toBe('rejected');
@@ -172,14 +172,14 @@ describe('useTabWorkspaceController', () => {
         { mount: 'deferred-content', activate: false },
       );
       hook.result.current.controller.append(
-        { id: 'space-1', view: 'space', title: 'Space' },
+        { id: 'account-1', view: 'account', title: 'Account' },
         { mount: 'immediate', activate: false },
       );
-      hook.result.current.controller.reorder('space-1', 'launcher-1');
+      hook.result.current.controller.reorder('account-1', 'launcher-1');
     });
 
     expect(hook.result.current.state.tabs.map((tab) => tab.id)).toEqual([
-      'space-1',
+      'account-1',
       'launcher-1',
       'settings-1',
     ]);
@@ -188,14 +188,14 @@ describe('useTabWorkspaceController', () => {
 
     act(() => {
       hook.result.current.controller.reveal('settings-1');
-      hook.result.current.controller.focus('space-1');
+      hook.result.current.controller.focus('account-1');
     });
-    const spaceCapture = hook.result.current.controller.capture('space-1')!;
+    const accountCapture = hook.result.current.controller.capture('account-1')!;
     const settingsCapture = hook.result.current.controller.capture('settings-1')!;
     act(() => {
       expect(
         hook.result.current.controller.removeMany(
-          [{ captured: spaceCapture }, { captured: settingsCapture }],
+          [{ captured: accountCapture }, { captured: settingsCapture }],
           () => ({ id: 'fallback', view: 'launcher', title: 'New Tab' }),
           'launcher-1',
         ),

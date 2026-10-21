@@ -4,12 +4,11 @@ import { join } from '@tauri-apps/api/path';
 
 import type { Provider, ProviderVerifyStatus, AppConfig, Project } from '../types';
 import {
-    PRESET_PROVIDERS,
     applyManagedCodexProviderReadiness,
     applyProviderEnablementAndOrder,
     isProviderEnabled,
-    withManagedCodexProviderCatalog,
 } from '../types';
+import { buildPackagedGatewayProvider, MYAGENTS_PROVIDER_ID, withoutPackagedGatewayDisabled } from '../../../shared/packaged-gateway';
 import type { AgentConfig } from '../../../shared/types/agent';
 import {
     isRuntimeBackedProvider,
@@ -154,12 +153,8 @@ export async function loadCustomProviders(): Promise<Provider[]> {
 
 export async function getAllProviders(config?: AppConfig): Promise<Provider[]> {
     const effectiveConfig = config ?? await loadAppConfig();
-    if (isBrowserDevMode()) {
-        return withManagedCodexProviderCatalog(PRESET_PROVIDERS, effectiveConfig);
-    }
-
-    const customProviders = await loadCustomProviders();
-    return withManagedCodexProviderCatalog([...PRESET_PROVIDERS, ...customProviders], effectiveConfig);
+    const models = effectiveConfig.presetCustomModels?.[MYAGENTS_PROVIDER_ID] ?? [];
+    return [buildPackagedGatewayProvider(models)];
 }
 
 export async function saveCustomProvider(provider: Provider): Promise<void> {
@@ -294,7 +289,7 @@ export async function rebuildAndPersistAvailableProviders(): Promise<void> {
                     config.presetCustomModels,
                     config.presetRemovedModels as Record<string, string[]> | undefined,
                 ),
-                config,
+                withoutPackagedGatewayDisabled(config),
             ),
             config,
         );

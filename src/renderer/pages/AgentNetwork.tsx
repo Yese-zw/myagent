@@ -8,10 +8,10 @@ import {
 import { useTranslation } from "react-i18next";
 import { metadataSchemas } from "@myagents/agent-network-protocol";
 import {
-  spaceGetSession,
-  spaceLogout,
-  type SpaceSessionView,
-} from "@/api/spaceCloud";
+  accountGetSession,
+  accountLogout,
+  type AccountSessionView,
+} from "@/api/accountCloud";
 import {
   allDeviceAgents,
   allNetworkDevices,
@@ -22,7 +22,7 @@ import {
   type NetworkSnapshot,
 } from "@/api/agentNetwork";
 import { useMyAgentsLogin } from "@/hooks/useMyAgentsLogin";
-import { SpaceLogin } from "@/pages/space/SpaceChrome";
+import { NetworkLogin } from "@/features/agent-network/NetworkLogin";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { getDeviceId, preloadDeviceId } from "@/identity/deviceIdentity";
 import { useToastOptional } from "@/components/Toast";
@@ -84,7 +84,7 @@ function AgentNetworkContent({
     (request: NetworkRequest) => requestNetwork(request, connectionId),
     [connectionId],
   );
-  const [session, setSession] = useState<SpaceSessionView | null>(null),
+  const [session, setSession] = useState<AccountSessionView | null>(null),
     [authLoading, setAuthLoading] = useState(true);
   const [accountError, setAccountError] = useState<string | null>(null);
   const [devices, setDevices] = useState<NetworkDevice[]>([]),
@@ -125,7 +125,7 @@ function AgentNetworkContent({
     setAuthLoading(true);
     setAccountError(null);
     try {
-      const result = await spaceGetSession();
+      const result = await accountGetSession();
       if (generation !== networkGeneration(connectionId)) return;
       setSession(result);
       await preloadDeviceId();
@@ -354,7 +354,7 @@ function AgentNetworkContent({
         : null;
     return (
       <NetworkPage selector={selector} gated>
-        <SpaceLogin
+        <NetworkLogin
           authBusy={authBusy}
           authFlow={authFlow}
           onLogin={() => {
@@ -363,7 +363,7 @@ function AgentNetworkContent({
           reauthRequired={session?.state === "reauth_required"}
           accountName={accountName}
           onForgetAccount={() => {
-            void spaceLogout().then(reloadAccount);
+            void accountLogout().then(reloadAccount);
           }}
         />
       </NetworkPage>

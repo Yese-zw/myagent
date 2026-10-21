@@ -8,10 +8,13 @@ import { createPortal } from 'react-dom';
 /**
  * OverlayBackdrop — Pit-of-success backdrop for all overlay/modal components.
  *
- * Encapsulates the correct dismissal behavior (onMouseDown + e.target === e.currentTarget)
+ * Encapsulates the correct dismissal behavior (onMouseDown on the dimmer only)
  * so individual overlay components cannot get it wrong. Using onClick on a backdrop is a
  * common bug: text selection that starts inside the panel and ends outside triggers a
  * click on the backdrop, closing the overlay unexpectedly.
+ *
+ * The dimmer is a sibling behind the panel, not a parent. WKWebView does not
+ * deliver keyboard events to inputs that are descendants of `backdrop-filter`.
  *
  * Usage:
  *   <OverlayBackdrop onClose={handleClose} className="z-[200]">
@@ -50,11 +53,19 @@ const OverlayBackdrop = forwardRef<HTMLDivElement, OverlayBackdropProps>(functio
   const backdrop = (
     <div
       ref={ref}
-      className={`fixed inset-0 flex items-center justify-center ${bg} backdrop-blur-sm ${className}`}
+      data-overlay-backdrop
+      data-suppress-browser
+      className={`fixed inset-0 flex items-center justify-center ${className}`}
       style={style}
-      onMouseDown={onClose ? (e) => { if (e.target === e.currentTarget) onClose(); } : undefined}
     >
-      {children}
+      <div
+        aria-hidden="true"
+        className={`absolute inset-0 ${bg} backdrop-blur-sm`}
+        onMouseDown={onClose}
+      />
+      <div className="relative z-10 max-h-full max-w-full">
+        {children}
+      </div>
     </div>
   );
   return portal && typeof document !== 'undefined'

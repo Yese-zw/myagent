@@ -169,45 +169,20 @@ Feature usage:
 - `task_center_open`
 - `bug_report_submit`
 
-MyAgents Space:
+MyAgents 账号:
 
-- `space_open`
-- `space_auth_start`
-- `space_auth_complete`
-- `space_switch`
-- `space_issue_mutation`
-- `space_goal_mutation`
-- `space_skill_mutation`
-- `space_tool_mutation`
-- `space_registered_agent_mutation`
-- `space_member_mutation`
-- `space_settings_mutation`
+- `account_auth_start`
+- `account_auth_complete`
 
-Space event dimensions are deliberately allowlisted:
+账号事件维度是白名单：
 
-- `space_kind`: `official`, `team`, `personal`, or `unknown`.
-- `is_official`: boolean derived from `space_kind`.
-- `space_role`: `owner`, `admin`, `member`, or `unknown`.
-- `space_surface`: `home`, `issue_list`, `issue_detail`, `goals`,
-  `skills`, `tools`, `agents`, `members`, `settings`, or `unknown`.
-- `operation`: normalized product operation such as `create`, `update`,
-  `comment`, `state_change`, `install`, `list_load`, `register`, or `revoke`.
+- `operation`: `start`、`success` 或 `failure`。
 - `ok`: boolean success marker.
 - `error_code`: normalized error bucket only; raw error messages are not
   uploaded.
-- `duration_ms`: mutation duration.
 
-Space analytics must not upload user-defined Space names/slugs, raw Issue,
-Goal, Skill, or Agent ids, Issue titles/bodies/comments, member emails, Google
-profile details, or workspace paths. Space business facts are owned by
-MyAgents_space admin APIs; client events only describe desktop usage behavior.
-
-Space Tool 使用 `space_tool_mutation`，稳定字段沿用其它 Space mutation。
-Tools 列表加载结果复用 `space_open`，并固定
-`space_surface=tools`、`operation=list_load`，只记录成功状态、数量和归一化错误。
-自定义安装提示词启动小助理时，Session birth 使用
-`surface=space_tools`、`entry_intent=tool_install`、
-`assistant_entry=space_tool_install`；不得上传 Tool 安装指令或 Space 名称。
+账号埋点只描述桌面端的登录行为，不得上传邮箱、账号名、头像 URL 或任何
+凭据片段。
 
 System events:
 

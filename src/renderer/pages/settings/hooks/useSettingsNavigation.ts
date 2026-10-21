@@ -17,7 +17,7 @@ interface UseSettingsNavigationParams {
 
 export function useSettingsNavigation({
   initialSection,
-  defaultSection = 'providers',
+  defaultSection = 'general',
   navigationNonce,
   floatingBallDevGate,
   onSectionChange,
@@ -30,6 +30,9 @@ export function useSettingsNavigation({
   }, [onSectionChange]);
 
   const getInitialSection = (): SettingsSection => {
+    if (initialSection === 'providers') {
+      return defaultSection;
+    }
     if (initialSection && VALID_SECTIONS.includes(initialSection as SettingsSection)) {
       if (initialSection === 'desktop-pet' && floatingBallDisabled) {
         return 'about';
@@ -49,6 +52,15 @@ export function useSettingsNavigation({
   }, []);
 
   useEffect(() => {
+    if (initialSection === 'providers') {
+      const timer = window.setTimeout(() => {
+        setActiveSection(defaultSection);
+        notifySectionChange();
+      }, 0);
+      return () => {
+        window.clearTimeout(timer);
+      };
+    }
     if (initialSection && VALID_SECTIONS.includes(initialSection as SettingsSection)) {
       const timer = window.setTimeout(() => {
         if (initialSection === 'desktop-pet' && floatingBallDisabled) {
@@ -69,7 +81,7 @@ export function useSettingsNavigation({
         window.clearTimeout(timer);
       };
     }
-  }, [floatingBallDisabled, initialSection, navigationNonce, notifySectionChange]);
+  }, [defaultSection, floatingBallDisabled, initialSection, navigationNonce, notifySectionChange]);
 
   useEffect(() => {
     if (activeSection === 'desktop-pet' && floatingBallDisabled) {

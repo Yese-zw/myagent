@@ -38,8 +38,6 @@ describe('Tab workspace dependency direction', () => {
       'features/capabilities/tabModule.tsx',
       'features/task-center/tabContract.ts',
       'features/task-center/tabModule.tsx',
-      'features/space/tabContract.ts',
-      'features/space/tabModule.tsx',
       'features/record/tabContract.ts',
       'features/record/tabModule.tsx',
       'features/record/tabPersistence.ts',

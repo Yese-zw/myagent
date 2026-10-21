@@ -6,10 +6,10 @@
  * The caller (BrowserPanel) uses this in a combined visibility effect to decide
  * whether to show/hide the native Webview.
  *
- * Modal backdrops are centrally owned per specs/DESIGN.md §5.5. The current
- * DOM detection contract is `backdrop-blur` + `position: fixed`; this
- * distinguishes full-screen overlays (modals, panels) from small fixed
- * elements (toasts, tooltips) which don't use backdrop-blur.
+ * Modal backdrops are centrally owned per specs/DESIGN.md §5.5. Detection
+ * uses `data-overlay-backdrop` / `data-suppress-browser`, then `backdrop-blur`
+ * + `position: fixed` for older overlays. That distinguishes full-screen
+ * overlays from small fixed elements (toasts, tooltips).
  *
  * Also checks `data-suppress-browser` attribute as a manual escape hatch.
  *
@@ -20,8 +20,9 @@
 import { useEffect, useRef, useState } from 'react';
 
 function checkOverlays(): boolean {
-  // Manual escape hatch
-  if (document.querySelector('[data-suppress-browser]')) return true;
+  // Manual escape hatch, including OverlayBackdrop (blur lives on a sibling
+  // so WKWebView can type into the panel; the root still marks the overlay).
+  if (document.querySelector('[data-suppress-browser], [data-overlay-backdrop]')) return true;
 
   // Scan body's direct children for overlay backdrops.
   // Design system convention: overlays use position:fixed + backdrop-blur.

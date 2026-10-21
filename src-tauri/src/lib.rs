@@ -45,6 +45,7 @@ pub mod managed_codex;
 pub mod management_api;
 mod mcp_selection;
 pub mod mcp_startup_admission;
+mod sub2api;
 pub mod tokendance;
 pub use myagents_media_worker_protocol as media_worker_protocol;
 #[cfg(any(windows, test))]
@@ -404,6 +405,7 @@ pub fn run() {
             },
         ))
         .plugin(tauri_plugin_deep_link::init())
+        .plugin(sub2api::captcha_plugin())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_shell::init())
@@ -442,6 +444,7 @@ pub fn run() {
 
     let app = builder
         .manage(sidecar_state)
+        .manage(sub2api::Sub2apiAccount::default())
         .manage(agent_network_state)
         .manage(sse_proxy_state)
         .manage(main_renderer::MainRendererState::default())
@@ -527,6 +530,14 @@ pub fn run() {
             speech_recognition::cmd_speech_model_pack_remove,
             speech_recognition::cmd_speech_record_transcribe,
             grok_auth::cmd_grok_auth_status,
+            sub2api::cmd_sub2api_get_account,
+            sub2api::cmd_sub2api_public_settings,
+            sub2api::cmd_sub2api_authenticate,
+            sub2api::cmd_sub2api_gateway,
+            sub2api::cmd_sub2api_send_code,
+            sub2api::cmd_sub2api_logout,
+            sub2api::cmd_sub2api_cancel,
+            sub2api::cmd_sub2api_account_api,
             grok_auth::cmd_grok_login_start,
             grok_auth::cmd_grok_login_status,
             grok_auth::cmd_grok_login_cancel,

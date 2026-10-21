@@ -896,9 +896,7 @@ export default function Launcher({
   // Navigate to Settings > Providers page
   const handleGoToSettings = useCallback(() => {
     window.dispatchEvent(
-      new CustomEvent(CUSTOM_EVENTS.OPEN_SETTINGS, {
-        detail: { section: 'providers' },
-      }),
+      new Event('sub2api-account:open-login'),
     );
   }, []);
 

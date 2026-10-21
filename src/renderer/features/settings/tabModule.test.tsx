@@ -12,7 +12,7 @@ import { useSettingsNavigation } from '@/pages/settings/hooks/useSettingsNavigat
 vi.mock('@/pages/Settings', () => ({
   default: function Probe(props: Parameters<typeof useSettingsNavigation>[0] & { mode: string }) {
     const { activeSection, setActiveSection } = useSettingsNavigation({
-      ...props, defaultSection: props.mode === 'capabilities' ? 'skills' : 'providers',
+      ...props, defaultSection: props.mode === 'capabilities' ? 'skills' : 'general',
     });
     return <>
       <output data-testid="section">{activeSection}</output>
@@ -49,7 +49,7 @@ function Harness({ kind, initialIntent = true }: { kind: 'settings' | 'capabilit
     <output data-testid="intent">{tab.navigationIntent ? 'pending' : 'none'}</output>
     {tab.view === 'settings'
       ? <SettingsRenderer tab={tab} isActive isDeferred={false} binding={{ ...updater, onNavigationConsumed }} />
-      : <CapabilitiesRenderer tab={tab} isActive isDeferred={false} binding={{ ...updater, onNavigationConsumed, onOpenToolMarket: () => {} }} />}
+      : <CapabilitiesRenderer tab={tab} isActive isDeferred={false} binding={{ ...updater, onNavigationConsumed }} />}
   </>;
 }
 
@@ -62,7 +62,7 @@ async function settleConsumed(generation: number) {
 
 describe.each(['settings', 'capabilities'] as const)('%s navigation intent lifecycle', kind => {
   const target = kind === 'settings' ? 'agent' : 'mcp';
-  const fallback = kind === 'settings' ? 'providers' : 'skills';
+  const fallback = kind === 'settings' ? 'general' : 'skills';
   it('keeps the target after consumption and supports repeat navigation after a manual selection', async () => {
     render(<Harness kind={kind} />);
     await settleConsumed(1);

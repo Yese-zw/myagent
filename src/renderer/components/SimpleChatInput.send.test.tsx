@@ -1079,41 +1079,64 @@ describe('SimpleChatInput send paths', () => {
     }
   });
 
-  it('opens Model Providers from the builtin AgentSDK model menu', async () => {
+  it('does not expose a Model Providers settings entry from the builtin model menu', async () => {
     const user = userEvent.setup();
     const provider = {
-      id: 'codex-sub',
-      name: 'Codex (订阅)',
-      vendor: 'OpenAI',
-      cloudProvider: '模型官方',
-      type: 'subscription',
+      id: 'myagents',
+      name: 'MyAgents',
+      vendor: 'MyAgents',
+      cloudProvider: '官方',
+      type: 'api',
       primaryModel: 'gpt-5.6-sol',
       isBuiltin: true,
       config: {},
       models: [{ model: 'gpt-5.6-sol', modelName: 'GPT-5.6-Sol' }],
     } as Provider;
-    const openSettings = vi.fn();
-    window.addEventListener(CUSTOM_EVENTS.OPEN_SETTINGS, openSettings);
+    renderInput({
+      runtime: 'builtin',
+      provider,
+      providers: [provider],
+      providerAvailable: true,
+      availableProviderIds: ['myagents'],
+      selectedModel: 'gpt-5.6-sol',
+    });
+    await user.click(screen.getByTitle('切换模型'));
+    expect(screen.queryByRole('button', { name: '管理自定义模型服务' })).not.toBeInTheDocument();
+  });
 
-    try {
-      renderInput({
-        runtime: 'builtin',
-        provider,
-        providers: [provider],
-        providerAvailable: true,
-        availableProviderIds: ['codex-sub'],
-        selectedModel: 'gpt-5.6-sol',
-      });
-
-      await user.click(screen.getByTitle('切换模型'));
-      await user.click(screen.getByRole('button', { name: '管理自定义模型服务' }));
-
-      expect(openSettings).toHaveBeenCalledTimes(1);
-      expect((openSettings.mock.calls[0]?.[0] as CustomEvent).detail).toEqual({ section: 'providers' });
-      expect(screen.queryByRole('button', { name: '管理自定义模型服务' })).not.toBeInTheDocument();
-    } finally {
-      window.removeEventListener(CUSTOM_EVENTS.OPEN_SETTINGS, openSettings);
-    }
+  it('keeps the packaged gateway models when the runtime changes', async () => {
+    const user = userEvent.setup();
+    const onBuiltinModelSelect = vi.fn();
+    const provider = {
+      id: 'myagents',
+      name: 'MyAgents',
+      vendor: 'MyAgents',
+      cloudProvider: '官方',
+      type: 'api',
+      primaryModel: 'claude-sonnet',
+      isBuiltin: true,
+      config: {},
+      models: [
+        { model: 'claude-sonnet', modelName: 'Claude Sonnet' },
+        { model: 'gpt-5.4', modelName: 'GPT-5.4' },
+      ],
+    } as Provider;
+    renderInput({
+      runtime: 'codex',
+      runtimeModels: [{ value: 'gpt-5.6-sol', displayName: 'GPT-5.6-Sol', isDefault: true }],
+      provider,
+      providers: [provider],
+      providerAvailable: true,
+      availableProviderIds: ['myagents'],
+      selectedModel: 'claude-sonnet',
+      onBuiltinModelSelect,
+    });
+    await user.click(screen.getByTitle('切换模型'));
+    expect(await screen.findByRole('button', { name: 'GPT-5.4' })).toBeInTheDocument();
+    expect(screen.getAllByText('Claude Sonnet').length).toBeGreaterThan(0);
+    expect(screen.queryByText('GPT-5.6-Sol')).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'GPT-5.4' }));
+    expect(onBuiltinModelSelect).toHaveBeenCalledWith({ providerId: 'myagents', model: 'gpt-5.4' });
   });
 
   it('does not show the custom model service row for user-managed CLI runtimes', async () => {

@@ -21,23 +21,6 @@ export interface AnnouncementNotificationItem {
   target: NotificationTarget;
 }
 
-export interface CommentNotificationItem {
-  id: string;
-  kind: 'space_issue_comment';
-  createdAt: string;
-  isRead: boolean;
-  commentId: string;
-  actor: {
-    type: 'user' | 'registered_agent';
-    id: string;
-    displayName: string;
-  };
-  spaceId: string;
-  issue: { id: string; number: number | null; title: string };
-  excerpt: string | null;
-  target: NotificationTarget;
-}
-
 export interface TaskAgentCommentNotificationItem {
   id: string;
   kind: 'task_agent_comment';
@@ -57,7 +40,6 @@ export interface TaskAgentCommentNotificationItem {
 
 export type NotificationItem =
   | AnnouncementNotificationItem
-  | CommentNotificationItem
   | TaskAgentCommentNotificationItem;
 
 export type NotificationLoadState = 'idle' | 'loading' | 'ready' | 'error' | 'unavailable';

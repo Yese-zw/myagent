@@ -14,7 +14,6 @@ export interface CapabilitiesOpenIntent {
 
 export interface CapabilitiesRenderBinding extends SettingsUpdaterBinding {
   onNavigationConsumed: (tabId: string, generation: number) => void;
-  onOpenToolMarket: () => void;
 }
 
 const CapabilitiesTabRenderer = memo(function CapabilitiesTabRenderer({

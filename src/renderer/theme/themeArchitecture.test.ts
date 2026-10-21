@@ -192,11 +192,9 @@ describe('Theme architecture guardrails', () => {
     expect(settings).not.toContain('className="brand-title');
   });
 
-  it('keeps Space inside the app-level Theme scope', () => {
+  it('keeps portaled popovers inside the app-level Theme scope', () => {
     for (const file of [
       'src/renderer/index.css',
-      'src/renderer/pages/Space.tsx',
-      'src/renderer/pages/space/SpaceChrome.tsx',
       'src/renderer/components/ui/Popover.tsx',
     ]) {
       const contents = source(file);

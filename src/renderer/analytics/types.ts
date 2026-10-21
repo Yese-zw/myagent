@@ -82,7 +82,6 @@ export type Surface =
   | 'record_detail'
   | 'speech_tool_card'
   | 'bug_report'
-  | 'space_tools'
   | 'agent_setup'
   | 'cmd_k'
   | 'external_link'
@@ -107,7 +106,6 @@ export type EntryIntent =
   | 'thought_alignment'
   | 'workspace_init'
   | 'support_diagnostics'
-  | 'tool_install'
   | 'new_chat'
   | 'fork'
   | 'unknown';
@@ -127,7 +125,6 @@ export type AssistantEntry =
   | 'terminal_reason'
   | 'runtime_diagnostics'
   | 'support_diagnostics'
-  | 'space_tool_install'
   | 'other';
 
 /**
@@ -205,18 +202,9 @@ export type EventName =
   | 'tts_play'
   | 'task_center_open'
   | 'bug_report_submit'
-  // MyAgents Space
-  | 'space_open'
-  | 'space_auth_start'
-  | 'space_auth_complete'
-  | 'space_switch'
-  | 'space_issue_mutation'
-  | 'space_goal_mutation'
-  | 'space_skill_mutation'
-  | 'space_tool_mutation'
-  | 'space_registered_agent_mutation'
-  | 'space_member_mutation'
-  | 'space_settings_mutation'
+  // MyAgents 账号
+  | 'account_auth_start'
+  | 'account_auth_complete'
   // 系统事件
   | 'update_check'
   | 'update_install'

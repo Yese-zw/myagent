@@ -40,7 +40,11 @@ fn main() {
     expose_dsh_build_lock();
     expose_space_build_env();
     prepare_incremental_tauri_resource_output();
-    tauri_build::build()
+    tauri_build::try_build(tauri_build::Attributes::new().plugin(
+        "sub2api-captcha",
+        tauri_build::InlinedPlugin::new().commands(&["complete"]),
+    ))
+    .expect("Tauri build")
 }
 
 fn expose_dsh_build_lock() {

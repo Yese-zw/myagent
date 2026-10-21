@@ -1,18 +1,18 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  spaceAuthAck,
-  spaceAuthPoll,
-  spaceAuthStart,
-  spaceErrorMessage,
-} from "@/api/spaceCloud";
+  accountAuthAck,
+  accountAuthPoll,
+  accountAuthStart,
+  accountErrorMessage,
+} from "@/api/accountCloud";
 import { useToast } from "@/components/Toast";
-import { trackSpaceAuth } from "@/pages/space/spaceMetrics";
+import { trackAccountAuth } from "@/features/agent-network/accountAnalytics";
 const AUTH_POLL_DELAY_MS = 3000;
 const AUTH_POLL_TIMEOUT_MS = 10 * 60 * 1000;
 
 /** The official account login flow is shared by Team and Agent Network.
- * Consumers decide what to load after login; this hook never boots Space data. */
+ * Consumers decide what to load after login; this hook never boots feature data. */
 export function useMyAgentsLogin(
   isActive: boolean,
   onAuthenticated: () => Promise<void>,
@@ -70,29 +70,29 @@ export function useMyAgentsLogin(
       while (!cancelled && Date.now() < authFlow.expiresAt) {
         const startedAt = Date.now();
         try {
-          const result = await spaceAuthPoll(authFlow.token);
+          const result = await accountAuthPoll(authFlow.token);
           if (cancelled) return;
           if (result.status === "done") {
             stopAuth();
-            toast.success(t("space.toasts.loginSuccess"));
+            toast.success(t("agentNetwork.login.success"));
             await onAuthenticated();
-            trackSpaceAuth("success", true);
-            void spaceAuthAck(authFlow.token).catch((error) => {
+            trackAccountAuth("success", true);
+            void accountAuthAck(authFlow.token).catch((error) => {
               console.warn(
-                "[Space] auth ack failed:",
-                spaceErrorMessage(error),
+                "[Account] auth ack failed:",
+                accountErrorMessage(error),
               );
             });
             return;
           }
           if (result.status === "failed") {
             stopAuth();
-            toast.error(String(result.error ?? t("space.toasts.loginFailed")));
-            trackSpaceAuth("failure", false, result.error ?? "failed");
-            void spaceAuthAck(authFlow.token).catch((error) => {
+            toast.error(String(result.error ?? t("agentNetwork.login.failed")));
+            trackAccountAuth("failure", false, result.error ?? "failed");
+            void accountAuthAck(authFlow.token).catch((error) => {
               console.warn(
-                "[Space] auth ack failed:",
-                spaceErrorMessage(error),
+                "[Account] auth ack failed:",
+                accountErrorMessage(error),
               );
             });
             return;
@@ -104,7 +104,7 @@ export function useMyAgentsLogin(
             Date.now() < authFlow.expiresAt
           ) {
             authPollWarningShownRef.current = true;
-            toast.warning(t("space.toasts.loginSlow"));
+            toast.warning(t("agentNetwork.login.slow"));
           }
         }
         const elapsed = Date.now() - startedAt;
@@ -113,8 +113,8 @@ export function useMyAgentsLogin(
 
       if (!cancelled) {
         stopAuth();
-        toast.error(t("space.toasts.loginTimeout"));
-        trackSpaceAuth("failure", false, "timeout");
+        toast.error(t("agentNetwork.login.timeout"));
+        trackAccountAuth("failure", false, "timeout");
       }
     };
 
@@ -137,9 +137,9 @@ export function useMyAgentsLogin(
 
   const startLogin = useCallback(async () => {
     setAuthBusy(true);
-    trackSpaceAuth("start", true);
+    trackAccountAuth("start", true);
     try {
-      const result = await spaceAuthStart();
+      const result = await accountAuthStart();
       const serverExpiresInMs =
         Number.isFinite(result.expiresInSeconds) && result.expiresInSeconds > 0
           ? result.expiresInSeconds * 1000
@@ -150,11 +150,11 @@ export function useMyAgentsLogin(
         expiresAt:
           Date.now() + Math.min(serverExpiresInMs, AUTH_POLL_TIMEOUT_MS),
       });
-      toast.info(t("space.toasts.browserLoginOpened"));
+      toast.info(t("agentNetwork.login.browserOpened"));
     } catch (error) {
       setAuthBusy(false);
-      trackSpaceAuth("failure", false, error);
-      toast.error(spaceErrorMessage(error));
+      trackAccountAuth("failure", false, error);
+      toast.error(accountErrorMessage(error));
     }
   }, [t, toast]);
 

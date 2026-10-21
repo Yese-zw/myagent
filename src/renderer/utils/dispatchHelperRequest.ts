@@ -44,18 +44,9 @@ type SupportHelperRequest = HelperRequestBase & {
     appVersion: string;
 };
 
-type SpaceToolInstallHelperRequest = HelperRequestBase & {
-    scenario: 'space_tool_install';
-    appVersion?: never;
-};
+export type HelperRequestInput = SupportHelperRequest;
 
-export type HelperRequestInput =
-    | SupportHelperRequest
-    | SpaceToolInstallHelperRequest;
-
-export type HelperRequestDetail =
-    | (Omit<SupportHelperRequest, 'scenario'> & { scenario: 'support' })
-    | SpaceToolInstallHelperRequest;
+export type HelperRequestDetail = Omit<SupportHelperRequest, 'scenario'> & { scenario: 'support' };
 
 export function dispatchHelperRequest(input: HelperRequestInput): void {
     const common = {
@@ -66,9 +57,7 @@ export function dispatchHelperRequest(input: HelperRequestInput): void {
         resumeSessionId: input.resumeSessionId,
         assistantEntry: input.assistantEntry,
     };
-    const detail: HelperRequestDetail = input.scenario === 'space_tool_install'
-        ? { ...common, scenario: 'space_tool_install' }
-        : { ...common, scenario: 'support', appVersion: input.appVersion };
+    const detail: HelperRequestDetail = { ...common, scenario: 'support', appVersion: input.appVersion };
     window.dispatchEvent(
         new CustomEvent(CUSTOM_EVENTS.LAUNCH_BUG_REPORT, {
             detail,

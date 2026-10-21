@@ -34,7 +34,7 @@ const SettingsTabRenderer = memo(function SettingsTabRenderer({
       <Settings
         mode="settings"
         // A consumed intent is no navigation; an explicit untargeted open still selects the default.
-        initialSection={tab.navigationIntent ? (tab.navigationIntent.section ?? 'providers') : undefined}
+        initialSection={tab.navigationIntent ? (tab.navigationIntent.section ?? 'general') : undefined}
         navigationNonce={generation}
         onSectionChange={generation === undefined ? undefined : () => binding.onNavigationConsumed(tab.id, generation)}
         isActive={isActive}

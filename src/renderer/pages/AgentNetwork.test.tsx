@@ -26,10 +26,10 @@ const mocks = vi.hoisted(() => ({
     error: null,
   } as NetworkSnapshot,
 }));
-vi.mock("@/api/spaceCloud", async (original) => ({
-  ...(await original<typeof import("@/api/spaceCloud")>()),
-  spaceGetSession: mocks.session,
-  spaceLogout: mocks.logout,
+vi.mock("@/api/accountCloud", async (original) => ({
+  ...(await original<typeof import("@/api/accountCloud")>()),
+  accountGetSession: mocks.session,
+  accountLogout: mocks.logout,
 }));
 vi.mock("@/api/agentNetwork", async (original) => ({
   ...(await original<typeof import("@/api/agentNetwork")>()),

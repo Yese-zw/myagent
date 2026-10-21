@@ -13,7 +13,6 @@ import { useAvailableProviders } from '@/hooks/useAvailableProviders';
 import { getAllMcpServers, getEnabledMcpServerIds } from '@/config/configService';
 import { patchAgentConfig, patchAgentProjectConfig } from '@/config/services/agentConfigService';
 import { isProviderAvailable } from '@/config/services/providerService';
-import { CUSTOM_EVENTS } from '@/../shared/constants';
 import { applyBuiltinBrowserExecutionToolToggle } from '@/../shared/browserTools';
 import { PERMISSION_MODES, type Project, type McpServerDefinition } from '@/config/types';
 import type { AgentConfig } from '../../../shared/types/agent';
@@ -33,7 +32,6 @@ import { useBrowserResourceReady } from '@/hooks/useBrowserResourceReady';
 import { MANAGED_BROWSER_MCP_ID } from '@/../shared/browserTools';
 import {
   isProviderModelCompatibleWithRuntime,
-  projectProvidersForRuntime,
 } from '@/utils/runtimeProviderProjection';
 
 interface WorkspaceBasicsSectionProps {
@@ -100,10 +98,7 @@ export default function WorkspaceBasicsSection({ project, agent, agentDir }: Wor
     && agentUsesManagedCodexProvider(agent);
   const usesExternalCliConfiguration = currentRuntime !== 'builtin' && currentRuntime !== 'dsh';
   const usesProductConfiguration = !usesExternalCliConfiguration;
-  const availableProviders = useMemo(
-    () => projectProvidersForRuntime(credentialedProviders, currentRuntime),
-    [credentialedProviders, currentRuntime],
-  );
+  const modelPickerProviders = credentialedProviders;
 
   // Sync name when canonical name changes externally
   useEffect(() => {
@@ -212,7 +207,7 @@ export default function WorkspaceBasicsSection({ project, agent, agentDir }: Wor
   }, [saveProjectMeta]);
 
   const handleModelSelect = useCallback((providerId: string, model: string) => {
-    const provider = availableProviders.find(p => p.id === providerId) ?? providers.find(p => p.id === providerId);
+    const provider = modelPickerProviders.find(p => p.id === providerId) ?? providers.find(p => p.id === providerId);
     if (!provider) return;
     const intent = toProviderExecutionIntent(provider, model);
     if (intent.kind === 'runtime-backed-provider') {
@@ -223,7 +218,7 @@ export default function WorkspaceBasicsSection({ project, agent, agentDir }: Wor
       void saveAgentConfig({ providerId, model });
     }
     setOpenPopup(null);
-  }, [agent?.runtimeConfig, availableProviders, providers, saveAgentConfig, toast, tChat]);
+  }, [agent?.runtimeConfig, modelPickerProviders, providers, saveAgentConfig, toast, tChat]);
 
   const handlePermissionSelect = useCallback((mode: string) => {
     void saveAgentConfig({ permissionMode: mode as AgentConfig['permissionMode'] });
@@ -307,9 +302,7 @@ export default function WorkspaceBasicsSection({ project, agent, agentDir }: Wor
   const providerName = selectedProvider?.name || t('agentSettings.basics.defaultProvider');
 
   const openProviderSettings = useCallback(() => {
-    window.dispatchEvent(new CustomEvent(CUSTOM_EVENTS.OPEN_SETTINGS, {
-      detail: { section: 'providers' },
-    }));
+    window.dispatchEvent(new Event('sub2api-account:open-login'));
     setOpenPopup(null);
   }, []);
 
@@ -488,8 +481,7 @@ export default function WorkspaceBasicsSection({ project, agent, agentDir }: Wor
         </>
       )}
 
-      {/* Product provider/model configuration is shared by Builtin and DSH. */}
-      {usesProductConfiguration && (
+      {/* Packaged models stay visible for every runtime, including external CLIs. */}
       <div className="relative flex items-center gap-3">
         <label className="w-16 shrink-0 text-sm text-[var(--ink-muted)]">{t('agentSettings.basics.model')}</label>
         <button
@@ -521,7 +513,7 @@ export default function WorkspaceBasicsSection({ project, agent, agentDir }: Wor
           placement="bottom-start"
           className="max-h-[300px] w-[320px] overflow-y-auto overscroll-contain rounded-xl p-2"
         >
-          {availableProviders.length === 0 ? (
+          {modelPickerProviders.length === 0 ? (
             <div className="px-3 py-3">
               <p className="mb-2 text-xs leading-relaxed text-[var(--ink-muted)]">
                 {t('agentSettings.basics.noProviders')}
@@ -535,7 +527,7 @@ export default function WorkspaceBasicsSection({ project, agent, agentDir }: Wor
               </button>
             </div>
           ) : (
-            availableProviders.map(provider => (
+            modelPickerProviders.map(provider => (
               <div key={provider.id} className="mb-1">
                 <div className="px-2 py-1 text-xs font-medium text-[var(--ink-muted)]">{provider.name}</div>
                 {provider.models?.map(model => (
@@ -556,7 +548,6 @@ export default function WorkspaceBasicsSection({ project, agent, agentDir }: Wor
           )}
         </Popover>
       </div>
-      )}
 
       {/* Product permission configuration is shared by Builtin and DSH. */}
       {usesProductConfiguration && (

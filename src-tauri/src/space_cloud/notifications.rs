@@ -62,14 +62,6 @@ pub struct NotificationActor {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
-pub struct NotificationIssue {
-    pub id: String,
-    pub number: Option<i64>,
-    pub title: String,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(
     tag = "kind",
     rename_all = "snake_case",
@@ -82,18 +74,6 @@ pub enum NotificationItem {
         is_read: bool,
         summary_zh: String,
         summary_other: Option<String>,
-        target: NotificationTarget,
-    },
-    #[serde(rename = "space_issue_comment")]
-    SpaceIssueComment {
-        id: String,
-        created_at: String,
-        is_read: bool,
-        comment_id: String,
-        actor: NotificationActor,
-        space_id: String,
-        issue: NotificationIssue,
-        excerpt: Option<String>,
         target: NotificationTarget,
     },
     #[serde(rename = "task_agent_comment")]
@@ -113,33 +93,27 @@ pub enum NotificationItem {
 impl NotificationItem {
     fn id(&self) -> &str {
         match self {
-            Self::Announcement { id, .. }
-            | Self::SpaceIssueComment { id, .. }
-            | Self::TaskAgentComment { id, .. } => id,
+            Self::Announcement { id, .. } | Self::TaskAgentComment { id, .. } => id,
         }
     }
 
     fn created_at(&self) -> &str {
         match self {
-            Self::Announcement { created_at, .. }
-            | Self::SpaceIssueComment { created_at, .. }
-            | Self::TaskAgentComment { created_at, .. } => created_at,
+            Self::Announcement { created_at, .. } | Self::TaskAgentComment { created_at, .. } => created_at,
         }
     }
 
     fn is_read(&self) -> bool {
         match self {
-            Self::Announcement { is_read, .. }
-            | Self::SpaceIssueComment { is_read, .. }
-            | Self::TaskAgentComment { is_read, .. } => *is_read,
+            Self::Announcement { is_read, .. } | Self::TaskAgentComment { is_read, .. } => *is_read,
         }
     }
 
     fn set_read(&mut self) {
         match self {
-            Self::Announcement { is_read, .. }
-            | Self::SpaceIssueComment { is_read, .. }
-            | Self::TaskAgentComment { is_read, .. } => *is_read = true,
+            Self::Announcement { is_read, .. } | Self::TaskAgentComment { is_read, .. } => {
+                *is_read = true
+            }
         }
     }
 
@@ -149,9 +123,9 @@ impl NotificationItem {
 
     fn target(&self) -> NotificationTarget {
         match self {
-            Self::Announcement { target, .. }
-            | Self::SpaceIssueComment { target, .. }
-            | Self::TaskAgentComment { target, .. } => target.clone(),
+            Self::Announcement { target, .. } | Self::TaskAgentComment { target, .. } => {
+                target.clone()
+            }
         }
     }
 
@@ -205,10 +179,33 @@ pub struct NotificationActivation {
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct FeedPage {
+    #[serde(deserialize_with = "deserialize_feed_items")]
     items: Vec<NotificationItem>,
     next_cursor: Option<String>,
     feed_cutoff: NotificationSortPoint,
     has_unread: Option<bool>,
+}
+
+/// Parse feed items one by one and drop the kinds this build does not know.
+///
+/// The cloud feed can still carry notification kinds that the current client
+/// does not render. A single unknown kind must not fail the whole page, so
+/// each item is deserialized on its own and unsupported kinds are skipped.
+fn deserialize_feed_items<'de, D>(deserializer: D) -> Result<Vec<NotificationItem>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let raw = Vec::<serde_json::Value>::deserialize(deserializer)?;
+    Ok(raw
+        .into_iter()
+        .filter_map(|value| {
+            let kind = value.get("kind").and_then(|kind| kind.as_str()).unwrap_or("");
+            match kind {
+                "announcement" | "task_agent_comment" => serde_json::from_value(value).ok(),
+                _ => None,
+            }
+        })
+        .collect())
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -981,10 +978,6 @@ fn toast_text(item: &NotificationItem) -> (String, String) {
                 body,
             )
         }
-        NotificationItem::SpaceIssueComment { actor, issue, .. } => (
-            crate::i18n::t("notification.centerCommentTitle", locale).to_string(),
-            format!("{} · {}", actor.display_name, issue.title),
-        ),
         NotificationItem::TaskAgentComment {
             agent,
             task_name,
@@ -2388,20 +2381,20 @@ mod tests {
                 },
                 {
                     "id": "comment_1",
-                    "kind": "space_issue_comment",
+                    "kind": "task_agent_comment",
                     "createdAt": "2026-08-16T00:59:00.000Z",
                     "isRead": true,
+                    "taskId": "task-1",
+                    "taskName": "升级依赖",
                     "commentId": "comment-1",
-                    "actor": { "type": "user", "id": "user-1", "displayName": "Ethan" },
-                    "spaceId": "space-1",
-                    "issue": { "id": "issue-1", "number": 7, "title": "通知中心" },
+                    "agent": { "type": "registered_agent", "id": "session-1", "displayName": "Ethan" },
                     "excerpt": "看起来不错",
                     "target": {
                         "kind": "app_route",
                         "route": {
                             "version": 1,
-                            "name": "space.issue",
-                            "params": { "spaceId": "space-1", "issueId": "issue-1" }
+                            "name": "task.comment",
+                            "params": { "taskId": "task-1", "commentId": "comment-1" }
                         }
                     }
                 }
@@ -2416,5 +2409,35 @@ mod tests {
             page.items[1].target(),
             NotificationTarget::AppRoute { .. }
         ));
+    }
+
+    #[test]
+    fn unknown_feed_kinds_are_skipped_instead_of_failing_the_page() {
+        let page: FeedPage = serde_json::from_value(json!({
+            "items": [
+                {
+                    "id": "announcement_1",
+                    "kind": "announcement",
+                    "createdAt": "2026-08-16T01:00:00.000Z",
+                    "isRead": false,
+                    "summaryZh": "系统公告",
+                    "summaryOther": null,
+                    "target": { "kind": "external_url", "url": "http://example.com/a" }
+                },
+                {
+                    "id": "legacy_1",
+                    "kind": "space_issue_comment",
+                    "createdAt": "2026-08-16T00:59:00.000Z",
+                    "isRead": true,
+                    "target": { "kind": "external_url", "url": "http://example.com/b" }
+                }
+            ],
+            "nextCursor": null,
+            "feedCutoff": { "createdAt": "2026-08-16T01:01:00.000Z", "id": "z" },
+            "hasUnread": true
+        }))
+        .expect("feed contract");
+        assert_eq!(page.items.len(), 1);
+        assert_eq!(page.items[0].id(), "announcement_1");
     }
 }

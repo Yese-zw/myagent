@@ -41,7 +41,7 @@ import { updateSession, type SessionMetadata } from '@/api/sessionClient';
 import { MyAgentsLogotype } from '@/components/brand/MyAgentsLogotype';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import FeedbackPopover from '@/components/FeedbackPopover';
-import AccountEntry from '@/features/account/AccountEntry';
+import Sub2apiAccountEntry from '@/features/account/Sub2apiAccountEntry';
 import { SidebarResizeHandle } from './SidebarResizeHandle';
 import { APP_SHELL_POPOVER_CHROME } from '@/components/global-sidebar/appShellPopoverChrome';
 import OverlayBackdrop from '@/components/OverlayBackdrop';
@@ -64,7 +64,6 @@ import {
   SettingsIcon,
   SidebarIcon,
   TasksIcon,
-  TeamIcon,
   FolderIcon,
 } from '@/components/icons';
 import UnreadNotificationIndicator from '@/components/UnreadNotificationIndicator';
@@ -177,11 +176,10 @@ interface GlobalSidebarProps {
   activeTab: Tab | undefined;
   activeWorkspacePath: string | null;
   sessionNotificationBadgeCounts?: ReadonlyMap<string, number>;
-  teamSpaceAvailable: boolean;
   onNewTab: () => void;
   onOpenTaskCenter: () => void;
   onCreateTask: () => void;
-  onOpenSpace: () => void;
+  onOpenAccount?: () => void;
   onOpenAgentNetwork?: () => void;
   onOpenAppRoute?: (route: AppRoute) => Promise<boolean> | boolean;
   onOpenCapabilities: (section?: CapabilitySection) => void;
@@ -324,8 +322,8 @@ function SidebarNavButton({
   );
 }
 
-function SidebarMore({ expanded, activeView, teamSpaceAvailable, onTeam, onBot }: {
-  expanded: boolean; activeView: string | undefined; teamSpaceAvailable: boolean; onTeam: () => void; onBot: () => void;
+function SidebarMore({ expanded, activeView, onBot }: {
+  expanded: boolean; activeView: string | undefined; onBot: () => void;
 }) {
   const { t } = useTranslation(['app', 'settings']);
   const [open, setOpen] = useState(false);
@@ -363,10 +361,6 @@ function SidebarMore({ expanded, activeView, teamSpaceAvailable, onTeam, onBot }
             event.preventDefault(); event.stopPropagation(); close(); anchor.current?.querySelector<HTMLButtonElement>('button')?.focus();
           }
         }}>
-        {teamSpaceAvailable && <button type="button" role="menuitem" onClick={() => { close(); onTeam(); }}
-          className="flex h-9 w-full items-center gap-2 rounded-md px-3 text-sm text-[var(--ink)] hover:bg-[var(--hover-bg)] focus:bg-[var(--hover-bg)]">
-          <TeamIcon className="h-4 w-4 text-[var(--ink-muted)]" /><span className="global-sidebar-label">{t('globalSidebar.team')}</span>
-        </button>}
         <button type="button" role="menuitem" onClick={() => { close(); onBot(); }}
           className="flex h-9 w-full items-center gap-2 rounded-md px-3 text-sm text-[var(--ink)] hover:bg-[var(--hover-bg)] focus:bg-[var(--hover-bg)]">
           <MessageIcon className="h-4 w-4 text-[var(--ink-muted)]" /><span className="global-sidebar-label">{t('sidebar.nav.bots', { ns: 'settings' })}</span>
@@ -466,11 +460,10 @@ export default memo(function GlobalSidebar({
   activeTab,
   activeWorkspacePath,
   sessionNotificationBadgeCounts,
-  teamSpaceAvailable,
   onNewTab,
   onOpenTaskCenter,
   onCreateTask,
-  onOpenSpace,
+  onOpenAccount,
   onOpenAgentNetwork,
   onOpenAppRoute,
   onOpenCapabilities,
@@ -1268,7 +1261,7 @@ export default memo(function GlobalSidebar({
             onClick={() => onOpenAgentNetwork?.()}
           />
           <SidebarMore key={activeView ?? 'launcher'} expanded={expanded} activeView={activeView}
-            teamSpaceAvailable={teamSpaceAvailable} onTeam={onOpenSpace} onBot={() => onOpenSettings('agent')} />
+            onBot={() => onOpenSettings('agent')} />
         </nav>
 
         <div className="relative min-h-0 flex-1" data-global-sidebar-workspace-shell>
@@ -1368,8 +1361,7 @@ export default memo(function GlobalSidebar({
             onClick={() => onOpenSettings('general')}
           />
           <div className="global-sidebar-account-row grid grid-cols-[minmax(0,1fr)_var(--global-sidebar-action-size)]" data-global-sidebar-account-row>
-            <AccountEntry expanded={expanded} available={teamSpaceAvailable}
-              environment={config.spaceEnvironment ?? 'production'} onOpenSpace={onOpenSpace} />
+            <Sub2apiAccountEntry expanded={expanded} onOpenAccount={onOpenAccount} />
             <span className="global-sidebar-notification-slot">
               <button
                 ref={notificationTriggerRef}

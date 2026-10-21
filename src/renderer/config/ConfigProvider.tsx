@@ -15,7 +15,6 @@ import {
     type ManagedCodexAuthState,
     type ManagedCodexRuntimeInstallState,
     type ProxySettings,
-    PRESET_PROVIDERS,
     PROXY_DEFAULTS,
     MANAGED_CODEX_REQUIRED_RUNTIME,
     applyManagedCodexProviderReadiness,
@@ -28,6 +27,7 @@ import type { RuntimeModelInfo } from '../../shared/types/runtime';
 import type { TokenDanceAuthView } from '../../shared/tokendance';
 import type { AgentConfig } from '../../shared/types/agent';
 import { apiGetJson } from '@/api/apiFetch';
+import { buildPackagedGatewayProvider, withoutPackagedGatewayDisabled } from '../../shared/packaged-gateway';
 import {
     notifyConfigChanged,
     loadAppConfig,
@@ -295,7 +295,7 @@ export const ConfigActionsContext = createContext<ConfigActionsValue | null>(nul
 export function ConfigProvider({ children }: { children: React.ReactNode }) {
     const [config, setConfig] = useState<AppConfig>(DEFAULT_CONFIG);
     const [projects, setProjects] = useState<Project[]>([]);
-    const [rawProviders, setRawProviders] = useState<Provider[]>(PRESET_PROVIDERS);
+    const [rawProviders, setRawProviders] = useState<Provider[]>(() => [buildPackagedGatewayProvider()]);
     const [managedCodexRuntimeModels, setManagedCodexRuntimeModels] = useState<RuntimeModelInfo[]>([]);
     const [apiKeys, setApiKeys] = useState<Record<string, string>>({});
     const [providerVerifyStatus, setProviderVerifyStatus] = useState<Record<string, ProviderVerifyStatus>>({});
@@ -307,20 +307,20 @@ export function ConfigProvider({ children }: { children: React.ReactNode }) {
 
     // Derived: merge preset custom models + apply user primary model overrides
     const providers = useMemo(() => {
-        const readinessConfig = {
+        const readinessConfig = withoutPackagedGatewayDisabled({
             managedCodexProviderDevGate: config.managedCodexProviderDevGate,
             managedCodexRuntimeInstall: config.managedCodexRuntimeInstall,
             managedCodexAuth: config.managedCodexAuth,
             disabledProviderIds: config.disabledProviderIds,
-        };
+        });
         // Platform availability is a read-only projection, never a config migration.
         const catalog = withManagedCodexProviderCatalog(rawProviders, readinessConfig, managedCodexRuntimeModels)
             .filter(provider => !getPlatformHiddenProviderIds().includes(provider.id));
         const merged = mergePresetCustomModels(catalog, config.presetCustomModels, config.presetRemovedModels);
-        const providerOrderSettings = {
+        const providerOrderSettings = withoutPackagedGatewayDisabled({
             providerOrder: config.providerOrder,
             disabledProviderIds: config.disabledProviderIds,
-        };
+        });
         const overrides = config.providerPrimaryModels;
         if (!overrides || Object.keys(overrides).length === 0) {
             return applyManagedCodexProviderReadiness(

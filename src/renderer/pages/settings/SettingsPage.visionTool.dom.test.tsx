@@ -104,13 +104,6 @@ vi.mock("@/api/apiFetch", () => ({
   apiPostJson: settingsMocks.apiPostJson,
 }));
 
-vi.mock("@/hooks/useSpaceBuildCapability", () => ({
-  useSpaceBuildCapability: () => ({
-    activeEnvironment: "production",
-    environments: ["production"],
-  }),
-}));
-
 vi.mock("@/hooks/useAutostart", () => ({
   useAutostart: () => ({
     isEnabled: false,

@@ -309,6 +309,13 @@ const SimpleChatInput = memo(forwardRef<SimpleChatInputHandle, SimpleChatInputPr
     () => availableProviderIds ? new Set(availableProviderIds) : null,
     [availableProviderIds],
   );
+  const catalogProviders = useMemo(() => {
+    const list = availableProviderIdSet
+      ? (providers ?? []).filter(p => availableProviderIdSet.has(p.id))
+      : (providers ?? []).filter(p => isProviderAvailable(p, apiKeys, providerVerifyStatus));
+    return list.filter(p => (p.models?.length ?? 0) > 0);
+  }, [availableProviderIdSet, providers, apiKeys, providerVerifyStatus]);
+  const useProductModelCatalog = catalogProviders.length > 0;
 
   // Send-key preference (Enter vs ⌘/Ctrl+Enter). Shared with AI 小助理 / 问题反馈
   // via @/utils/chatSendKey. Mirrored to a ref so the big handleKeyDown callback
@@ -485,13 +492,17 @@ const SimpleChatInput = memo(forwardRef<SimpleChatInputHandle, SimpleChatInputPr
   // Derive current model ID from prop or provider default — no hardcoded fallback
   const currentModelId = selectedModel ?? provider?.primaryModel;
   // Get display name for current model (runtime-aware)
-  const currentModelName = isExternalRuntime
-    ? (runtimeModels?.find(m => m.value === selectedModel)?.displayName
-      ?? runtimeModels?.find(m => m.isDefault)?.displayName
-      ?? t('input.modelDefault'))
-    : (currentModelId
+  const currentModelName = useProductModelCatalog
+    ? (currentModelId
       ? (provider ? getModelDisplayName(provider, currentModelId) : currentModelId)
-      : t('input.selectModel'));
+      : t('input.selectModel'))
+    : isExternalRuntime
+      ? (runtimeModels?.find(m => m.value === selectedModel)?.displayName
+        ?? runtimeModels?.find(m => m.isDefault)?.displayName
+        ?? t('input.modelDefault'))
+      : (currentModelId
+        ? (provider ? getModelDisplayName(provider, currentModelId) : currentModelId)
+        : t('input.selectModel'));
 
   const [showFileSearch, setShowFileSearch] = useState(false);
   const [fileSearchQuery, setFileSearchQuery] = useState('');
@@ -2013,7 +2024,7 @@ const SimpleChatInput = memo(forwardRef<SimpleChatInputHandle, SimpleChatInputPr
                   data-model-list
                   className="relative max-h-[260px] overflow-y-auto py-1"
                 >
-                {isExternalRuntime && runtimeModels ? (
+                {isExternalRuntime && runtimeModels && !useProductModelCatalog ? (
                   <>
                     <div className="px-3 pb-0.5 pt-1.5 text-xs font-semibold uppercase tracking-wider text-[var(--ink-muted)]/60">
                       {t('input.runtimeModelHeader', {
@@ -2045,9 +2056,11 @@ const SimpleChatInput = memo(forwardRef<SimpleChatInputHandle, SimpleChatInputPr
                     })}
                   </>
                 ) : (() => {
-                  const availableProviders = availableProviderIdSet
-                    ? (providers ?? []).filter(p => availableProviderIdSet.has(p.id))
-                    : (providers ?? []).filter(p => isProviderAvailable(p, apiKeys, providerVerifyStatus));
+                  const availableProviders = catalogProviders.length > 0
+                    ? catalogProviders
+                    : availableProviderIdSet
+                      ? (providers ?? []).filter(p => availableProviderIdSet.has(p.id))
+                      : (providers ?? []).filter(p => isProviderAvailable(p, apiKeys, providerVerifyStatus));
                   if (availableProviders.length === 0) {
                     return (
                       <button
@@ -2055,9 +2068,7 @@ const SimpleChatInput = memo(forwardRef<SimpleChatInputHandle, SimpleChatInputPr
                         onClick={(e) => {
                           e.stopPropagation();
                           setShowModelMenu(false);
-                          window.dispatchEvent(new CustomEvent(CUSTOM_EVENTS.OPEN_SETTINGS, {
-                            detail: { section: 'providers' }
-                          }));
+                          window.dispatchEvent(new Event('sub2api-account:open-login'));
                         }}
                         className="w-full px-3 py-2.5 text-left text-sm text-[var(--accent)] transition-colors hover:bg-[var(--hover-bg)]"
                       >
@@ -2116,7 +2127,7 @@ const SimpleChatInput = memo(forwardRef<SimpleChatInputHandle, SimpleChatInputPr
                   selectionKey={isExternalRuntime
                     ? `${runtime ?? 'external'}:${selectedModel ?? 'default'}`
                     : `${provider?.id ?? 'none'}:${currentModelId ?? 'none'}`}
-                  modelSource={isExternalRuntime ? runtimeModels : providers}
+                  modelSource={useProductModelCatalog || !isExternalRuntime ? providers : runtimeModels}
                 />
 
                 {/* #324 — fixed bottom row: 推理强度. Hidden when the surface has
@@ -2207,25 +2218,6 @@ const SimpleChatInput = memo(forwardRef<SimpleChatInputHandle, SimpleChatInputPr
                   </div>
                 )}
 
-                {!isExternalRuntime && (
-                  <div className="border-t border-[var(--line)] p-1">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setShowModelMenu(false);
-                        window.dispatchEvent(new CustomEvent(CUSTOM_EVENTS.OPEN_SETTINGS, {
-                          detail: { section: 'providers' },
-                        }));
-                      }}
-                      className="flex w-full items-center gap-1.5 rounded-md px-3 py-1.5 text-left text-sm text-[var(--ink)] transition-colors hover:bg-[var(--hover-bg)]"
-                    >
-                      <SlidersIcon className="h-3.5 w-3.5 shrink-0 text-[var(--ink-muted)]" />
-                      <span className="flex-1">{t('input.customModelService')}</span>
-                      <ChevronRightIcon className="h-3 w-3 shrink-0 text-[var(--ink-muted)]" />
-                    </button>
-                  </div>
-                )}
               </Popover>
 
               {/* Button states:

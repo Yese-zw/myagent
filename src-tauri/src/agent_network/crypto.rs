@@ -10,8 +10,11 @@ use rustls::{
 };
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
+use std::fs::{self, OpenOptions};
 use std::io::{Cursor, Read, Write};
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
+use uuid::Uuid;
 use zeroize::Zeroizing;
 
 pub(crate) fn external_tls_config() -> Result<ClientConfig, CryptoError> {
@@ -97,57 +100,36 @@ impl KeyScope {
     }
 }
 
-/// The caller serializes these operations with the App's keyed lifecycle gate
-/// and invokes them on spawn_blocking. Constructing the concrete backend avoids
-/// keyring's process-global default override and its mock fallback entirely.
+/// Device identity lives in the local credential directory. The App never
+/// reads or writes the OS keychain / credential manager.
 pub struct OsIdentityStore;
 impl OsIdentityStore {
-    #[cfg(any(target_os = "macos", target_os = "windows", target_os = "linux"))]
-    fn entry(scope: &KeyScope) -> Result<keyring::Entry, CryptoError> {
-        let user = scope.credential_name()?;
-        #[cfg(target_os = "macos")]
-        let builder = keyring::macos::default_credential_builder();
-        #[cfg(target_os = "windows")]
-        let builder = keyring::windows::default_credential_builder();
-        #[cfg(target_os = "linux")]
-        let builder = keyring::secret_service::default_credential_builder();
-        let credential = builder
-            .build(None, "MyAgents.AgentNetwork.v1", &user)
-            .map_err(|_| CryptoError::CredentialUnavailable)?;
-        Ok(keyring::Entry::new_with_credential(credential))
-    }
-    #[cfg(not(any(target_os = "macos", target_os = "windows", target_os = "linux")))]
-    fn entry(_scope: &KeyScope) -> Result<keyring::Entry, CryptoError> {
-        Err(CryptoError::UnsupportedPlatform)
+    fn path(scope: &KeyScope) -> Result<PathBuf, CryptoError> {
+        Ok(identity_dir()?.join(scope.credential_name()?))
     }
 
     pub fn load(scope: &KeyScope) -> Result<DevicePrivateKey, CryptoError> {
-        let secret = Self::entry(scope)?
-            .get_secret()
-            .map_err(|error| match error {
-                keyring::Error::NoEntry => CryptoError::CredentialMissing,
-                _ => CryptoError::CredentialUnavailable,
-            })?;
-        DevicePrivateKey::from_der(Zeroizing::new(secret))
+        let secret = match fs::read(Self::path(scope)?) {
+            Ok(bytes) => Zeroizing::new(bytes),
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+                return Err(CryptoError::CredentialMissing);
+            }
+            Err(_) => return Err(CryptoError::CredentialUnavailable),
+        };
+        DevicePrivateKey::from_der(secret)
     }
     pub fn save_pending(scope: &KeyScope, key: &DevicePrivateKey) -> Result<(), CryptoError> {
-        let entry = Self::entry(scope)?;
-        match entry.get_secret() {
+        match Self::load(scope) {
             Ok(existing) => {
-                let existing = DevicePrivateKey::from_der(Zeroizing::new(existing))?;
                 if existing.public_fingerprint()? != key.public_fingerprint()? {
                     return Err(CryptoError::CredentialConflict);
                 }
                 return Ok(());
             }
-            Err(keyring::Error::NoEntry) => {}
-            Err(_) => return Err(CryptoError::CredentialUnavailable),
+            Err(CryptoError::CredentialMissing) => {}
+            Err(error) => return Err(error),
         }
-        entry
-            .set_secret(&key.der)
-            .map_err(|_| CryptoError::CredentialUnavailable)?;
-        // Confirm persistence before allowing issuer activation. Failure never
-        // falls back to a file or an in-memory replacement identity.
+        write_identity_file(&Self::path(scope)?, &key.der)?;
         let persisted = Self::load(scope)?;
         if persisted.public_fingerprint()? != key.public_fingerprint()? {
             return Err(CryptoError::CredentialConflict);
@@ -155,11 +137,79 @@ impl OsIdentityStore {
         Ok(())
     }
     pub fn delete(scope: &KeyScope) -> Result<(), CryptoError> {
-        match Self::entry(scope)?.delete_credential() {
-            Ok(()) | Err(keyring::Error::NoEntry) => Ok(()),
+        match fs::remove_file(Self::path(scope)?) {
+            Ok(()) => Ok(()),
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(()),
             Err(_) => Err(CryptoError::CredentialUnavailable),
         }
     }
+}
+
+fn identity_dir() -> Result<PathBuf, CryptoError> {
+    #[cfg(test)]
+    if let Some(dir) = TEST_IDENTITY_DIR.with(|slot| slot.borrow().clone()) {
+        return Ok(dir);
+    }
+    let root = crate::app_dirs::myagents_data_dir().ok_or(CryptoError::CredentialUnavailable)?;
+    Ok(root.join("credentials").join("agent-network"))
+}
+
+fn write_identity_file(path: &Path, bytes: &[u8]) -> Result<(), CryptoError> {
+    let parent = path.parent().ok_or(CryptoError::CredentialUnavailable)?;
+    fs::create_dir_all(parent).map_err(|_| CryptoError::CredentialUnavailable)?;
+    harden_directory_permissions(parent);
+    let tmp = parent.join(format!(
+        ".identity.{}.{}.tmp",
+        std::process::id(),
+        Uuid::new_v4().simple()
+    ));
+    let mut options = OpenOptions::new();
+    options.create_new(true).write(true);
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::OpenOptionsExt;
+        options.mode(0o600);
+    }
+    let mut file = options
+        .open(&tmp)
+        .map_err(|_| CryptoError::CredentialUnavailable)?;
+    if file.write_all(bytes).and_then(|()| file.sync_all()).is_err() {
+        let _ = fs::remove_file(&tmp);
+        return Err(CryptoError::CredentialUnavailable);
+    }
+    drop(file);
+    if fs::rename(&tmp, path).is_err() {
+        let _ = fs::remove_file(&tmp);
+        return Err(CryptoError::CredentialUnavailable);
+    }
+    harden_file_permissions(path);
+    Ok(())
+}
+
+fn harden_file_permissions(path: &Path) {
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let _ = fs::set_permissions(path, fs::Permissions::from_mode(0o600));
+    }
+    #[cfg(not(unix))]
+    let _ = path;
+}
+
+fn harden_directory_permissions(path: &Path) {
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let _ = fs::set_permissions(path, fs::Permissions::from_mode(0o700));
+    }
+    #[cfg(not(unix))]
+    let _ = path;
+}
+
+#[cfg(test)]
+thread_local! {
+    static TEST_IDENTITY_DIR: std::cell::RefCell<Option<PathBuf>> =
+        const { std::cell::RefCell::new(None) };
 }
 
 pub struct DevicePrivateKey {
@@ -834,8 +884,16 @@ pub(crate) mod tests {
     }
 
     #[test]
-    #[ignore = "Explicit OS integration: creates and deletes isolated real system credentials"]
-    fn network_os_credentials_persist_scope_and_never_replace_a_generation() {
+    fn network_local_credentials_persist_scope_and_never_replace_a_generation() {
+        let dir = tempfile::tempdir().unwrap();
+        TEST_IDENTITY_DIR.with(|slot| *slot.borrow_mut() = Some(dir.path().to_path_buf()));
+        struct ResetDir;
+        impl Drop for ResetDir {
+            fn drop(&mut self) {
+                TEST_IDENTITY_DIR.with(|slot| *slot.borrow_mut() = None);
+            }
+        }
+        let _reset = ResetDir;
         let scope = KeyScope {
             issuer: "https://isolated-credentials.myagents.invalid".into(),
             environment: "development".into(),
@@ -844,13 +902,6 @@ pub(crate) mod tests {
             device_id: uuid::Uuid::new_v4().to_string(),
             key_generation: 1,
         };
-        struct Cleanup(KeyScope);
-        impl Drop for Cleanup {
-            fn drop(&mut self) {
-                let _ = OsIdentityStore::delete(&self.0);
-            }
-        }
-        let _cleanup = Cleanup(scope.clone());
         assert!(matches!(
             OsIdentityStore::load(&scope),
             Err(CryptoError::CredentialMissing)

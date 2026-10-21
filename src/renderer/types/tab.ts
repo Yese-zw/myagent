@@ -6,8 +6,8 @@ import type { LauncherTab } from '@/features/launcher/tabContract';
 import type { SettingsTab } from '@/features/settings/tabContract';
 import type { CapabilitiesTab } from '@/features/capabilities/tabContract';
 import type { TaskCenterTab } from '@/features/task-center/tabContract';
-import type { SpaceTab } from '@/features/space/tabContract';
 import type { RecordTab } from '@/features/record/tabContract';
+import type { AccountTab } from '@/features/account/tabContract';
 
 export type { TabBase } from '@/tab-workspace/contracts';
 export type {
@@ -26,12 +26,12 @@ export type {
   CapabilitySection,
 } from '@/features/capabilities/tabContract';
 export type { TaskCenterSearchIntent, TaskCenterTab } from '@/features/task-center/tabContract';
-export type { SpaceTab } from '@/features/space/tabContract';
 export type { RecordTab } from '@/features/record/tabContract';
+export type { AccountTab } from '@/features/account/tabContract';
 
 /** Closed union for the builtin MyAgents edition. Downstream editions extend
  * their own closed union and composition explicitly. */
-export type Tab = LauncherTab | ChatTab | SettingsTab | CapabilitiesTab | TaskCenterTab | SpaceTab | RecordTab | AgentNetworkTab;
+export type Tab = LauncherTab | ChatTab | SettingsTab | CapabilitiesTab | TaskCenterTab | RecordTab | AgentNetworkTab | AccountTab;
 
 export type TabKind = Tab['view'];
 export type TabOf<K extends TabKind> = Extract<Tab, { view: K }>;

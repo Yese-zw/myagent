@@ -28,7 +28,7 @@ describe('resolveGlobalSidebarWorkspace', () => {
     expect(resolveGlobalSidebarWorkspace(chat('/work/project'))).toBe('/work/project');
   });
 
-  it.each(['settings', 'capabilities', 'taskcenter', 'space'] as const)(
+  it.each(['settings', 'capabilities', 'taskcenter'] as const)(
     'does not leak stale workspace context into a %s tab',
     (view) => {
       const tab: Tab = { id: 'tab-1', view, title: 'Tab' };

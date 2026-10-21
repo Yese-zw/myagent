@@ -238,7 +238,7 @@ export function useTrayEvents(options: TrayEventsOptions) {
             return;
           }
           // 2. Safety net: unregistered overlay visible → block (safe degradation)
-          if (document.querySelector('.fixed.inset-0[class*="backdrop-blur"]')) {
+          if (document.querySelector('[data-overlay-backdrop]')) {
             console.log('[useTrayEvents] Cmd+W: unregistered overlay visible, blocked');
             return;
           }
