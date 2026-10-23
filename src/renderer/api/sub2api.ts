@@ -6,6 +6,7 @@ export interface Sub2apiAccount { serverUrl: string; user: Sub2apiUser | null }
 export interface Sub2apiAgreement { id: string; title: string; content_md: string }
 export interface Sub2apiSettings {
   site_name: string;
+  site_logo?: string;
   registration_enabled: boolean;
   email_verify_enabled: boolean;
   invitation_code_enabled: boolean;

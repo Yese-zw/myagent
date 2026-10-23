@@ -31,6 +31,18 @@ beforeEach(async () => {
 });
 
 describe('native sub2api account form', () => {
+  it('shows introductory text inside the sign-in and register fields', async () => {
+    const user = userEvent.setup();
+    render(<Sub2apiAccountDialog {...props()} />);
+    expect(screen.getByLabelText('Email')).toHaveAttribute('placeholder', 'Email you use to sign in');
+    expect(screen.getByLabelText('Password')).toHaveAttribute('placeholder', 'Your sign-in password');
+    await user.click(screen.getByRole('tab', { name: 'Register' }));
+    expect(screen.getByLabelText('Email')).toHaveAttribute('placeholder', 'Email for registration and verification codes');
+    expect(screen.getByLabelText('Password', { exact: true })).toHaveAttribute('placeholder', 'Choose a password, at least 6 characters');
+    expect(screen.getByLabelText('Confirm password')).toHaveAttribute('placeholder', 'Enter the password again to confirm');
+    expect(screen.getByLabelText('Email verification code')).toHaveAttribute('placeholder', 'Code sent to your email');
+  });
+
   it('logs in inside the app and never asks for a website navigation', async () => {
     const user = userEvent.setup(); const callbacks = props();
     const signedIn = { ...account, user: { id: 1, email: 'a@example.com', username: 'Alice' } };

@@ -2,14 +2,14 @@
 
 使用场景：Provider 不通、npm/plugin 拉包失败、MCP 远程服务不可达、外部 Runtime 在终端能用但 MyAgents 里不能用、localhost 被代理导致 502。
 
-不同网络链路的产品 owner 先读 `/myagents-docs/references/settings-safety.md` 与 `models-providers-runtimes.md`。
+不同网络链路的产品 owner 先读 `/lsagent-docs/references/settings-safety.md` 与 `models-providers-runtimes.md`。
 
 ## Ground truth
 
 - MyAgents 有自己的代理设置，Rust 启动子进程时会注入 proxy env，并保护 localhost/127.0.0.1 不走代理。
-- `runtimeSource=system-cli` 的外部 Runtime 有 `envPolicy.proxy`：`myagents` 使用 MyAgents 设置的代理，`terminal` 尝试复现用户交互式 shell 的 proxy env。
+- `runtimeSource=system-cli` 的外部 Runtime 有 `envPolicy.proxy`：`lsagent` 使用 MyAgents 设置的代理，`terminal` 尝试复现用户交互式 shell 的 proxy env。
 - builtin Provider 路径和 external Runtime envPolicy 不是同一套机制。
-- DSH 进程的一般出站代理与模型请求的 Provider 代理分别判断；模型设置按对应配置边界应用，进程代理不能仅凭当前全局设置推断。使用 `myagents diagnose runtime dsh` 查看实际配置。
+- DSH 进程的一般出站代理与模型请求的 Provider 代理分别判断；模型设置按对应配置边界应用，进程代理不能仅凭当前全局设置推断。使用 `lsagent diagnose runtime dsh` 查看实际配置。
 - `runtimeSource=managed-provider` 的 `codex-sub` 走 Provider 管理的 runtime 链路，要同时看 Provider 状态和 `[managed-codex]` 日志，不要只按用户系统 Codex CLI 的环境判断。
 - 插件 npm 安装、远程 MCP、Provider verify、Codex app-server 诊断是不同链路，要按现象分开查。
 - Cloud Space 也有独立 Rust HTTP 链路；只有 Space 异常时转 `cloud-space.md`，不要用外部 Runtime 的 envPolicy 解释。
@@ -18,14 +18,14 @@
 ## 取证
 
 ```bash
-myagents status --json
+lsagent status --json
 rg -n "proxy|NO_PROXY|HTTP_PROXY|HTTPS_PROXY|ALL_PROXY|ECONNREFUSED|ECONNRESET|ENOTFOUND|ETIMEDOUT|502|npm install|registry|provider/verify|runtime_diagnostics|effectiveEnv|runtimeSource|managed-codex|codex-sub" ./logs/unified-*.log | node .claude/skills/support/scripts/redact-log-output.mjs | tail -180
 ```
 
 system-cli Codex env 差异：
 
 ```bash
-myagents runtime diagnose codex --workspacePath <absolute-workspace-path> --json
+lsagent runtime diagnose codex --workspacePath <absolute-workspace-path> --json
 ```
 
 ## 判断

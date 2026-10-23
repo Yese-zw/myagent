@@ -301,6 +301,10 @@ fn reconcile_launchers(
     // fail closed instead of executing the old business payload.
     let mut changed = install_launcher(&bin_dir.join("myagents"), posix.as_bytes(), true)?;
     changed |= install_launcher(&bin_dir.join("myagents.cmd"), windows.as_bytes(), false)?;
+    // Product prompts call the same launcher `lsagent`. Keep `myagents` so
+    // existing terminals and scripts continue to resolve.
+    changed |= install_launcher(&bin_dir.join("lsagent"), posix.as_bytes(), true)?;
+    changed |= install_launcher(&bin_dir.join("lsagent.cmd"), windows.as_bytes(), false)?;
 
     let retired_marker = data_dir.join(".cli-version");
     match fs::symlink_metadata(&retired_marker) {

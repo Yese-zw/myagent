@@ -3,7 +3,7 @@
 // Historical note: this module used to host an in-process MCP server
 // (`im-media`) with a single `send_media` tool. The MCP was retired in
 // v0.2.11 in favour of the universal `myagents im send-media` CLI command
-// + the system prompt's <myagents-cli-im-media> guidance (see
+// + the system prompt's <lsagent-cli-im-media> guidance (see
 // system-prompt-cli-tools.ts). The CLI handler lives in
 // admin-api.ts::handleImSendMedia and reaches the same Rust Management
 // API endpoint the old MCP did.

@@ -207,7 +207,7 @@ describe("channel prompt contract", () => {
     expect(output).toContain("\"addressedToBot\":false");
     expect(output).not.toContain("\"mentions\":[]");
     expect(context.facts.sender!.name).toBeNull();
-    expect(context.facts.delivery.cliCommand).toBe("myagents im send-message");
+    expect(context.facts.delivery.cliCommand).toBe("lsagent im send-message");
     expect(context.facts.projection.omitted.history).toBe(0);
   });
   it("keeps truncation diagnostics internal even when data is clipped", () => {

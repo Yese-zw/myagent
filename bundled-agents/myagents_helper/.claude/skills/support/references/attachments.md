@@ -2,7 +2,7 @@
 
 使用场景：图片、音频、PDF、截图等工具产物生成但不显示；Codex `image_generation` 有结果没图；IM 没发出媒体；工具卡有路径但 gallery 空白。
 
-正常产物与安全边界先读 `/myagents-docs/references/tools-skills-plugins.md`。
+正常产物与安全边界先读 `/lsagent-docs/references/tools-skills-plugins.md`。
 
 ## Ground truth
 

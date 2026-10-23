@@ -20,7 +20,9 @@ async fn configured_service_public_settings_are_compatible() {
 async fn public_settings_allow_embedded_branding_but_auth_responses_stay_bounded() {
     let payload = json!({"code":0,"data":{"site_name":"Service", "site_logo":"x".repeat(RESPONSE_LIMIT + 1)}});
     let (server, _) = fixture("200 OK", payload.clone(), None);
-    assert_eq!(settings(&server).await.unwrap().site_name, "Service");
+    let loaded = settings(&server).await.unwrap();
+    assert_eq!(loaded.site_name, "Service");
+    assert_eq!(loaded.site_logo.len(), RESPONSE_LIMIT + 1);
     let (server, _) = fixture("200 OK", payload, None);
     assert_eq!(
         request(&server, "auth/me", None, None)

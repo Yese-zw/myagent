@@ -36,5 +36,5 @@ export function channelHandoffInputError(missingFields: readonly string[]): stri
     '发送给其他私聊、群聊或频道时，需要 target.id、text、context：\n' +
     '目标 Session 会先接收发送内容和事情背景，再替你告知该会话用户并承接后续对话。\n' +
     '请补齐目标 ID、待告知内容和事情上下文；本次未投递、未发送。\n' +
-    '完整用法与示例：myagents im send-message --help（向其他会话发送）。';
+    '完整用法与示例：lsagent im send-message --help（向其他会话发送）。';
 }

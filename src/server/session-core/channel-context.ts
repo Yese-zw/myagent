@@ -306,7 +306,7 @@ export function channelContextForInput(
           : delivery.assistant === "caller-owned" ? "caller_managed"
           : "forwarded",
       defaultTarget: binding,
-      cliCommand: "myagents im send-message",
+      cliCommand: "lsagent im send-message",
       targetTypes: channel?.targetTypes ?? null,
       mediaTypes: channel?.mediaTypes ?? null,
       askUserQuestion: snapshot.askUserQuestion,

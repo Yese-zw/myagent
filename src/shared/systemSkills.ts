@@ -1,5 +1,5 @@
 /** Version shared with Rust's SYSTEM_SKILLS_VERSION contract. */
-export const SYSTEM_SKILLS_VERSION = '61';
+export const SYSTEM_SKILLS_VERSION = '62';
 
 /**
  * Canonical Skill names that are part of LSAGENT' always-available runtime
@@ -7,19 +7,19 @@ export const SYSTEM_SKILLS_VERSION = '61';
  *
  * The effective project/global winner for these names cannot be disabled as
  * an ordinary Skill. The task and memory skills back managed workflows, while
- * myagents-cli and myagents-docs are the product's baseline operation and
+ * lsagent-cli and lsagent-docs are the product's baseline operation and
  * product-knowledge surfaces.
  */
 export const REQUIRED_SYSTEM_SKILLS = [
-  'myagents-task-alignment',
-  'myagents-memory-update',
-  'myagents-memory-gardener',
-  'myagents-memory-molt',
-  'myagents-cli',
-  'myagents-anydoc',
-  'myagents-speech-recognition',
-  'myagents-task-automation',
-  'myagents-docs',
+  'lsagent-task-alignment',
+  'lsagent-memory-update',
+  'lsagent-memory-gardener',
+  'lsagent-memory-molt',
+  'lsagent-cli',
+  'lsagent-anydoc',
+  'lsagent-speech-recognition',
+  'lsagent-task-automation',
+  'lsagent-docs',
 ] as const;
 
 export type RequiredSystemSkill = typeof REQUIRED_SYSTEM_SKILLS[number];
@@ -31,17 +31,17 @@ export type RequiredSystemSkill = typeof REQUIRED_SYSTEM_SKILLS[number];
  * still current before dispatch.
  */
 export interface ProductSystemSkillRequirement {
-  name: 'myagents-task-alignment';
-  sourceLocalId: 'myagents-task-alignment';
+  name: 'lsagent-task-alignment';
+  sourceLocalId: 'lsagent-task-alignment';
   systemSkillsVersion: typeof SYSTEM_SKILLS_VERSION;
   contentSha256: string;
 }
 
 export const TASK_ALIGNMENT_SKILL_REQUIREMENT: ProductSystemSkillRequirement = {
-  name: 'myagents-task-alignment',
-  sourceLocalId: 'myagents-task-alignment',
+  name: 'lsagent-task-alignment',
+  sourceLocalId: 'lsagent-task-alignment',
   systemSkillsVersion: SYSTEM_SKILLS_VERSION,
-  contentSha256: '9620698adb62b54b5f8f2e700a33d8e417a29b447e6134316bbf9ff3cc35fd58',
+  contentSha256: '61595999cf5d1b4343bb3a631f3c133892be69d030225916ff819e1b56e5407c',
 };
 
 export type SystemSkillAdmissionRequirement =

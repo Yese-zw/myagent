@@ -44,7 +44,7 @@ describe('ExternalCliSettingsSection', () => {
         return {
           enabled: false,
           launcherPath: '/Applications/MyAgents/myagents',
-          skillPath: '/Users/test/.myagents/external-myagents-cli/SKILL.md',
+          skillPath: '/Users/test/.myagents/external-lsagent-cli/SKILL.md',
           skillReady: true,
         };
       }
@@ -54,7 +54,7 @@ describe('ExternalCliSettingsSection', () => {
           token: 'mae_test_token',
           createdAt: '2026-09-19T00:00:00.000Z',
           launcherPath: '/Applications/MyAgents/myagents',
-          skillPath: '/Users/test/.myagents/external-myagents-cli/SKILL.md',
+          skillPath: '/Users/test/.myagents/external-lsagent-cli/SKILL.md',
           skillReady: true,
         };
       }
@@ -66,7 +66,7 @@ describe('ExternalCliSettingsSection', () => {
     mocks.invoke.mockResolvedValueOnce({
       enabled: false,
       launcherPath: '/Applications/MyAgents/myagents',
-      skillPath: '/Users/test/.myagents/external-myagents-cli/SKILL.md',
+      skillPath: '/Users/test/.myagents/external-lsagent-cli/SKILL.md',
       skillReady: true,
     });
     renderSection();
@@ -80,7 +80,7 @@ describe('ExternalCliSettingsSection', () => {
       token: 'mae_from_other_window',
       createdAt: '2026-09-19T00:00:00.000Z',
       launcherPath: '/Applications/MyAgents/myagents',
-      skillPath: '/Users/test/.myagents/external-myagents-cli/SKILL.md',
+      skillPath: '/Users/test/.myagents/external-lsagent-cli/SKILL.md',
       skillReady: true,
     });
     mocks.listener?.();
@@ -106,7 +106,7 @@ describe('ExternalCliSettingsSection', () => {
       .mockResolvedValueOnce({
         enabled: false,
         launcherPath: '/Applications/MyAgents/myagents',
-        skillPath: '/Users/test/.myagents/external-myagents-cli/SKILL.md',
+        skillPath: '/Users/test/.myagents/external-lsagent-cli/SKILL.md',
         skillReady: true,
       })
       .mockResolvedValueOnce({
@@ -114,7 +114,7 @@ describe('ExternalCliSettingsSection', () => {
         token: 'mae_missed_event',
         createdAt: '2026-09-19T00:00:00.000Z',
         launcherPath: '/Applications/MyAgents/myagents',
-        skillPath: '/Users/test/.myagents/external-myagents-cli/SKILL.md',
+        skillPath: '/Users/test/.myagents/external-lsagent-cli/SKILL.md',
         skillReady: true,
       });
 
@@ -160,7 +160,7 @@ describe('ExternalCliSettingsSection', () => {
           token: 'mae_real_secret_must_not_leak',
           createdAt: '2026-09-19T00:00:00.000Z',
           launcherPath: '/Users/test/.myagents/bin/myagents',
-          skillPath: '/Users/test/.myagents/external-myagents-cli/SKILL.md',
+          skillPath: '/Users/test/.myagents/external-lsagent-cli/SKILL.md',
           skillReady: true,
         };
       }
@@ -183,7 +183,7 @@ describe('ExternalCliSettingsSection', () => {
 
     const copied = mocks.copyPlainText.mock.calls.at(-1)?.[0] as string;
     expect(copied).toBe(
-      '请先阅读本机文件 "/Users/test/.myagents/external-myagents-cli/SKILL.md"，并严格按照其中的公开 CLI 契约操作 LSAGENT。\n\n' +
+      '请先阅读本机文件 "/Users/test/.myagents/external-lsagent-cli/SKILL.md"，并严格按照其中的公开 CLI 契约操作 LSAGENT。\n\n' +
         '本机 LSAGENT CLI 完整路径是："/Users/test/.myagents/bin/myagents"\n\n' +
         '请将 MYAGENTS_API_TOKEN 注入到环境变量：`export MYAGENTS_API_TOKEN="mae_real_secret_must_not_leak"`',
     );
@@ -263,7 +263,7 @@ describe('ExternalCliSettingsSection', () => {
           token: 'mae_existing_token',
           createdAt: '2026-09-19T00:00:00.000Z',
           launcherPath: '/Users/test/.myagents/bin/myagents',
-          skillPath: '/Users/test/.myagents/external-myagents-cli/SKILL.md',
+          skillPath: '/Users/test/.myagents/external-lsagent-cli/SKILL.md',
           skillReady: false,
         };
       }

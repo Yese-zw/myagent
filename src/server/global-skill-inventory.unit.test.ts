@@ -67,7 +67,7 @@ describe('global Skill inventory', () => {
 
   it('reports a missing required Skill without rejecting the remaining inventory', () => {
     const root = makeSkillsRoot();
-    rmSync(join(root, 'myagents-cli'), { recursive: true, force: true });
+    rmSync(join(root, 'lsagent-cli'), { recursive: true, force: true });
     mkdirSync(join(root, 'optional-broken'), { recursive: true });
     const snapshot = createGlobalSkillInventorySnapshot({
       rootPath: root,
@@ -75,9 +75,9 @@ describe('global Skill inventory', () => {
       disabledSkillNames: new Set(),
     });
 
-    expect(snapshot.entries.map(entry => entry.folderName)).not.toContain('myagents-cli');
+    expect(snapshot.entries.map(entry => entry.folderName)).not.toContain('lsagent-cli');
     expect(snapshot.integrityIssues).toContainEqual(expect.objectContaining({
-      folderName: 'myagents-cli',
+      folderName: 'lsagent-cli',
       reason: 'missing_required_skill',
     }));
     expect(snapshot.integrityIssues).toContainEqual(expect.objectContaining({
@@ -88,8 +88,8 @@ describe('global Skill inventory', () => {
 
   it('does not let a non-directory Required slot hide its diagnostic', () => {
     const root = makeSkillsRoot();
-    rmSync(join(root, 'myagents-cli'), { recursive: true, force: true });
-    writeFileSync(join(root, 'myagents-cli'), 'not a Skill directory');
+    rmSync(join(root, 'lsagent-cli'), { recursive: true, force: true });
+    writeFileSync(join(root, 'lsagent-cli'), 'not a Skill directory');
 
     const snapshot = createGlobalSkillInventorySnapshot({
       rootPath: root,
@@ -98,7 +98,7 @@ describe('global Skill inventory', () => {
     });
 
     expect(snapshot.integrityIssues).toContainEqual(expect.objectContaining({
-      folderName: 'myagents-cli',
+      folderName: 'lsagent-cli',
       reason: 'missing_required_skill',
     }));
   });

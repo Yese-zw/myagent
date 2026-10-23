@@ -2,7 +2,7 @@
 
 使用场景：白屏、整页渲染错误、某面板打开就崩，或桌面宠物/悬浮窗打不开、卡在“正在连接 Mino”、无法对话。
 
-小助理与悬浮入口的正常定位先读 `/myagents-docs/references/agents-channels.md`。
+小助理与悬浮入口的正常定位先读 `/lsagent-docs/references/agents-channels.md`。
 
 ## 主窗口 Render
 
@@ -12,8 +12,8 @@
 - 长文本流式卡顿与 render exception 分开：当前 Markdown 稳定前缀按块缓存，布局估算只重算变化行；巨大单个代码块/首次挂载仍有成本。记录消息形态、长度、是否 streaming、是否能滚动及首个错误，不把所有卡顿都归给网络或历史保存。
 
 ```bash
-myagents status --json
-myagents version
+lsagent status --json
+lsagent version
 rg -n "\\[AppErrorBoundary\\]|\\[REACT\\] \\[ERROR\\]|Cannot read properties|Minified React error|render" ./logs/unified-*.log | node .claude/skills/support/scripts/redact-log-output.mjs | tail -100
 rg '\[boot\]' ./logs/unified-*.log | node .claude/skills/support/scripts/redact-log-output.mjs | tail -5
 ```

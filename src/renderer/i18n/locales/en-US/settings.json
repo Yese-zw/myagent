@@ -30,7 +30,7 @@
   },
   "externalCli": {
     "title": "External Calls",
-    "description": "Let local programs call LSAGENT through the myagents CLI bundled with the app. The app must remain running.",
+    "description": "Let local programs call LSAGENT through the lsagent CLI bundled with the app. The app must remain running.",
     "enableTitle": "LSAGENT CLI external access",
     "enableDescription": "Off by default. When enabled, only commands in the public list with the current token are accepted.",
     "enabledToast": "CLI external access enabled",
@@ -2235,7 +2235,7 @@
     "developerQuote": "You have an idea. And it's done.",
     "labTitle": "Lab",
     "cliRegistryTitle": "CLI Tool Registry",
-    "cliRegistryDescription": "Allow AI to create and register command-line tools, then manage them in Tools. New sessions can discover enabled tools automatically. MCP and built-in myagents CLI capabilities are not affected.",
+    "cliRegistryDescription": "Allow AI to create and register command-line tools, then manage them in Tools. New sessions can discover enabled tools automatically. MCP and built-in lsagent CLI capabilities are not affected.",
     "desktopPetTitle": "Desktop Pet",
     "desktopPetDescription": "Show the Desktop Pet entry in the Settings sidebar. The floating ball itself is controlled by the switch at the top of the Desktop Pet page.",
     "desktopPetEnabled": "Desktop Pet entry shown",

@@ -37,7 +37,7 @@ describe('buildUserToolsSectionText', () => {
     expect(text).toContain(`## tool-${CLI_TOOL_PROMPT_MAX_TOOLS - 1}`);
     expect(text).not.toContain(`## tool-${CLI_TOOL_PROMPT_MAX_TOOLS}`);
     expect(text).toContain('…and 5 more registered tool(s)');
-    expect(text).toContain('myagents tool list');
+    expect(text).toContain('lsagent tool list');
   });
 });
 
@@ -68,7 +68,7 @@ describe('findMissingEnvKeys', () => {
 describe('readCliToolManifest', () => {
   const dirs: string[] = [];
   const makeToolDir = (manifest: unknown, opts?: { skipEntryFile?: boolean }): string => {
-    const dir = mkdtempSync(join(tmpdir(), 'myagents-clitool-test-'));
+    const dir = mkdtempSync(join(tmpdir(), 'lsagent-clitool-test-'));
     dirs.push(dir);
     writeFileSync(join(dir, 'tool.json'), typeof manifest === 'string' ? manifest : JSON.stringify(manifest));
     if (!opts?.skipEntryFile) writeFileSync(join(dir, 'run.mjs'), '// entry');
@@ -86,7 +86,7 @@ describe('readCliToolManifest', () => {
   });
 
   it('fails with MANIFEST_NOT_FOUND for a dir without tool.json', () => {
-    const dir = mkdtempSync(join(tmpdir(), 'myagents-clitool-test-'));
+    const dir = mkdtempSync(join(tmpdir(), 'lsagent-clitool-test-'));
     dirs.push(dir);
     const r = readCliToolManifest(dir);
     expect(r.ok).toBe(false);

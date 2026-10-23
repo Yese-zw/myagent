@@ -2,7 +2,7 @@
 
 使用场景：Task/Cron 到点没执行、任务状态卡住、Goal 不续跑或终态错误、Record 异常、需要向另一个 Session 反馈。
 
-正确产品语义先读 `/myagents-docs/references/automation.md`。这里仅处理实际行为偏离预期的现场。
+正确产品语义先读 `/lsagent-docs/references/automation.md`。这里仅处理实际行为偏离预期的现场。
 
 ## Ground truth
 
@@ -16,12 +16,12 @@
 ## Task / Cron 取证
 
 ```bash
-myagents cron status --json
-myagents cron list --json
-myagents cron list --workspace <absolute-workspace-path> --json
-myagents cron runs <task-id> --limit 20 --json
-myagents task list --json
-myagents task get <task-id> --json
+lsagent cron status --json
+lsagent cron list --json
+lsagent cron list --workspace <absolute-workspace-path> --json
+lsagent cron runs <task-id> --limit 20 --json
+lsagent task list --json
+lsagent task get <task-id> --json
 rg -n "task-scheduler|\\[task\\]|CronTask|cron_runs|nextRun|workspacePath|execution failed|runtimeSource|terminal_reason" ./logs/unified-*.log | node .claude/skills/support/scripts/redact-log-output.mjs | tail -180
 ```
 
@@ -42,16 +42,16 @@ rg -n "task-scheduler|\\[task\\]|CronTask|cron_runs|nextRun|workspacePath|execut
 需要复现调度时，先向用户说明会实际启动一次执行及其可能的工具调用、费用和外部副作用；只有取得明确确认后才运行：
 
 ```bash
-myagents cron run-now <task-id>
+lsagent cron run-now <task-id>
 # 或按 Task 当前状态和精确 help 选择：
-myagents task run <task-id>
-myagents task rerun <task-id>
+lsagent task run <task-id>
+lsagent task rerun <task-id>
 ```
 
 ## Goal Mode 取证
 
 ```bash
-myagents goal get
+lsagent goal get
 rg -n "\\[Goal\\]|goal|token_budget|continuation|complete|blocked|pause|cancel|owner|terminal_reason" ./logs/unified-*.log | node .claude/skills/support/scripts/redact-log-output.mjs | tail -180
 ```
 
@@ -66,17 +66,17 @@ rg -n "\\[Goal\\]|goal|token_budget|continuation|complete|blocked|pause|cancel|o
 ## Record 与 Session Inbox
 
 ```bash
-myagents record list --json
-myagents record list --kind text --json
-myagents record list --kind audio --json
+lsagent record list --json
+lsagent record list --kind text --json
+lsagent record list --kind audio --json
 ```
 
-Record 统一保存文字笔记和会议录音，不会自行创建或执行 Task。若 Record 存在但后续 Task 未创建，先确认用户是否真的走了对齐/物化流程；音频 Record 还应分别核对录音、转写和说话人处理状态，不能把“文件已保存”误判为“转写已完成”。`myagents thought` 只是在旧脚本中可能出现的文字 Record 兼容 alias，新诊断命令不主动使用。
+Record 统一保存文字笔记和会议录音，不会自行创建或执行 Task。若 Record 存在但后续 Task 未创建，先确认用户是否真的走了对齐/物化流程；音频 Record 还应分别核对录音、转写和说话人处理状态，不能把“文件已保存”误判为“转写已完成”。`lsagent thought` 只是在旧脚本中可能出现的文字 Record 兼容 alias，新诊断命令不主动使用。
 
 当用户明确要求给另一个 Session 反馈、追问或下指令时：
 
 ```bash
-myagents session send <session-id> -p "..."
+lsagent session send <session-id> -p "..."
 ```
 
 多行内容用 `--prompt-file`。仅回答当前用户时不要使用 `session send`；发送会改变另一个 Session，应有明确目标与内容授权。只观察用 get/state/watch，接纳未知不自动重发；本机/跨设备与回传语义见 `agent-network.md`。

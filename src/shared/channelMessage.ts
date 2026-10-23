@@ -8,7 +8,7 @@ const id = z
 /** Shared by the CLI and the Session admin endpoint. No caller or
  * delivery-authority fields are accepted from model input. */
 export const channelMessageShape = {
-  context: z.string().optional().describe('向其他会话交接时必填的事情背景；仅供目标 Session 理解，不作为外发正文。用法见 myagents im send-message --help。'),
+  context: z.string().optional().describe('向其他会话交接时必填的事情背景；仅供目标 Session 理解，不作为外发正文。用法见 lsagent im send-message --help。'),
   text: z
     .string()
     .optional()
@@ -56,7 +56,7 @@ export const channelMessageSchema = z.preprocess((input, ctx) => {
       if (typeof value.context !== 'string' || !value.context.trim()) missing.push('context');
       ctx.addIssue({ code: 'custom', message: channelHandoffInputError(missing), params: { code: CHANNEL_HANDOFF_INPUT_INCOMPLETE, missingFields: missing } });
     } else if (target && !['user', 'chat'].includes(String(target.type))) {
-      ctx.addIssue({ code: 'custom', message: 'target.type 必须为 user 或 chat。发送到其他会话时，需要目标 ID、text 和 context；目标 Session 接收背景后转达并承接后续对话。本次未投递、未发送。完整用法：myagents im send-message --help（向其他会话发送）。', params: { code: 'CHANNEL_TARGET_INVALID' } });
+      ctx.addIssue({ code: 'custom', message: 'target.type 必须为 user 或 chat。发送到其他会话时，需要目标 ID、text 和 context；目标 Session 接收背景后转达并承接后续对话。本次未投递、未发送。完整用法：lsagent im send-message --help（向其他会话发送）。', params: { code: 'CHANNEL_TARGET_INVALID' } });
     }
   }
   return input;

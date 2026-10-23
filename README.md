@@ -43,7 +43,7 @@ LSAGENT 同时为人和 Agent 提供操作入口：你通过GUI使用， Agent �
 本文面向 **0.5.0**。可下载版本与发布说明请以[官网](https://myagents.io)和 [Releases](https://github.com/hAcKlyc/MyAgents/releases) 为准。
 
 1. **安装客户端**：支持 macOS 13+（Apple Silicon / Intel）和 Windows 10+。下载对应安装包即可开始，无需自行安装 Node.js 或搭建服务器。
-2. **接入模型**：在「设置 → 模型供应商」中登录支持的订阅，或填写模型 API 配置，再选择匹配的 Runtime 与模型。具体接入方式见[模型与 Runtime 指南](bundled-skills/myagents-docs/references/models-providers-runtimes.md)。
+2. **接入模型**：在「设置 → 模型供应商」中登录支持的订阅，或填写模型 API 配置，再选择匹配的 Runtime 与模型。具体接入方式见[模型与 Runtime 指南](bundled-skills/lsagent-docs/references/models-providers-runtimes.md)。
 3. **选择工作区、创建 Agent**：可以使用自己的项目目录，也可以从内置 Mino 模板开始，为 Agent 配好需要的 Skill 与工具。
 4. **开始工作**：带上资料说明目标，在对话中不断调整方向；需要持续处理的事务，让 Agent 帮你建立 Task。
 
@@ -74,13 +74,13 @@ LSAGENT 同时为人和 Agent 提供操作入口：你通过GUI使用， Agent �
 
 > 每天上午检查这个工作区的新资料；有更新时整理摘要和需要我决定的事项，没有更新就保持安静。先和我确认检查方式与结果保存位置，再建立任务。
 
-Task 安排工作何时触发；如果当前会话需要围绕一个目标持续研究、执行和验证，可以使用 **Goal Mode**。两者的用法见[任务与自动化指南](bundled-skills/myagents-docs/references/automation.md)。
+Task 安排工作何时触发；如果当前会话需要围绕一个目标持续研究、执行和验证，可以使用 **Goal Mode**。两者的用法见[任务与自动化指南](bundled-skills/lsagent-docs/references/automation.md)。
 
 ### 人通过 GUI 操作，Agent 通过 CLI 安排工作
 
 你可以在界面中管理 Agent、Task 和工作记录，LSAGENT 内运行的 Agent 也可以通过 `myagents` CLI 建立任务、调用其他 Agent、读取状态、回写结果。对话里的要求由此可以成为真正的任务安排。
 
-你安装的其他 Agent 同样可以接入：在「设置 → 外部调用」中启用功能并完成令牌授权后，通过公开 CLI 能力使用 LSAGENT。支持范围与接入步骤见[外部 Agent 接入指南](bundled-guides/external-myagents-cli/SKILL.md)。
+你安装的其他 Agent 同样可以接入：在「设置 → 外部调用」中启用功能并完成令牌授权后，通过公开 CLI 能力使用 LSAGENT。支持范围与接入步骤见[外部 Agent 接入指南](bundled-guides/external-lsagent-cli/SKILL.md)。
 
 ### 从常用的消息软件与 Agent 协作
 
@@ -88,7 +88,7 @@ Task 安排工作何时触发；如果当前会话需要围绕一个目标持续
 
 ![Channel 设置中的飞书、钉钉、Telegram 与可扩展 IM 平台](specs/assets/readme/v050-im-channels-zh.png)
 
-*将通道添加到工作区，或安装所需的平台插件；具体配置见 [Agent 与 Channel 指南](bundled-skills/myagents-docs/references/agents-channels.md)。*
+*将通道添加到工作区，或安装所需的平台插件；具体配置见 [Agent 与 Channel 指南](bundled-skills/lsagent-docs/references/agents-channels.md)。*
 
 ### 用 Space 围绕目标交接结果
 
@@ -96,7 +96,7 @@ Space 提供 Issue、共同目标（Space Goal）、共享 Skill 和工具。你
 
 参与的 Agent 在 Space 中登记身份、认领工作，再回到自己的本地环境执行。你与自己的 Agent 持续互动，合作方也与他们的 Agent 推进工作，彼此围绕目标与交付协作。
 
-已有的 GitHub、在线文档和办公系统也可以通过相应工具接入工作流程。Space 的使用方式见[协作空间指南](bundled-skills/myagents-docs/references/cloud-space.md)。
+已有的 GitHub、在线文档和办公系统也可以通过相应工具接入工作流程。Space 的使用方式见[协作空间指南](bundled-skills/lsagent-docs/references/cloud-space.md)。
 
 ## 更多工作能力
 
@@ -110,7 +110,7 @@ Space 提供 Issue、共同目标（Space Goal）、共享 Skill 和工具。你
 | 桌面入口 | 主工作台、小助理和桌面浮窗，适合完整工作与临时提问。 |
 | 本机桌面操作 | macOS / Windows 提供可选的 Cuse 全局 Skill 与 CLI，让 Agent 使用本机桌面操作能力。 |
 
-进一步了解：[模型与 Runtime](bundled-skills/myagents-docs/references/models-providers-runtimes.md) · [Skill、工具与插件](bundled-skills/myagents-docs/references/tools-skills-plugins.md) · [Agent 与 Channel](bundled-skills/myagents-docs/references/agents-channels.md) · [Record 与 Task](bundled-skills/myagents-docs/references/automation.md)
+进一步了解：[模型与 Runtime](bundled-skills/lsagent-docs/references/models-providers-runtimes.md) · [Skill、工具与插件](bundled-skills/lsagent-docs/references/tools-skills-plugins.md) · [Agent 与 Channel](bundled-skills/lsagent-docs/references/agents-channels.md) · [Record 与 Task](bundled-skills/lsagent-docs/references/automation.md)
 
 ## 运行说明与常见问题
 
@@ -141,7 +141,7 @@ LSAGENT 客户端免费开源。你选择的模型订阅、API 或外部工具�
 
 ### 外部 Agent 可以操作全部功能吗？
 
-外部调用默认关闭。启用并授权后，外部 Agent 可以使用公开命令提供的 Agent、会话、Task、Record 等能力；具体范围见[接入指南](bundled-guides/external-myagents-cli/SKILL.md)，与应用内 Agent 的完整操作范围有所区别。
+外部调用默认关闭。启用并授权后，外部 Agent 可以使用公开命令提供的 Agent、会话、Task、Record 等能力；具体范围见[接入指南](bundled-guides/external-lsagent-cli/SKILL.md)，与应用内 Agent 的完整操作范围有所区别。
 
 ## 开发与贡献
 

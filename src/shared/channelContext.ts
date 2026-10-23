@@ -107,7 +107,7 @@ export const channelFactsSchema = z
           "suppressed",
         ]),
         defaultTarget: channelTargetSchema.nullable(),
-        cliCommand: z.literal("myagents im send-message"),
+        cliCommand: z.literal("lsagent im send-message"),
         targetTypes: z
           .array(
             z

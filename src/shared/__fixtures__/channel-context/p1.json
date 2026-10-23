@@ -5,6 +5,6 @@
   "sender":{"id":"user_demo","idType":"open_id","name":"小林","username":null,"kind":"human"},
   "message":{"eventId":"request_demo","platformMessageId":"message_demo","sentAt":null,"receivedAt":"2026-10-17T10:00:00+08:00","aggregation":"single","addressedToBot":true,"mentionsSelf":false,"replyToSelf":null},
   "execution":{"source":"im","startedAt":"2026-10-17T10:00:02+08:00","timezone":"Asia/Shanghai"},
-  "delivery":{"mode":"tool_only","ordinaryOutput":"not_forwarded","defaultTarget":{"channelId":"channel_demo","type":"chat","id":"chat_demo","idType":"chat_id"},"cliCommand":"myagents im send-message","targetTypes":[{"type":"user","idTypes":["open_id"]},{"type":"chat","idTypes":["chat_id"]}],"mediaTypes":["image","file"],"askUserQuestion":"none"},
+  "delivery":{"mode":"tool_only","ordinaryOutput":"not_forwarded","defaultTarget":{"channelId":"channel_demo","type":"chat","id":"chat_demo","idType":"chat_id"},"cliCommand":"lsagent im send-message","targetTypes":[{"type":"user","idTypes":["open_id"]},{"type":"chat","idTypes":["chat_id"]}],"mediaTypes":["image","file"],"askUserQuestion":"none"},
   "projection":{"truncatedFields":[],"omitted":{"history":0,"mentions":0,"attachments":0,"parts":0,"platformContext":0}}
 }

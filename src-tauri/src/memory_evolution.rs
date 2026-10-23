@@ -125,14 +125,14 @@ pub async fn configure_memory_evolution_tasks(
         MANAGED_KIND_MEMORY_GARDENER,
         "Memory Gardener",
         GARDENER_INTERVAL_MINUTES,
-        "myagents-memory-gardener",
+        "lsagent-memory-gardener",
         &request.workspace_path,
     );
     let molt = job_spec(
         MANAGED_KIND_MEMORY_MOLT,
         "Memory Molt",
         MOLT_INTERVAL_MINUTES,
-        "myagents-memory-molt",
+        "lsagent-memory-molt",
         &request.workspace_path,
     );
 
@@ -217,8 +217,8 @@ pub(crate) async fn reconcile_prompt_before_start(
     control: &crate::task_scheduler::TaskControlGuard,
 ) -> Result<(), String> {
     let skill_name = match existing.managed_kind.as_deref() {
-        Some(MANAGED_KIND_MEMORY_GARDENER) => "myagents-memory-gardener",
-        Some(MANAGED_KIND_MEMORY_MOLT) => "myagents-memory-molt",
+        Some(MANAGED_KIND_MEMORY_GARDENER) => "lsagent-memory-gardener",
+        Some(MANAGED_KIND_MEMORY_MOLT) => "lsagent-memory-molt",
         _ => return Ok(()),
     };
     let prompt = maintenance_prompt(skill_name, &existing.workspace_path);
@@ -891,9 +891,9 @@ mod tests {
             let current = std::fs::read_to_string(&path).unwrap();
             if let Some(kind) = kind {
                 let skill = if kind == MANAGED_KIND_MEMORY_GARDENER {
-                    "myagents-memory-gardener"
+                    "lsagent-memory-gardener"
                 } else {
-                    "myagents-memory-molt"
+                    "lsagent-memory-molt"
                 };
                 assert_eq!(current, maintenance_prompt(skill, &existing.workspace_path));
                 assert!(current.contains("Create missing files when necessary"));

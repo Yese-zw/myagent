@@ -1669,9 +1669,9 @@ mod tests {
     #[test]
     fn packaged_task_automation_detector_examples_match_the_real_validators() {
         let skill = include_str!(
-            "../../bundled-skills/myagents-task-automation/references/command-detector.md"
+            "../../bundled-skills/lsagent-task-automation/references/command-detector.md"
         );
-        let index = include_str!("../../bundled-skills/myagents-task-automation/SKILL.md");
+        let index = include_str!("../../bundled-skills/lsagent-task-automation/SKILL.md");
         assert!(index.contains("myagents task start <taskId>"));
         assert!(!index.contains("myagents cron start <taskId>"));
         let blocks = skill

@@ -1140,24 +1140,24 @@ function resolveBundledSkillsDir(): string | null {
 const SYSTEM_SKILLS: readonly string[] = [
   // Optional native desktop Skill; Rust owns complete bundle updates.
   'cuse',
-  'myagents-task-alignment',
+  'lsagent-task-alignment',
   // v10: ultra-research removed — not generic enough.
   'download-anything',
-  // v9: myagents-cli — global skill that exposes the entire `myagents`
+  // v9: lsagent-cli — global skill that exposes the entire `myagents`
   // CLI surface (cron / task / mcp / model / agent / runtime / skill /
   // plugin / widget / im / config) to every AI session in the product.
   // Force-synced because SKILL.md must track CLI changes in lockstep.
-  'myagents-cli',
+  'lsagent-cli',
   // v49: progressive instructions for the bundled offline document converter.
-  'myagents-anydoc',
+  'lsagent-anydoc',
   // v54: progressive instructions for Session-scoped local attachment ASR.
-  'myagents-speech-recognition',
+  'lsagent-speech-recognition',
   // v44: one Agent workflow for scheduled, future and conditional Task
   // automation; command Detector protocol is progressively disclosed inside.
-  'myagents-task-automation',
+  'lsagent-task-automation',
   // v35: stable product-use knowledge and expected-behaviour contract for
-  // every LSAGENT session. Live operations remain in myagents-cli.
-  'myagents-docs',
+  // every LSAGENT session. Live operations remain in lsagent-cli.
+  'lsagent-docs',
   // v18: tool-creator — meta-skill for the CLI tool registry (PRD 0.2.36).
   // Teaches AI to author standards-compliant Agent-CLI tools and register
   // them via `myagents tool add`. Force-synced because its contract (eight
@@ -1167,9 +1167,9 @@ const SYSTEM_SKILLS: readonly string[] = [
   // v33: hidden memory-maintenance flows target these skills by exact name.
   // Force-sync so the injected prompt, managed tasks, and skill workflow stay
   // consistent across app upgrades.
-  'myagents-memory-update',
-  'myagents-memory-gardener',
-  'myagents-memory-molt',
+  'lsagent-memory-update',
+  'lsagent-memory-gardener',
+  'lsagent-memory-molt',
   // v50: skill-creator promoted from utility → system skill so its bundled
   // workflow and evaluation scripts update existing installations.
   'skill-creator',
@@ -2012,6 +2012,8 @@ async function routeAdminApi(
     const { handleAdminSessionStart } = await import(
       './inbox/start-admin-handler'
     );
+    const sourceKind =
+      caller.kind === 'external-cli' ? 'external-cli' : 'internal-session';
     const result = await handleAdminSessionStart(
       getRuntimeSessionIdForRequest(),
       payload,
@@ -2036,6 +2038,8 @@ async function routeAdminApi(
       replyBack:
         caller.kind === 'external-cli' ? false : payload.replyBack !== false,
     };
+    const sourceKind =
+      caller.kind === 'external-cli' ? 'external-cli' : 'internal-session';
     const result = await handleAdminInbox(
       getRuntimeSessionIdForRequest(),
       sessionRequest,
@@ -11358,7 +11362,7 @@ description: >
 
           // Build the hidden official-workflow prompt. Empty UPDATE_MEMORY.md
           // body means there are no workspace-specific additions; it does not
-          // disable the versioned myagents-memory-update system skill.
+          // disable the versioned lsagent-memory-update system skill.
           const now = new Date().toLocaleString('en-US', {
             timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
             year: 'numeric',
@@ -11416,7 +11420,7 @@ description: >
             timeoutMs: MEMORY_UPDATE_TIMEOUT_MS,
             pollMs: 1000,
             beforeDispatch: taskDispatchGuard,
-            requiredSystemSkill: 'myagents-memory-update',
+            requiredSystemSkill: 'lsagent-memory-update',
             ...(isAuto
               ? {
                   queueId,

@@ -5333,8 +5333,8 @@ fn validate_discussion_input(
         || input.text.trim().is_empty()
         || input.text != context.visible_user_message
         || Uuid::parse_str(&input.client_request_id).is_err()
-        || input.required_system_skill.name != "myagents-task-alignment"
-        || input.required_system_skill.source_local_id != "myagents-task-alignment"
+        || input.required_system_skill.name != "lsagent-task-alignment"
+        || input.required_system_skill.source_local_id != "lsagent-task-alignment"
         || input.required_system_skill.system_skills_version.is_empty()
         || input.required_system_skill.content_sha256.len() != 64
         || !input
@@ -7773,7 +7773,7 @@ mod tests {
                 "candidatesDir": dir.join("candidates").to_string_lossy(), "workspaceId": "ws", "workspacePath": "/ws", "sourceRecordId": "record-audio",
                 "sourceRecordDocumentPath": "/record/content.md", "sourceRecordAudioPaths": [{ "track": "mixed", "path": "/record/audio.wav" }],
                 "visibleUserMessage": "  Original input\nkeep spaces  " } },
-            "requiredSystemSkill": { "name": "myagents-task-alignment", "sourceLocalId": "myagents-task-alignment", "systemSkillsVersion": "60", "contentSha256": "a".repeat(64) }
+            "requiredSystemSkill": { "name": "lsagent-task-alignment", "sourceLocalId": "lsagent-task-alignment", "systemSkillsVersion": "60", "contentSha256": "a".repeat(64) }
         })).unwrap()
     }
 

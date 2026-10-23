@@ -86,6 +86,8 @@ pub struct Agreement {
 #[serde(default)]
 pub struct PublicSettings {
     pub site_name: String,
+    /// Website logo. May be an absolute URL, a root-relative path, or a data URL.
+    pub site_logo: String,
     pub registration_enabled: bool,
     pub email_verify_enabled: bool,
     pub invitation_code_enabled: bool,

@@ -2,7 +2,7 @@
 
 使用场景：Provider/API Key/订阅登录/模型不可用、回复报错，或 MCP 工具不显示、启动/登录/握手失败。
 
-正确概念与生效时机先读 `/myagents-docs/references/models-providers-runtimes.md` 和 `tools-skills-plugins.md`。
+正确概念与生效时机先读 `/lsagent-docs/references/models-providers-runtimes.md` 和 `tools-skills-plugins.md`。
 
 ## Provider Ground truth
 
@@ -18,15 +18,15 @@
 ## Provider 取证
 
 ```bash
-myagents model list --json
+lsagent model list --json
 rg -n "provider/verify|subscription/verify|auth error|401|403|429|verification|model_error|terminal_reason|anthropic-sub|codex-sub|xai-sub|antigravity-sub|cliproxy|opencode|managed-codex|grok-auth|entitlement|quota|usage credits" ./logs/unified-*.log | node .claude/skills/support/scripts/redact-log-output.mjs | tail -200
 ```
 
 API Key Provider 需要现场复测时：
 
 ```bash
-myagents model verify <provider-id> --json
-myagents model verify <provider-id> --model <model-id> --json
+lsagent model verify <provider-id> --json
+lsagent model verify <provider-id> --model <model-id> --json
 ```
 
 订阅 Provider 先用设置页、`model list` 与日志看登录/readiness。只有精确 help 明确支持时才运行对应 verify；不要把“不接受 API Key verify”当成订阅失败。
@@ -53,16 +53,16 @@ myagents model verify <provider-id> --model <model-id> --json
 ## MCP 取证
 
 ```bash
-myagents mcp list --json
-myagents mcp show <mcp-id> --json
-myagents mcp oauth status <mcp-id> --json
+lsagent mcp list --json
+lsagent mcp show <mcp-id> --json
+lsagent mcp oauth status <mcp-id> --json
 rg -n "\\[mcp\\]|MCP|mcp.*failed|command not found|oauth|tool_use|tool_result|managed-codex|runtimeSource" ./logs/unified-*.log | node .claude/skills/support/scripts/redact-log-output.mjs | tail -160
 ```
 
 需要复现握手时，在说明影响后运行：
 
 ```bash
-myagents mcp test <mcp-id> --json
+lsagent mcp test <mcp-id> --json
 ```
 
 判断要点：

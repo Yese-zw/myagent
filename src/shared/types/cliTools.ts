@@ -70,6 +70,7 @@ export const CLI_TOOL_NAME_PATTERN = /^[a-z0-9][a-z0-9-]{1,28}[a-z0-9]$/;
  */
 export const CLI_TOOL_RESERVED_NAMES: ReadonlySet<string> = new Set([
   'myagents',
+  'lsagent',
   // 外部 Runtime 的 CLI：重名工具会被 resolveCommand 解析到（~/.myagents/bin
   // 在 fallback PATH 前列），导致 spawn 的是注册工具而不是真 runtime——必然灾难级。
   'claude', 'codex',

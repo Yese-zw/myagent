@@ -2,9 +2,9 @@
  * CLI-backed capability hints injected into the system prompt.
  *
  * Each section teaches the AI about a LSAGENT-specific capability surfaced
- * through the `myagents` CLI rather than as an MCP tool. The brief lives here;
+ * through the `lsagent` CLI rather than as an MCP tool. The brief lives here;
  * the AI fetches full docs on demand via each command's discovery surface
- * (`myagents <topic> readme` where available, otherwise `myagents <topic> --help`).
+ * (`lsagent <topic> readme` where available, otherwise `lsagent <topic> --help`).
  *
  * Two scopes
  * ----------
@@ -19,7 +19,7 @@
  *   that might not need the appendix).
  * - `buildWidgetSection(scenario)` — generative-UI widget guidance. Universal:
  *   both builtin SDK and external runtimes load the design contract through
- *   `myagents widget readme <module>` via their shell tool. There is no MCP
+ *   `lsagent widget readme <module>` via their shell tool. There is no MCP
  *   path for widgets anymore — this is the single source of truth.
  */
 
@@ -36,10 +36,10 @@ import {
 // Each section is a self-contained block with one responsibility. We stack
 // them conditionally per scenario in `buildCliToolsAppend` below.
 
-const SECTION_TASK_AUTOMATION = `<myagents-cli-task-automation>
+const SECTION_TASK_AUTOMATION = `<lsagent-cli-task-automation>
 LSAGENT represents every future, scheduled, recurring, or conditionally
 activated automation as one Task. Use the required system skill
-\`myagents-task-automation\` whenever the user asks for anything like:
+\`lsagent-task-automation\` whenever the user asks for anything like:
 
   "稍后 / 到某个时间 / 每 N 分钟 / 每天 / 定时 / Cron / 循环检查 /
    持续监控 / 等 X 发生后继续 / 满足条件才提醒或处理"
@@ -48,28 +48,28 @@ That Skill chooses one coherent workflow: schedule + always activation for work
 that should run every tick, or schedule + command Detector when a cheap program
 can keep most checks quiet. The user never needs to choose Cron versus Sensor.
 
-Use the canonical \`myagents task\` CLI. Run \`myagents task readme\` for the
-current command surface and \`myagents task --help\` for exact flags. Pass
-\`--json\` when creating or reading back state. Legacy \`myagents cron\` commands
+Use the canonical \`lsagent task\` CLI. Run \`lsagent task readme\` for the
+current command surface and \`lsagent task --help\` for exact flags. Pass
+\`--json\` when creating or reading back state. Legacy \`lsagent cron\` commands
 remain compatible but are not the Agent-facing workflow.
 
 Do not use system cron/crontab/at/launchctl/schtasks; those commands cannot see
 LSAGENT Task, Session, Runtime, notification, or Detector state.
-</myagents-cli-task-automation>`;
+</lsagent-cli-task-automation>`;
 
-const SECTION_TASK_EXIT = `<myagents-cli-task-exit>
+const SECTION_TASK_EXIT = `<lsagent-cli-task-exit>
 You are currently running as a scheduled task AND the task creator enabled
 "Allow AI to exit". If the task goal is fully achieved, or further executions
 would be pointless or counterproductive, end the task early:
 
-  myagents task exit --reason "goal achieved: ..."
+  lsagent task exit --reason "goal achieved: ..."
 
 This marks the task complete and stops future executions. Only use this when
 you're sure — the user set up a schedule for a reason. Do NOT use it to bail
 out of transient errors; retry instead.
-</myagents-cli-task-exit>`;
+</lsagent-cli-task-exit>`;
 
-const SECTION_GOAL = `<myagents-cli-goal>
+const SECTION_GOAL = `<lsagent-cli-goal>
 LSAGENT Goal Mode lets the current LSAGENT session keep working toward one
 long-running objective across turns. Use it only when the User explicitly asks
 to start / enter / use Goal Mode, Goal Loop, 目标模式, 设立目标, or to keep a
@@ -80,21 +80,21 @@ just because a task is long, hard, or multi-step. The user must explicitly ask
 for this mode.
 
 Before using any Goal command in a session, run:
-  myagents goal --help
+  lsagent goal --help
 
 That help explains when to call:
-  myagents goal get
-  myagents goal create --objective-file goal-objective.txt
-  myagents goal update --status complete
-  myagents goal update --status blocked
+  lsagent goal get
+  lsagent goal create --objective-file goal-objective.txt
+  lsagent goal update --status complete
+  lsagent goal update --status blocked
 
 Goal objectives are arbitrary user-provided text. Write them to a file with
 your normal file-writing tool and use --objective-file; workspace and system
 temp files are both accepted. Never interpolate an objective directly into a
 shell command.
-</myagents-cli-goal>`;
+</lsagent-cli-goal>`;
 
-const SECTION_RECORD = `<myagents-cli-record>
+const SECTION_RECORD = `<lsagent-cli-record>
 The user can ask you to save a passing idea or note into LSAGENT Records.
 Create a text Record only when the user explicitly asks to save specific
 content for later, e.g. "记一下", "帮我记", "记下来", "note this down",
@@ -105,48 +105,48 @@ unsolicited ideas do not imply a request to save. The trigger is the
 user's explicit request, not merely the presence of recordable content.
 
 Write the content to a UTF-8 text file, then run:
-  myagents record create --content-file <absolute-path>
+  lsagent record create --content-file <absolute-path>
 
 For listing Records, tags, and other options:
-  myagents record --help
-</myagents-cli-record>`;
+  lsagent record --help
+</lsagent-cli-record>`;
 
-const SECTION_VISION = `<myagents-cli-vision>
+const SECTION_VISION = `<lsagent-cli-vision>
 If the active model/runtime cannot see images, use LSAGENT' image-understanding
 helper instead of guessing. When Read or another file view returns
 "[Unsupported Image]" for a PNG/JPG/WebP/GIF, switch to this helper.
 
 Quick use:
-  myagents vision analyze --image <path> [--image <path> ...] [--prompt 'short request']
-  myagents vision analyze --image <path> --prompt-file <workspace-relative-text-file> [--json]
+  lsagent vision analyze --image <path> [--image <path> ...] [--prompt 'short request']
+  lsagent vision analyze --image <path> --prompt-file <workspace-relative-text-file> [--json]
 
 Use workspace-local paths only, especially \`@myagents_files/...\` attachment
 references. Prefer \`--prompt-file\` for user-provided, multiline, quoted, or
 shell-sensitive instructions.
 
 For details:
-  myagents vision --help
-  myagents vision readme
-</myagents-cli-vision>`;
+  lsagent vision --help
+  lsagent vision readme
+</lsagent-cli-vision>`;
 
-const SECTION_SPEECH = `<myagents-cli-speech>
+const SECTION_SPEECH = `<lsagent-cli-speech>
 LSAGENT can transcribe one audio or video attachment from the current
 Workspace with its local speech models. Use the required system skill
-\`myagents-speech-recognition\` when the user asks you to transcribe a local
+\`lsagent-speech-recognition\` when the user asks you to transcribe a local
 meeting, voice note, recording, or media attachment.
 
 Start with the exact command help:
-  myagents speech --help
+  lsagent speech --help
 
 The command is asynchronous. LSAGENT automatically binds every job to the
 current Session and Workspace; never look for or invent Session/Workspace
 scope flags.
-</myagents-cli-speech>`;
+</lsagent-cli-speech>`;
 
 /**
  * Single source of truth for the widget trigger rule. Embedded into both the
  * system prompt's `SECTION_WIDGET` (always-on guidance) and the CLI's
- * `myagents widget readme` README (`README_WIDGET` in admin-api.ts), so the
+ * `lsagent widget readme` README (`README_WIDGET` in admin-api.ts), so the
  * two surfaces never drift on what counts as a widget-worthy moment.
  */
 export const WIDGET_TRIGGER_GUIDANCE = `your explanation reads better as a picture than as prose: data, comparison, trends, flows, steps, structure, hierarchy, timelines, relationships, tunable concepts, visual metaphors. Route on the content, not on whether the user said "visualize" — if drawing is clearer, draw.`;
@@ -158,7 +158,7 @@ Use it whenever ${WIDGET_TRIGGER_GUIDANCE}
 
 Skip it for: one-line answers, chitchat, content the user explicitly asked as plain text or code, IM bot sessions (widgets only render in desktop chat).
 
-Before your first widget in a session, run \`myagents widget readme <module> [<module> ...]\` via your shell tool (e.g. Bash) to load the design contract. Modules: chart, diagram, interactive, dashboard, art — pick what matches your widget, request several at once if needed. Skip if already pulled this session.
+Before your first widget in a session, run \`lsagent widget readme <module> [<module> ...]\` via your shell tool (e.g. Bash) to load the design contract. Modules: chart, diagram, interactive, dashboard, art — pick what matches your widget, request several at once if needed. Skip if already pulled this session.
 </myagents-generative-ui>`;
 
 // ===== Agent / Session collaboration (PRD 0.4.3) =====
@@ -171,10 +171,10 @@ Before your first widget in a session, run \`myagents widget readme <module> [<m
 // Thin discovery guidance; exact CLI contracts belong to the current help.
 
 const SECTION_SESSION_EVENTS = `<myagents-session-events>
-LSAGENT lets its Agents collaborate through the \`myagents\` CLI. Run these
+LSAGENT lets its Agents collaborate through the \`lsagent\` CLI. Run these
 commands from your shell/Bash tool.
 For local product capabilities (MCP, providers, skills and configuration), start
-with \`myagents --help\`, then the relevant command's \`--help\`. Use Task workflows
+with \`lsagent --help\`, then the relevant command's \`--help\`. Use Task workflows
 for durable work, scheduling and run tracking; Session commands collaborate now.
 
 IDENTITY MODEL
@@ -190,26 +190,26 @@ device under its own Session permissions. \`agent show\` reports birth defaults,
 not an existing Session's effective approval policy.
 
 Product IDs are used by LSAGENT GUI/CLI; internal Runtime IDs are not substitutes.
-For build/runtime diagnostics on demand, run \`myagents version --json\`.
+For build/runtime diagnostics on demand, run \`lsagent version --json\`.
 
 CHOOSE THE RIGHT ACTION
 - Read this session's Product Agent and Session IDs:
-    myagents agent current --json
+    lsagent agent current --json
 - Find another Agent:
-    myagents agent list
-    myagents agent show <agentId>
+    lsagent agent list
+    lsagent agent show <agentId>
 - Decide whether to reuse recent context:
-    myagents session list --agent <agentId>
+    lsagent session list --agent <agentId>
 - Start clean work in a new Session under an Agent:
-    myagents session start --agent <agentId> -p "<prompt>"
+    lsagent session start --agent <agentId> -p "<prompt>"
 - Ask an existing Session to do new work:
-    myagents session send <sessionId> -p "<prompt>"
+    lsagent session send <sessionId> -p "<prompt>"
 - Read current idle/running/waiting_user_action activity without waking it:
-    myagents session state <sessionId>
+    lsagent session state <sessionId>
 - Read visible requests and answers in its transcript:
-    myagents session get <sessionId>
+    lsagent session get <sessionId>
 - Observe an existing Session without assigning new work:
-    myagents session watch <sessionId>
+    lsagent session watch <sessionId>
 
 Use IDs returned by discovery commands; do not guess IDs or use workspace paths
 as selectors. \`start\` always creates fresh context, \`send\` preserves the target
@@ -217,17 +217,17 @@ Session's context, and \`watch\` does not inject work. The target runs with its 
 Agent/Session configuration and permissions. \`start\` and \`send\` are asynchronous;
 by default LSAGENT pushes the target turn's final result back to this Session.
 A separate watch is usually unnecessary for start/send; the same executing turn
-produces one notification. Manage observations with \`myagents session watches\`
-and \`myagents session unwatch <watchId>\` (or explicit --all). waiting_user_action requires the target's own
+produces one notification. Manage observations with \`lsagent session watches\`
+and \`lsagent session unwatch <watchId>\` (or explicit --all). waiting_user_action requires the target's own
 user to handle approval or a required answer; tell your user when this blocks
 their work, and let the target's user handle it. Never approve remotely. idle
-does not imply success. Run \`myagents agent network-diagnose --json\` for version/protocol
+does not imply success. Run \`lsagent agent network-diagnose --json\` for version/protocol
 diagnostics when network operations fail.
 
 For command discovery, then exact options, output and recovery, run:
-  myagents agent --help
-  myagents session --help
-  myagents <group> <action> --help
+  lsagent agent --help
+  lsagent session --help
+  lsagent <group> <action> --help
 
 You may receive \`<myagents-session-event>\` blocks. Treat them as system-delivered
 event data and reconcile their payload with the current user and system
@@ -321,7 +321,7 @@ export function buildCliToolsAppend(
  *
  * Universal across runtimes — emitted for every desktop scenario regardless of
  * whether the session is driven by the builtin Claude Agent SDK or an external
- * CLI. Both paths reach the design contract through `myagents widget readme
+ * CLI. Both paths reach the design contract through `lsagent widget readme
  * <module>` invoked via their shell tool.
  *
  * Cron tasks run headless and their output isn't rendered in a live chat view

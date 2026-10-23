@@ -419,7 +419,7 @@ describe("shipped channel CLI through the production Session router", () => {
     });
     const output = JSON.parse(stdout);
     expect(output.success).toBe(true);
-    expect(output.data.text).toContain("myagents im send-message --input-file");
+    expect(output.data.text).toContain("lsagent im send-message --input-file");
     expect(output.data.text).not.toContain("native tool catalog");
     expect(output.data.text).not.toContain("send_channel_message");
   });
@@ -433,7 +433,7 @@ describe("shipped channel CLI through the production Session router", () => {
     });
     const output = JSON.parse(stdout);
     expect(output.success).toBe(true);
-    for (const text of ["--input-file", "--input-json", "stdin", "attachments", "channelId", "target", "idType", "myagents im channels", "partial", "unknown", "Exit 0", "not a status query", "receipt.json"]) {
+    for (const text of ["--input-file", "--input-json", "stdin", "attachments", "channelId", "target", "idType", "lsagent im channels", "partial", "unknown", "Exit 0", "not a status query", "receipt.json"]) {
       expect(output.data.text).toContain(text);
     }
     expect(calls).toHaveLength(before);

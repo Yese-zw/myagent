@@ -2,7 +2,7 @@
 
 使用场景：功能入口、设置项、Runtime、CLI 工具注册表或 Team Space 看不到。
 
-先读 `/myagents-docs/references/settings-safety.md`。实验功能不可见通常是正常门控；只有满足门控后仍不出现才进入 Bug 诊断。
+先读 `/lsagent-docs/references/settings-safety.md`。实验功能不可见通常是正常门控；只有满足门控后仍不出现才进入 Bug 诊断。
 
 ## 总原则
 
@@ -17,8 +17,8 @@
 - 选项不可用时区分 Provider 约束、DSH 资源、系统 CLI 安装/登录、Managed Codex readiness；不能只改旧字段。
 
 ```bash
-myagents runtime list --json
-myagents agent show <agent-id> --json
+lsagent runtime list --json
+lsagent agent show <agent-id> --json
 rg -n "runtimeSource|defaultIntegratedRuntime|integrated-dsh|managed-provider|codex-sub" ./logs/unified-*.log | node .claude/skills/support/scripts/redact-log-output.mjs | tail -120
 ```
 
@@ -26,10 +26,10 @@ rg -n "runtimeSource|defaultIntegratedRuntime|integrated-dsh|managed-provider|co
 
 - 设置：设置 → 关于&反馈 → 实验室 → CLI 工具注册表
 - 字段：`cliToolRegistryEnabled`，默认关闭
-- 关闭时用户 CLI Tool 与 `tool-creator` 不注入；稳定内置 `myagents` CLI 不受影响
+- 关闭时用户 CLI Tool 与 `tool-creator` 不注入；稳定内置 `lsagent` CLI 不受影响
 
 ```bash
-myagents tool --help
+lsagent tool --help
 ```
 
 若关闭，help 只显示开启指引属于正常行为。开启后当前 Session 仍看不到工具描述时，再核对 Session 刷新边界和 tool registry sync。
@@ -42,7 +42,7 @@ myagents tool --help
 2. 隐藏开发者开关 `teamSpaceDevGate` 只有显式 false 才关闭，默认开启；旧 `teamSpaceEnabled` 不再控制入口。配置加载完成后从侧栏「更多 → 协作空间」进入。
 
 ```bash
-myagents space list --json
+lsagent space list --json
 rg -n "\\[space\\]|Team Space|space_build_capability|teamSpaceDevGate|not enabled in this build|requires a Tauri build" ./logs/unified-*.log | node .claude/skills/support/scripts/redact-log-output.mjs | tail -160
 ```
 

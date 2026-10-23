@@ -1,4 +1,5 @@
 import lingsiLogo from '@/assets/brand/lingsi-logo.png';
+import { useProductLogo } from '@/features/account/useProductLogo';
 
 interface MyAgentsLogotypeProps {
   /** `display` is the launcher/about lockup; `compact` is the sidebar wordmark. */
@@ -8,17 +9,19 @@ interface MyAgentsLogotypeProps {
   title?: string;
 }
 
-/** Website lockup from the configured product origin (lingsiai.vip). */
+/** Product lockup. Uses the packaged origin's site logo, then the bundled mark. */
 export function MyAgentsLogotype({ variant = 'display', className, title }: MyAgentsLogotypeProps) {
+  const logo = useProductLogo(lingsiLogo);
   return (
     <img
-      src={lingsiLogo}
+      src={logo.src}
       alt={title ?? ''}
       aria-hidden={title ? undefined : true}
       className={className}
       draggable={false}
       data-myagents-logotype=""
       data-brand-variant={variant}
+      onError={logo.onError}
     />
   );
 }

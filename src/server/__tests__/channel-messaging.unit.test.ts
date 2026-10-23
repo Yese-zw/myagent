@@ -36,7 +36,7 @@ describe("unified channel send capability", () => {
     const result = await sendChannelMessage({ target: { id: 'user' }, text: 'hello', context: 'background' }, workspace());
     expect(result).toMatchObject({ status: 'failed', code: 'CHANNEL_TARGET_INVALID' });
     expect(result.error).toContain('目标 Session');
-    expect(result.error).toContain('myagents im send-message --help');
+    expect(result.error).toContain('lsagent im send-message --help');
     expect(api).not.toHaveBeenCalled();
   });
 

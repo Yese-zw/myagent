@@ -124,8 +124,7 @@ async function handleSessionWatchRegister(request: Request): Promise<Response> {
     targetStateAtRegistration: targetSessionState,
     registeredAt: new Date().toISOString(),
     turnId,
-    observerScope: networkReturn ? body.observerScope : undefined,
-    ...(networkReturn ? { networkReturn } : {}),
+    observerScope: undefined,
   });
   return jsonResponse({
     accepted: true,

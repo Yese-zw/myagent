@@ -96,7 +96,7 @@ describe('systemReminder', () => {
     expect(parsed.body).toContain('taskMdPath: /tmp/a&amp;b/task.md');
     expect(parsed.body).toContain('author: Agent &lt;one&gt;');
     expect(parsed.body).toContain(
-      '`myagents task comment task-1 --body-file <reply-file> --reply-to comment-1 --json`',
+      '`lsagent task comment task-1 --body-file <reply-file> --reply-to comment-1 --json`',
     );
     expect(parsed.visibleText).toBe('只处理第一个问题');
     expect(parsed.body).not.toContain('<myagents-session-event');
@@ -279,7 +279,7 @@ describe('systemReminder', () => {
     const parsed = parseLeadingSystemReminder(raw);
 
     expect(parsed.body).toContain('disabled autonomous Goal termination');
-    expect(parsed.body).not.toContain('myagents goal update --status');
+    expect(parsed.body).not.toContain('lsagent goal update --status');
     expect(parsed.visibleText).toBe('Continue');
   });
 

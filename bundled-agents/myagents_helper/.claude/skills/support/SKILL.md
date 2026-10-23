@@ -3,19 +3,19 @@ name: support
 description: >-
   MyAgents 本地问题诊断、恢复与反馈升级流程。用户描述报错、崩溃、无响应、配置后仍不可用、状态或结果不符合预期、
   Task/Goal/Channel/Provider/Runtime/MCP/Plugin/附件/Agent 网络/协作空间等功能异常，或者前端“小助理诊断/问题反馈”注入诊断上下文时使用。
-  先用 `/myagents-docs` 确认正确产品预期，再以本地状态、CLI、日志和必要 probe 分类、修复、验证；确认产品缺陷或功能建议后，
-  在用户确认下形成并提交脱敏 Issue。普通“是什么/怎么用/入口在哪”不使用本 skill，直接使用 `/myagents-docs`。
+  先用 `/lsagent-docs` 确认正确产品预期，再以本地状态、CLI、日志和必要 probe 分类、修复、验证；确认产品缺陷或功能建议后，
+  在用户确认下形成并提交脱敏 Issue。普通“是什么/怎么用/入口在哪”不使用本 skill，直接使用 `/lsagent-docs`。
 ---
 
 # MyAgents Support
 
-Support 的职责是解释“为什么实际行为没有符合正确预期”，并把问题推进到恢复或可执行的产品反馈。它不拥有产品百科；产品行为基线来自 `/myagents-docs`，当前实例状态来自 CLI/UI，发生过程来自本地证据。
+Support 的职责是解释“为什么实际行为没有符合正确预期”，并把问题推进到恢复或可执行的产品反馈。它不拥有产品百科；产品行为基线来自 `/lsagent-docs`，当前实例状态来自 CLI/UI，发生过程来自本地证据。
 
 ## 总原则
 
 1. 先理解用户目标，再比较预期与实际；不要把不会用直接升级成事故。
 2. 先被动证据，后 active probe；先局部恢复，后破坏性重置。
-3. 配置修复优先走 `/myagents-cli`，不直接改 `config.json` 或内部 store。
+3. 配置修复优先走 `/lsagent-cli`，不直接改 `config.json` 或内部 store。
 4. 不读取 credential store。状态通过脱敏 CLI/API 获取，日志和报告中的 Key、Token、Secret、Webhook query、home 用户名都要脱敏。
 5. 修复后必须重走触发原问题的路径验证，不能只跑一个总状态命令。
 6. 区分已确认、根因假设和已排除；证据不足时不装作确定。
@@ -29,7 +29,7 @@ Support 的职责是解释“为什么实际行为没有符合正确预期”，
 - 正确情况下应该看到什么
 - 现在实际看到什么
 
-涉及产品语义时，加载 `/myagents-docs` 的相关 reference，确认前置条件、作用域、生效时机、成功标志和限制。若发现只是功能理解或正常门控，回到产品使用指导，不继续扫日志。
+涉及产品语义时，加载 `/lsagent-docs` 的相关 reference，确认前置条件、作用域、生效时机、成功标志和限制。若发现只是功能理解或正常门控，回到产品使用指导，不继续扫日志。
 
 白屏、明确 crash、数据错位等无需争议的异常可以直接进入取证，但报告仍要补齐 expected/actual。
 
@@ -46,8 +46,8 @@ Support 的职责是解释“为什么实际行为没有符合正确预期”，
 常用只读基线：
 
 ```bash
-myagents status --json
-myagents version
+lsagent status --json
+lsagent version
 rg '\[boot\]' ./logs/unified-*.log | node .claude/skills/support/scripts/redact-log-output.mjs | tail -5
 ```
 
@@ -114,7 +114,7 @@ rg -n "ERROR|WARN|auth error|401|403|429|terminal_reason|AppErrorBoundary|extern
 | 类型 | 判断依据 | 行动 |
 |---|---|---|
 | 使用理解 | 行为符合 docs，用户误解入口、作用域、生效时机或限制 | 解释产品行为，必要时用 CLI 代为完成 |
-| 配置错误 | 当前配置与用户目标或合法值域明确不符 | 用 `/myagents-cli` 修复并同路径验证 |
+| 配置错误 | 当前配置与用户目标或合法值域明确不符 | 用 `/lsagent-cli` 修复并同路径验证 |
 | 环境问题 | 网络、代理、PATH、Runtime 安装、registry、OAuth 外部状态异常 | 给出具体恢复，必要时执行已说明的 probe |
 | 实验门控 | 功能默认关闭或需要人工开启 | 解释设置入口，不绕过可见门控 |
 | 临时运行异常 | 重启窗口、瞬时网络/限流或可恢复进程状态，重试后恢复 | 说明证据和恢复结果，不夸大为产品 Bug |
@@ -138,7 +138,7 @@ rg -n "ERROR|WARN|auth error|401|403|429|terminal_reason|AppErrorBoundary|extern
 
 确认产品 Bug 或用户希望提交功能建议后：
 
-1. 用 `/myagents-docs` 检查它是否已有能力、正常限制或已知使用路径。
+1. 用 `/lsagent-docs` 检查它是否已有能力、正常限制或已知使用路径。
 2. 生成下面的脱敏标题与报告，路径优先写相对路径或 `<HOME>`，先展示给用户。
 3. 按下面的渠道发现选择建议入口，向用户说明目标社区/仓库。取得向该渠道发送脱敏关键词的授权后，搜索相似 Issue；没有搜索能力或用户不授权就明确未搜索。
 4. 根据搜索结果更新报告并展示。用户确认最终报告与提交目标后执行提交；已有明确授权仍有效，不重复询问同一个决定。
@@ -151,7 +151,7 @@ MyAgents Space 从 0.5.0 起正式提供官方社区 Issue 反馈。先运行 `g
 | 当前能力 | 推荐入口与下一步 |
 |---|---|
 | `gh` 可运行 | 优先建议 GitHub 仓库 `hAcKlyc/MyAgents`。用 `gh auth status` 检查可用性（不显示 token）；未认证时提示 GitHub 登录，也可按用户选择转 Space，不把“装了 gh”当成已登录。 |
-| 没有可用 `gh`，Space 已登录 | 用 `myagents space list --json` 读取当前成员空间，选择 `data.items[]` 中 `spaceKind=official` 的官方社区，使用返回的实际 slug（当前通常是 `myagents`）。推荐提交到这里。 |
+| 没有可用 `gh`，Space 已登录 | 用 `lsagent space list --json` 读取当前成员空间，选择 `data.items[]` 中 `spaceKind=official` 的官方社区，使用返回的实际 slug（当前通常是 `lsagent`）。推荐提交到这里。 |
 | Space 未登录或需要重新认证 | 提供 `[登录 MyAgents Space](myagents://open/v1/spaces)`，用户点击会打开/聚焦 Space Tab 的登录入口；登录后重新运行 `space list` 再继续。 |
 
 `space list` 是经应用提供的脱敏状态接口；不要读取 Space credential 文件。只有 `NOT_AUTHENTICATED` / `SPACE_REAUTH_REQUIRED` 等明确认证错误才能判断需登录。网络、门控或权限错误保留具体原因，不误报退出登录；官方社区未出现在列表中时引导用户在 Space 检查成员状态，不猜 slug 或新建同名社区。尊重用户明确指定的渠道；不要求用户为了反馈安装 `gh`。
@@ -159,7 +159,7 @@ MyAgents Space 从 0.5.0 起正式提供官方社区 Issue 反馈。先运行 `g
 渠道确认与对外授权到位后，使用精确 help 核对参数：
 
 - GitHub：`gh issue list --repo hAcKlyc/MyAgents --state open --search '<脱敏关键词>'`；确认报告后 `gh issue create --repo hAcKlyc/MyAgents --title '<标题>' --body-file issue.md`。
-- Space：先 `myagents space whoami --space <返回的slug> --json` 核对身份，再 `myagents space issue list --space <slug> --q '<脱敏关键词>' --json` 查相似反馈。普通小助理 Session 应为 User；不通过注册 Agent、显式 token 或身份降级绕过拒绝。确认报告后 `myagents space issue create --space <slug> --title '<标题>' --body-file issue.md --json`。报告文件保存于当前工作区；不指定 assignee；如需归入 BUGFIX/功能建议 Goal，先用 `space goal list` 取得真实 active Goal ID，否则省略 `--goal` 进入 Inbox。
+- Space：先 `lsagent space whoami --space <返回的slug> --json` 核对身份，再 `lsagent space issue list --space <slug> --q '<脱敏关键词>' --json` 查相似反馈。普通小助理 Session 应为 User；不通过注册 Agent、显式 token 或身份降级绕过拒绝。确认报告后 `lsagent space issue create --space <slug> --title '<标题>' --body-file issue.md --json`。报告文件保存于当前工作区；不指定 assignee；如需归入 BUGFIX/功能建议 Goal，先用 `space goal list` 取得真实 active Goal ID，否则省略 `--goal` 进入 Inbox。
 
 成功必须根据命令返回结果判断，不把超时/失败说成已提交或盲目重复创建。GitHub 返回其实际 Issue URL；Space 用返回的真实 `id` 生成 `[查看反馈](myagents://open/v1/spaces/<slug>/issues/<issueId>)`，不能把界面的 `#12` 等展示编号替代 Issue ID。也可提供 `[官方社区反馈列表](myagents://open/v1/spaces/official/issues)`。这些链接只导航，不触发搜索、上传或创建。
 

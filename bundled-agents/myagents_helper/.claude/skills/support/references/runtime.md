@@ -2,7 +2,7 @@
 
 使用场景：DeepSeek Harness / Codex / Claude Code 不工作；终端能用但 MyAgents 里不行；Runtime 的模型、权限、MCP、登录或代理异常。
 
-先读 `/myagents-docs/references/models-providers-runtimes.md` 确认 Provider / Model / Runtime 与 `runtimeSource` 的产品边界。
+先读 `/lsagent-docs/references/models-providers-runtimes.md` 确认 Provider / Model / Runtime 与 `runtimeSource` 的产品边界。
 
 ## Ground truth
 
@@ -18,12 +18,12 @@
 ## 被动取证
 
 ```bash
-myagents runtime list --json
-myagents runtime describe codex --json
-myagents runtime describe dsh --json
-myagents diagnose runtime dsh --json
-myagents agent list --json
-myagents agent show <agent-id> --json
+lsagent runtime list --json
+lsagent runtime describe codex --json
+lsagent runtime describe dsh --json
+lsagent diagnose runtime dsh --json
+lsagent agent list --json
+lsagent agent show <agent-id> --json
 rg -n "MYAGENTS_RUNTIME|integrated-dsh|external-session|external-runtime|runtime_diagnostics|RuntimeDiagnostics|runtimeSource|managed-provider|managed-codex|codex-sub|Codex|app-server|envPolicy|mcp|admission" ./logs/unified-*.log | node .claude/skills/support/scripts/redact-log-output.mjs | tail -200
 ```
 
@@ -32,7 +32,7 @@ rg -n "MYAGENTS_RUNTIME|integrated-dsh|external-session|external-runtime|runtime
 ## system-cli Codex active probe
 
 ```bash
-myagents runtime diagnose codex --workspacePath <absolute-workspace-path> --json
+lsagent runtime diagnose codex --workspacePath <absolute-workspace-path> --json
 ```
 
 它会启动短命 Codex app-server，并读取 Codex 自己看到的 auth、experimental features、MCP server status、apps 与 effective env。执行前说明会启动进程并触发 Codex 侧检查。

@@ -10805,10 +10805,10 @@ async function resolveBuiltinForkSource(source: SessionMetadata, visited = new S
 export function isAutoAllowedRecordCliCommand(command: string): boolean {
   const cmd = command.trim();
   return (
-    /^myagents[ \t]+record[ \t]+list(?:[ \t]+(?:--kind[ \t]+(?:text|audio)|--tag[ \t]+[a-z0-9][a-z0-9-]{0,31}|--limit[ \t]+\d{1,4}|--json))*[ \t]*$/.test(cmd)
-    || /^myagents[ \t]+thought[ \t]+list(?:[ \t]+(?:--tag[ \t]+[a-z0-9][a-z0-9-]{0,31}|--limit[ \t]+\d{1,4}|--json))*[ \t]*$/.test(cmd)
-    || /^myagents[ \t]+(?:record|thought)[ \t]+create[ \t]+(?:--content[ \t]+)?'[^']*'[ \t]*$/.test(cmd)
-    || /^myagents[ \t]+(?:record|thought)[ \t]+create[ \t]+--content-file[ \t]+[^ \t\n\r;|&<>$`'"]+[ \t]*$/.test(cmd)
+    /^(?:myagents|lsagent)[ \t]+record[ \t]+list(?:[ \t]+(?:--kind[ \t]+(?:text|audio)|--tag[ \t]+[a-z0-9][a-z0-9-]{0,31}|--limit[ \t]+\d{1,4}|--json))*[ \t]*$/.test(cmd)
+    || /^(?:myagents|lsagent)[ \t]+thought[ \t]+list(?:[ \t]+(?:--tag[ \t]+[a-z0-9][a-z0-9-]{0,31}|--limit[ \t]+\d{1,4}|--json))*[ \t]*$/.test(cmd)
+    || /^(?:myagents|lsagent)[ \t]+(?:record|thought)[ \t]+create[ \t]+(?:--content[ \t]+)?'[^']*'[ \t]*$/.test(cmd)
+    || /^(?:myagents|lsagent)[ \t]+(?:record|thought)[ \t]+create[ \t]+--content-file[ \t]+[^ \t\n\r;|&<>$`'"]+[ \t]*$/.test(cmd)
   );
 }
 
@@ -11607,7 +11607,7 @@ async function startStreamingSession(preWarm = false): Promise<void> {
 
           // 1. Widget design contract: `myagents widget [readme|list|<module>] [<module>...]`
           //    — module names limited to `[a-z][a-z0-9-]*`.
-          if (/^myagents[ \t]+widget(?:[ \t]+(?:readme|list))?(?:[ \t]+[a-z][a-z0-9-]*)*[ \t]*$/.test(cmd)) {
+          if (/^(?:myagents|lsagent)[ \t]+widget(?:[ \t]+(?:readme|list))?(?:[ \t]+[a-z][a-z0-9-]*)*[ \t]*$/.test(cmd)) {
             console.log(`[permission] myagents widget readme auto-allowed: ${cmd}`);
             return {
               behavior: 'allow' as const,
@@ -11618,7 +11618,7 @@ async function startStreamingSession(preWarm = false): Promise<void> {
           // 2. Cron / IM read-only surface (zero-arg listings + readme):
           //    `myagents cron list|status|readme [--json]`
           //    `myagents im channels|readme [--json]`
-          if (/^myagents[ \t]+(?:cron[ \t]+(?:list|status|readme)|im[ \t]+(?:channels|readme))(?:[ \t]+--json)?[ \t]*$/.test(cmd)) {
+          if (/^(?:myagents|lsagent)[ \t]+(?:cron[ \t]+(?:list|status|readme)|im[ \t]+(?:channels|readme))(?:[ \t]+--json)?[ \t]*$/.test(cmd)) {
             console.log(`[permission] myagents readonly CLI auto-allowed: ${cmd}`);
             return {
               behavior: 'allow' as const,
@@ -11629,7 +11629,7 @@ async function startStreamingSession(preWarm = false): Promise<void> {
           // 3. Cron run history: `myagents cron runs <taskId> [--limit N] [--full] [--json]`
           //    — taskId is an opaque slug-style id (alphanumerics + dash/underscore,
           //    bounded length); --limit takes a small integer. Order-agnostic flags.
-          if (/^myagents[ \t]+cron[ \t]+runs[ \t]+[a-zA-Z0-9_-]{1,64}(?:[ \t]+(?:--limit[ \t]+\d{1,4}|--full|--json))*[ \t]*$/.test(cmd)) {
+          if (/^(?:myagents|lsagent)[ \t]+cron[ \t]+runs[ \t]+[a-zA-Z0-9_-]{1,64}(?:[ \t]+(?:--limit[ \t]+\d{1,4}|--full|--json))*[ \t]*$/.test(cmd)) {
             console.log(`[permission] myagents cron runs auto-allowed: ${cmd}`);
             return {
               behavior: 'allow' as const,

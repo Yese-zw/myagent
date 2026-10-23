@@ -169,7 +169,6 @@ function renderBrandSection(
   overrides: Partial<ComponentProps<typeof BrandSection>> = {},
   themeId?: string,
 ) {
-  const onGoToSettings = vi.fn();
   const content = (
     <BrandSection
       projects={[project]}
@@ -183,7 +182,6 @@ function renderBrandSection(
       providers={[]}
       apiKeys={{}}
       providerVerifyStatus={{}}
-      onGoToSettings={onGoToSettings}
       {...overrides}
     />
   );
@@ -198,7 +196,7 @@ function renderBrandSection(
       {content}
     </ThemeRuntimeProvider>,
   );
-  return { ...view, onGoToSettings };
+  return view;
 }
 
 describe('BrandSection', () => {
@@ -285,16 +283,11 @@ describe('BrandSection', () => {
       screen.getByTestId('launcher-context-row'),
     );
     expect(stack as HTMLElement).toContainElement(
-      screen.getByRole('button', { name: /配置模型供应商/ }),
+      screen.getByText(/只需一步，即刻开启 AI 之旅/),
     );
-  });
-
-  it('opens provider settings from the no-provider CTA', () => {
-    const { onGoToSettings } = renderBrandSection();
-
-    fireEvent.click(screen.getByRole('button', { name: /配置模型供应商/ }));
-
-    expect(onGoToSettings).toHaveBeenCalledTimes(1);
+    expect(
+      screen.queryByRole('button', { name: /配置模型供应商/ }),
+    ).not.toBeInTheDocument();
   });
 
   it('opens the Goal preset from the launcher slash action', () => {
@@ -354,8 +347,8 @@ describe('BrandSection', () => {
       screen.getByText(/One step to start your AI journey/),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('button', { name: /Configure a model provider/ }),
-    ).toBeInTheDocument();
+      screen.queryByRole('button', { name: /Configure a model provider/ }),
+    ).not.toBeInTheDocument();
   });
 
   it('renders product name and localized slogan from the resolved Theme Hero', () => {

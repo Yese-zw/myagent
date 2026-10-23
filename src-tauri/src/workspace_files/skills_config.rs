@@ -51,15 +51,15 @@ pub fn read_disabled_list(myagents_root: &Path) -> Vec<String> {
 /// Product-owned runtime contracts that must remain enabled across every
 /// LSAGENT surface. Keep in sync with `src/shared/systemSkills.ts`.
 pub const REQUIRED_SYSTEM_SKILLS: &[&str] = &[
-    "myagents-task-alignment",
-    "myagents-memory-update",
-    "myagents-memory-gardener",
-    "myagents-memory-molt",
-    "myagents-cli",
-    "myagents-anydoc",
-    "myagents-speech-recognition",
-    "myagents-task-automation",
-    "myagents-docs",
+    "lsagent-task-alignment",
+    "lsagent-memory-update",
+    "lsagent-memory-gardener",
+    "lsagent-memory-molt",
+    "lsagent-cli",
+    "lsagent-anydoc",
+    "lsagent-speech-recognition",
+    "lsagent-task-automation",
+    "lsagent-docs",
 ];
 
 pub fn is_required_system_skill(name: &str) -> bool {
@@ -91,7 +91,7 @@ mod tests {
         let root = tempfile::tempdir().expect("tempdir");
         fs::write(
             root.path().join("skills-config.json"),
-            r#"{"disabled":["myagents-task-alignment","myagents-memory-update","myagents-memory-gardener","myagents-memory-molt","myagents-cli","myagents-anydoc","myagents-speech-recognition","myagents-task-automation","myagents-docs","ordinary-skill"]}"#,
+            r#"{"disabled":["lsagent-task-alignment","lsagent-memory-update","lsagent-memory-gardener","lsagent-memory-molt","lsagent-cli","lsagent-anydoc","lsagent-speech-recognition","lsagent-task-automation","lsagent-docs","ordinary-skill"]}"#,
         )
         .expect("write skills config");
 

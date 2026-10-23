@@ -132,8 +132,6 @@ interface BrandSectionProps {
   workspaceEnabledPlugins?: string[];
   onWorkspacePluginToggle?: (pluginId: string, enabled: boolean) => void;
   onRefreshProviders?: () => void;
-  // Navigation
-  onGoToSettings?: () => void;
   // Runtime (external runtimes adapt model/permission selectors)
   runtime?: RuntimeType;
   usesExternalRuntimeControls?: boolean;
@@ -191,7 +189,6 @@ export default memo(function BrandSection({
   workspaceEnabledPlugins,
   onWorkspacePluginToggle,
   onRefreshProviders,
-  onGoToSettings,
   runtime,
   usesExternalRuntimeControls,
   runtimeModels,
@@ -616,13 +613,6 @@ export default memo(function BrandSection({
   const providerSettingsPrompt = !hasAnyProvider ? (
     <p className="text-center text-sm text-[var(--ink-muted)]">
       {t('brand.providerPrompt.prefix')}
-      <button
-        type="button"
-        onClick={() => onGoToSettings?.()}
-        className="ml-1 rounded-md px-1 py-0.5 text-[var(--accent-warm)] transition-colors hover:bg-[var(--accent-warm-subtle)] hover:text-[var(--accent-warm-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-warm-muted)]"
-      >
-        {t('brand.providerPrompt.configure')}
-      </button>
     </p>
   ) : null;
 

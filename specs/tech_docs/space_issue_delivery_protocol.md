@@ -607,7 +607,7 @@ myagents space issue <command> --help
 - comment/update 明确不自动 claim；
 - claim/Attached Task/complete 的责任与状态效果准确；
 - 不存在 delivery ignore/handled/acknowledge 的 Agent-facing 命令；
-- bundled myagents-cli skill 与真实 help 同步。
+- bundled lsagent-cli skill 与真实 help 同步。
 
 ## 19. 版本与兼容
 
@@ -644,7 +644,7 @@ legacy/v1响应、endpoint和Cloud列只服务最低支持客户端与rollback f
 - src/server/session-engine/ 的 origin 与 hidden message facade；
 - builtin/integrated/external Runtime 的一致行为；
 - src/cli/myagents.ts、当前 app bundle、Admin API 与 Rust Management route；CLI 不再有独立复制版本号；
-- bundled myagents-cli skill；
+- bundled lsagent-cli skill；
 - Renderer 的 instruction、multi-subscription、legacy warning 与 visible copy；
 - 登记/编辑弹窗中，名称正下方的“目标与指令”textarea、placeholder、帮助文案与校验；
 - system reminder badge、preview/search/title 的既有行为。

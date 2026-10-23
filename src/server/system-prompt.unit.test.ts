@@ -83,7 +83,7 @@ describe('Channel Prompt Contract v1 stable system sections', () => {
     expect(text).toContain('## 对话环境');
     expect(text).toContain('## 消息发送');
     expect(text).not.toContain('not a verified identity');
-    expect(text).not.toContain('myagents-cli-im-media');
+    expect(text).not.toContain('lsagent-cli-im-media');
     expect(text).not.toContain('im send-media');
     expect(buildDshSystemContext(scenario, {channelBound: true}).sections.find(section => section.id === 'myagents:session')?.text).toContain(CHANNEL_PROMPT);
     const desktop = buildSystemPromptAppend({type:'desktop'}, {channelBound:true});

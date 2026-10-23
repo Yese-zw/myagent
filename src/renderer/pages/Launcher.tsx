@@ -893,13 +893,6 @@ export default function Launcher({
     ],
   );
 
-  // Navigate to Settings > Providers page
-  const handleGoToSettings = useCallback(() => {
-    window.dispatchEvent(
-      new Event('sub2api-account:open-login'),
-    );
-  }, []);
-
   const handleOpenSpeechSettings = useCallback(() => {
     setRecordingSourceDialog(null);
     window.dispatchEvent(
@@ -1282,7 +1275,6 @@ export default function Launcher({
           workspaceEnabledPlugins={launcherEnabledPlugins}
           onWorkspacePluginToggle={handleLauncherPluginToggle}
           onRefreshProviders={refreshProviderData}
-          onGoToSettings={handleGoToSettings}
           runtime={
             launcherRuntime !== 'builtin' ? launcherRuntime : undefined
           }

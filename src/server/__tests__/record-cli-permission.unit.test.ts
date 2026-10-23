@@ -5,6 +5,7 @@ import { isAutoAllowedRecordCliCommand } from '../agent-session';
 describe('Record CLI automatic permission', () => {
   it.each([
     'myagents record list',
+    'lsagent record list --json',
     'myagents record list --kind text --tag meeting-1 --limit 25 --json',
     'myagents record list --json --kind audio',
     'myagents thought list --tag legacy --limit 10 --json',

@@ -2,7 +2,7 @@
 
 使用场景：工作区文件树/搜索/预览异常；`@` 文件或图片失败；拖拽/粘贴附件失败；新建、重命名、删除、移动、在 Finder/默认应用打开文件不正常。
 
-正常 Workspace、Session 与文件能力先读 `/myagents-docs/references/workspaces-sessions-files.md`。
+正常 Workspace、Session 与文件能力先读 `/lsagent-docs/references/workspaces-sessions-files.md`。
 
 ## Ground truth
 
@@ -16,7 +16,7 @@
 ## 取证
 
 ```bash
-myagents status --json
+lsagent status --json
 rg -n "cmd_workspace|workspace_files|DirectoryPanel|SimpleChatInput|FilePreviewModal|RichDocViewer|WorkspaceTree|workspace:files-changed|watch_start|watch_stop|Unsupported file type|File type not supported|symlink|resolve_existing_inside_workspace" ./logs/unified-*.log | node .claude/skills/support/scripts/redact-log-output.mjs | tail -180
 rg -n "\\[AppErrorBoundary\\]|\\[REACT\\] \\[ERROR\\]" ./logs/unified-*.log | node .claude/skills/support/scripts/redact-log-output.mjs | tail -80
 ```

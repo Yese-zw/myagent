@@ -776,7 +776,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Space Agent 管理更直接**：Agent 详情改为统一编辑器，目标与指令前置，订阅默认使用新会话并简化单条订阅配置；弹窗适配较小视口，同一 workspace 的多个 Agent 不再互相混淆。
 - **Space Issue 筛选更完整**：状态筛选支持更清晰的全部 / 未完成 / 具体状态切换，并在 Space、页面和退出边界正确保留或重置选择。
-- **核心 System Skill 始终可用**：`myagents-cli`、`myagents-docs` 与三项受管 Memory Skill 被标记为 Required，旧配置中的误禁用状态会自动清理，产品运行契约不再因用户级开关缺失。
+- **核心 System Skill 始终可用**：`lsagent-cli`、`lsagent-docs` 与三项受管 Memory Skill 被标记为 Required，旧配置中的误禁用状态会自动清理，产品运行契约不再因用户级开关缺失。
 - **Tab 上下文更易辨认**：会话标题会保留工作区身份，活跃与非活跃标题、工作区和 Session 名称形成更稳定的视觉层级。
 
 ### Fixed
@@ -1762,7 +1762,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **AI 小助理 inbox 加「历史」入口**：设置页右上角新增「历史」按钮，点选直接新开 Tab 进会话 (#120)。
-- **任意会话都能驱动 LSAGENT 自身**：`/self-config` 升级为全局 `/myagents-cli`，Chat / IM Bot / Cron 都能用。
+- **任意会话都能驱动 LSAGENT 自身**：`/self-config` 升级为全局 `/lsagent-cli`，Chat / IM Bot / Cron 都能用。
 
 ### Fixed
 

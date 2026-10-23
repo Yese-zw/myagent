@@ -1,8 +1,7 @@
 {
   "brand": {
     "providerPrompt": {
-      "prefix": "✨ 只需一步，即刻开启 AI 之旅 —",
-      "configure": "配置模型供应商 →"
+      "prefix": "✨ 只需一步，即刻开启 AI 之旅"
     }
   },
   "toasts": {

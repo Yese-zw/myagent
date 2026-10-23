@@ -42,6 +42,7 @@ import ConfirmDialog from '@/components/ConfirmDialog';
 import FeedbackPopover from '@/components/FeedbackPopover';
 import Sub2apiAccountEntry from '@/features/account/Sub2apiAccountEntry';
 import Sub2apiBalanceCard from '@/features/account/Sub2apiBalanceCard';
+import { useProductLogo } from '@/features/account/useProductLogo';
 import { SidebarResizeHandle } from './SidebarResizeHandle';
 import { APP_SHELL_POPOVER_CHROME } from '@/components/global-sidebar/appShellPopoverChrome';
 import OverlayBackdrop from '@/components/OverlayBackdrop';
@@ -481,6 +482,7 @@ export default memo(function GlobalSidebar({
 }: GlobalSidebarProps) {
   const { t } = useTranslation('app');
   const { t: tLauncher } = useTranslation('launcher');
+  const brandIcon = useProductLogo(myAgentsLogo);
   const toast = useToast();
   const deleteSession = useSessionDeletion();
   const toastRef = useRef(toast);
@@ -1170,11 +1172,12 @@ export default memo(function GlobalSidebar({
             data-global-sidebar-brand-link
           >
             <img
-              src={myAgentsLogo}
+              src={brandIcon.src}
               alt=""
               aria-hidden="true"
               className="global-sidebar-brand-icon shrink-0"
               data-global-sidebar-brand-icon
+              onError={brandIcon.onError}
             />
             <span
               className="theme-product-wordmark global-sidebar-copy min-w-0 truncate text-sm font-medium"

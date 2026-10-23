@@ -4,7 +4,7 @@
 
 账号入口已移到全局侧栏底部左侧，右侧为通知；收起侧栏只保留通知。未登录点击账号复用 Space Tab，已登录菜单顶部信息行打开资料编辑，Space 内不再重复提供账号入口。若全局身份与 Space/AgentNet 不一致，检查 Rust credential 状态、`space-account:changed` 的账号投影失效通知、当前环境/generation，以及全局资料更新是否合并到已加载的 Space 缓存；不要通过打开 Space 来掩盖独立账号读取或编辑的问题。
 
-正常产品概念先读 `/myagents-docs/references/cloud-space.md`。Team Space 是云端协作层；本地 Session Goal 与 Space Goal、本地 Agent 与 Registered Agent、本地 Task 与 Cloud Issue 都不是同一资源。
+正常产品概念先读 `/lsagent-docs/references/cloud-space.md`。Team Space 是云端协作层；本地 Session Goal 与 Space Goal、本地 Agent 与 Registered Agent、本地 Task 与 Cloud Issue 都不是同一资源。
 
 ## Ground truth
 
@@ -18,10 +18,10 @@
 ## 被动取证
 
 ```bash
-myagents space list --json
-myagents space whoami --space <slug> --json
-myagents space goal list --space <slug> --json
-myagents space issue view <issue-id> --space <slug> --comments --json
+lsagent space list --json
+lsagent space whoami --space <slug> --json
+lsagent space goal list --space <slug> --json
+lsagent space issue view <issue-id> --space <slug> --comments --json
 rg -n "\\[space\\]|space_cloud|registered-agent|delivery|claim|assignee|notificationVersion|operationKey|quota|entitlement|attachment|conflict|401|403|409|429" ./logs/unified-*.log | node .claude/skills/support/scripts/redact-log-output.mjs | tail -220
 ```
 

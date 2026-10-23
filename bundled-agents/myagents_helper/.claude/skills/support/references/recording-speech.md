@@ -2,19 +2,19 @@
 
 使用场景：录音没有声音、实时文字迟迟不出现、停止后处理失败、重新转写或人物归属异常、模型安装失败，或工作区附件 speech job 不可用。
 
-先读 `/myagents-docs/references/automation.md`。Record 录制/会后整理与 Session 附件转写是不同路径，不能拿一种 job 的状态证明另一种已完成。
+先读 `/lsagent-docs/references/automation.md`。Record 录制/会后整理与 Session 附件转写是不同路径，不能拿一种 job 的状态证明另一种已完成。
 
 ## 被动取证
 
 ```bash
-myagents version
-myagents record list --kind audio --json
+lsagent version
+lsagent record list --kind audio --json
 rg -n 'RECORDING_|SPEECH_|\[recording\]|\[speech\]|worker-ready|stage-change|worker-completed|terminal' ./logs/unified-*.log | node .claude/skills/support/scripts/redact-log-output.mjs | tail -180
 ```
 
 先从详情页取得 Record/job/generation、来源音轨、处理 stage、失败 code 和操作时间。`record get` 可能包含完整私密正文，仅在用户授权且确需内容时读取，不把转写、人物名、音频、路径或原始 Worker stderr 发到报告。
 
-附件 job 必须在发起它的原 Session 运行 `myagents speech status <job-id>` / `list`，小助理自己的 Session 不能读取其它 Session 的 job。`SPEECH_JOB_NOT_FOUND` 可能是 scope 不同，不应通过复制身份环境绕过。
+附件 job 必须在发起它的原 Session 运行 `lsagent speech status <job-id>` / `list`，小助理自己的 Session 不能读取其它 Session 的 job。`SPEECH_JOB_NOT_FOUND` 可能是 scope 不同，不应通过复制身份环境绕过。
 
 ## 分界判断
 

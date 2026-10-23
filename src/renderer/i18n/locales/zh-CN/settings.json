@@ -30,7 +30,7 @@
   },
   "externalCli": {
     "title": "外部调用",
-    "description": "让本机脚本通过安装包自带的 myagents CLI 调用 LSAGENT。App 必须保持运行。",
+    "description": "让本机脚本通过安装包自带的 lsagent CLI 调用 LSAGENT。App 必须保持运行。",
     "enableTitle": "LSAGENT CLI 外部调用",
     "enableDescription": "默认关闭。开启后，只有携带当前 token 且属于公开清单的命令会被接受。",
     "enabledToast": "已开启 CLI 外部调用",
@@ -2235,7 +2235,7 @@
     "developerQuote": "你有一个想法，And it's done.",
     "labTitle": "实验室",
     "cliRegistryTitle": "CLI 工具注册表",
-    "cliRegistryDescription": "允许 AI 创建并注册命令行小工具，并在工具箱中管理；开启后新会话可自动发现已启用工具。MCP 与 myagents 内置 CLI 能力不受影响。",
+    "cliRegistryDescription": "允许 AI 创建并注册命令行小工具，并在工具箱中管理；开启后新会话可自动发现已启用工具。MCP 与 lsagent 内置 CLI 能力不受影响。",
     "desktopPetTitle": "桌面宠物",
     "desktopPetDescription": "显示设置侧边栏中的「桌面宠物」入口。悬浮球是否显示由桌面宠物页顶部开关控制。",
     "desktopPetEnabled": "已显示桌面宠物入口",

@@ -151,7 +151,7 @@ fn handoff_missing_error(id: bool, text: bool, context: bool) -> Value {
 }
 fn handoff_missing_fields(fields: Vec<&str>) -> Value {
     json!({"status":"failed","connection":null,"target":null,"items":[],"code":"CHANNEL_HANDOFF_INPUT_INCOMPLETE","missingFields":fields,
-        "error":format!("无法提交跨会话消息：缺少 {}。\n发送给其他私聊、群聊或频道时，需要 target.id、text、context：\n目标 Session 会先接收发送内容和事情背景，再替你告知该会话用户并承接后续对话。\n请补齐目标 ID、待告知内容和事情上下文；本次未投递、未发送。\n完整用法与示例：myagents im send-message --help（向其他会话发送）。", fields.join("、"))})
+        "error":format!("无法提交跨会话消息：缺少 {}。\n发送给其他私聊、群聊或频道时，需要 target.id、text、context：\n目标 Session 会先接收发送内容和事情背景，再替你告知该会话用户并承接后续对话。\n请补齐目标 ID、待告知内容和事情上下文；本次未投递、未发送。\n完整用法与示例：lsagent im send-message --help（向其他会话发送）。", fields.join("、"))})
 }
 
 fn validate_direct_content(
@@ -159,12 +159,12 @@ fn validate_direct_content(
     attachments: &[AttachmentInput],
 ) -> Result<(), String> {
     if text.is_none_or(|text| text.trim().is_empty()) && attachments.is_empty() {
-        return Err("Provide non-empty text or an attachment for the current conversation. See myagents im send-message --help.".into());
+        return Err("Provide non-empty text or an attachment for the current conversation. See lsagent im send-message --help.".into());
     }
     Ok(())
 }
 fn target_format_error(detail: &str) -> String {
-    format!("{detail} 发送到其他会话需要 target.id、text、context，目标 Session 接收背景后转达并承接后续对话；本次未投递、未发送。完整用法：myagents im send-message --help（向其他会话发送）。")
+    format!("{detail} 发送到其他会话需要 target.id、text、context，目标 Session 接收背景后转达并承接后续对话；本次未投递、未发送。完整用法：lsagent im send-message --help（向其他会话发送）。")
 }
 
 struct PreparedAttachment {
@@ -585,7 +585,7 @@ mod tests {
                 "bot",
             )
             .unwrap_err();
-            assert!(error.contains("myagents im send-message --help"), "{error}");
+            assert!(error.contains("lsagent im send-message --help"), "{error}");
             assert!(error.contains("目标 Session"), "{error}");
         }
     }
@@ -613,7 +613,7 @@ mod tests {
             assert!(result["error"]
                 .as_str()
                 .unwrap()
-                .contains("myagents im send-message --help"));
+                .contains("lsagent im send-message --help"));
         }
     }
 

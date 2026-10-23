@@ -107,9 +107,9 @@ export function createTaskDispatchGuard(
 
 function requiredMemorySystemSkill(managedKind: string | undefined): RequiredSystemSkill | undefined {
   switch (managedKind) {
-    case 'memory_auto_update_batch': return 'myagents-memory-update';
-    case 'memory_gardener': return 'myagents-memory-gardener';
-    case 'memory_molt': return 'myagents-memory-molt';
+    case 'memory_auto_update_batch': return 'lsagent-memory-update';
+    case 'memory_gardener': return 'lsagent-memory-gardener';
+    case 'memory_molt': return 'lsagent-memory-molt';
     default: return undefined;
   }
 }

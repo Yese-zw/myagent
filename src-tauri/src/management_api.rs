@@ -94,11 +94,15 @@ async fn require_internal_cli_request(request: Request, next: Next) -> Response 
 }
 
 fn request_sidecar_generation(headers: &HeaderMap) -> Result<u64, Json<serde_json::Value>> {
-    let generation = headers
-        .get("x-myagents-sidecar-generation")
-        .and_then(|value| value.to_str().ok())
-        .and_then(|value| value.parse::<u64>().ok())
-        .filter(|value| *value > 0);
+    let generation = [
+        "x-myagents-sidecar-generation",
+        "x-lsagent-sidecar-generation",
+    ]
+    .iter()
+    .find_map(|name| headers.get(*name))
+    .and_then(|value| value.to_str().ok())
+    .and_then(|value| value.parse::<u64>().ok())
+    .filter(|value| *value > 0);
     generation.ok_or_else(|| {
         Json(serde_json::json!({
             "ok": false,
@@ -218,7 +222,7 @@ pub async fn start_management_api() -> Result<u16, String> {
             "/api/agent/stop-channels",
             post(agent_stop_channels_handler),
         )
-        // Task Center (v0.1.69) — HTTP surface for the `myagents task` CLI.
+        // Task Center (v0.1.69) — HTTP surface for the `lsagent task` CLI.
         .route("/api/task/list", get(task_list_handler))
         .route("/api/task/get", get(task_get_handler))
         .route("/api/task/create-direct", post(task_create_direct_handler))
@@ -3491,7 +3495,7 @@ async fn handle_bridge_message(
 // ========================================================================
 //
 // These endpoints are called by the Bun Admin API (admin-api.ts), which in
-// turn is called by the `myagents task` CLI. The CLI is the entry point for
+// turn is called by the `lsagent task` CLI. The CLI is the entry point for
 // `actor` / `source` audit classification (PRD §10.2.1 caller-inference table):
 //
 // - `MYAGENTS_SESSION_ID` set in the CLI process → `actor=agent, source=cli`
@@ -4237,7 +4241,7 @@ struct ThoughtListQuery {
     query: Option<String>,
     limit: Option<usize>,
     /// `active` (default) / `archived` / `all`. CLI parity with v0.2.16
-    /// archive feature so `myagents thought list --archived` works.
+    /// archive feature so `lsagent thought list --archived` works.
     archived: Option<String>,
 }
 
@@ -4436,8 +4440,8 @@ fn space_cli_error(error: String) -> serde_json::Value {
         .unwrap_or_else(|| ("SPACE_COMMAND_FAILED".to_string(), error));
     let (suggestion, suggested_command) = match code.as_str() {
         "SPACE_REQUIRED" | "SPACE_NOT_AVAILABLE" => (
-            Some("Run `myagents space list --json`, then retry with one returned slug."),
-            Some("myagents space list --json"),
+            Some("Run `lsagent space list --json`, then retry with one returned slug."),
+            Some("lsagent space list --json"),
         ),
         "ASSIGNEE_ID_INVALID" => (
             Some("List valid typed assignee IDs for the selected Space, then retry with one returned assigneeId."),
@@ -4445,11 +4449,11 @@ fn space_cli_error(error: String) -> serde_json::Value {
         ),
         "GOAL_NOT_FOUND" | "GOAL_IS_ARCHIVED" | "GOAL_ID_REQUIRED" => (
             Some("List active Goals for the selected Space and copy a current data.items[].id."),
-            Some("myagents space goal list --space <slug> --json"),
+            Some("lsagent space goal list --space <slug> --json"),
         ),
         "ISSUE_MUTATION_CONFLICT" => (
             Some("Re-read the authoritative Issue, then retry only after reconciling the concurrent change."),
-            Some("myagents space issue view <issueId> --space <slug> --json"),
+            Some("lsagent space issue view <issueId> --space <slug> --json"),
         ),
         "ATTACHMENT_REQUIRED" => (
             Some("Add one or more workspace files with repeated --file flags."),
@@ -4484,7 +4488,7 @@ fn space_cli_error(error: String) -> serde_json::Value {
             None,
         ),
         "SPACE_AGENT_BINDING_INVALID" | "SPACE_CONTEXT_INVALID" | "SPACE_CONTEXT_MISMATCH" => (
-            Some("Verify the selected Space and current identity with `myagents space whoami --space <slug> --json`."),
+            Some("Verify the selected Space and current identity with `lsagent space whoami --space <slug> --json`."),
             None,
         ),
         code if code.contains("PERMISSION")
@@ -4499,7 +4503,7 @@ fn space_cli_error(error: String) -> serde_json::Value {
             || code == "THIS_ISSUE_IS_OUTSIDE_THIS_REGISTERED_AGENT_SUBSCRIPTION"
             || code == "ONLY_OWNER_ADMIN_OR_THE_CREATOR_OF_AN_OPEN_ISSUE_CAN_EDIT_IT" => (
             Some("Verify the effective actor with space whoami; retry only with a User or Registered Agent that has permission for this action."),
-            Some("myagents space whoami --space <slug> --json"),
+            Some("lsagent space whoami --space <slug> --json"),
         ),
         code if code.contains("NOT_FOUND") => (
             Some("Re-read the current Space or Issue state, copy a current stable ID, and retry."),
@@ -4748,7 +4752,7 @@ struct TaskReadDocQuery {
     doc: String,
 }
 
-/// `GET /api/task/read-doc?id=&doc=` — used by the `myagents task show-doc`
+/// `GET /api/task/read-doc?id=&doc=` — used by the `lsagent task show-doc`
 /// CLI so Agents running in a workspace can read a Task's markdown without
 /// hardcoding the filesystem path (task docs live in the user profile dir
 /// after v0.1.69, not in the workspace).
@@ -5085,7 +5089,7 @@ async fn inbox_deliver_handler(Json(req): Json<InboxDeliverRequest>) -> Json<ser
         .is_some_and(|event| event.get("channelHandoff").is_some())
     {
         return Json(
-            serde_json::json!({"ok":false,"error":"Channel handoffs must use myagents im send-message"}),
+            serde_json::json!({"ok":false,"error":"Channel handoffs must use lsagent im send-message"}),
         );
     }
     let Some(manager) = get_sidecar_state() else {
@@ -5315,11 +5319,11 @@ fn speech_error_value(code: &str) -> serde_json::Value {
         ),
         "SPEECH_JOB_NOT_FOUND" => (
             "The speech job was not found for this Session.",
-            "Run `myagents speech list` in the Session that submitted the job.",
+            "Run `lsagent speech list` in the Session that submitted the job.",
         ),
         "SPEECH_JOB_NOT_CANCELLABLE" => (
             "The speech job is already terminal and cannot be cancelled.",
-            "Run `myagents speech status <job-id>` to inspect its terminal result.",
+            "Run `lsagent speech status <job-id>` to inspect its terminal result.",
         ),
         "SPEECH_MEDIA_LIMIT_EXCEEDED" => (
             "The media source is empty or exceeds the 4 GiB / 8 hour limits.",
@@ -5335,7 +5339,7 @@ fn speech_error_value(code: &str) -> serde_json::Value {
         ),
         "SPEECH_UNSUPPORTED_CODEC" => (
             "The probed media container and audio codec combination is not supported.",
-            "Re-export the audio as WAV/PCM or another format listed by `myagents speech transcribe --help`.",
+            "Re-export the audio as WAV/PCM or another format listed by `lsagent speech transcribe --help`.",
         ),
         "SPEECH_CORRUPT_MEDIA" => (
             "The media container or selected audio stream is damaged.",
@@ -5355,7 +5359,7 @@ fn speech_error_value(code: &str) -> serde_json::Value {
         ),
         "SPEECH_LIST_LIMIT_INVALID" => (
             "Speech list limit must be from 1 through 100.",
-            "Retry with `myagents speech list --limit 20`.",
+            "Retry with `lsagent speech list --limit 20`.",
         ),
         "SPEECH_MANAGER_UNAVAILABLE" => (
             "The speech recognition manager is unavailable.",
@@ -5363,7 +5367,7 @@ fn speech_error_value(code: &str) -> serde_json::Value {
         ),
         _ => (
             "The speech recognition operation failed.",
-            "Inspect the returned code, then run `myagents speech --help` for recovery guidance.",
+            "Inspect the returned code, then run `lsagent speech --help` for recovery guidance.",
         ),
     };
     serde_json::json!({
@@ -5729,12 +5733,12 @@ mod tests {
         );
         assert_eq!(
             response.get("suggestedCommand").and_then(Value::as_str),
-            Some("myagents space list --json")
+            Some("lsagent space list --json")
         );
         assert!(response
             .get("suggestion")
             .and_then(Value::as_str)
-            .is_some_and(|value| value.starts_with("Run `myagents space list")));
+            .is_some_and(|value| value.starts_with("Run `lsagent space list")));
     }
 
     #[test]
@@ -5744,7 +5748,7 @@ mod tests {
             assert_eq!(response.get("code").and_then(Value::as_str), Some(code));
             assert_eq!(
                 response.get("suggestedCommand").and_then(Value::as_str),
-                Some("myagents space goal list --space <slug> --json")
+                Some("lsagent space goal list --space <slug> --json")
             );
             assert!(response
                 .get("suggestion")
@@ -5757,7 +5761,7 @@ mod tests {
         );
         assert_eq!(
             conflict.get("suggestedCommand").and_then(Value::as_str),
-            Some("myagents space issue view <issueId> --space <slug> --json")
+            Some("lsagent space issue view <issueId> --space <slug> --json")
         );
 
         for code in [
@@ -5771,7 +5775,7 @@ mod tests {
             assert_eq!(permission.get("code").and_then(Value::as_str), Some(code));
             assert_eq!(
                 permission.get("suggestedCommand").and_then(Value::as_str),
-                Some("myagents space whoami --space <slug> --json")
+                Some("lsagent space whoami --space <slug> --json")
             );
         }
     }

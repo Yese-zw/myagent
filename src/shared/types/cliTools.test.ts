@@ -31,7 +31,7 @@ describe('validateCliToolName', () => {
   });
 
   it('rejects reserved names that would shadow system commands', () => {
-    for (const reserved of ['curl', 'git', 'node', 'myagents', 'rm']) {
+    for (const reserved of ['curl', 'git', 'node', 'myagents', 'lsagent', 'rm']) {
       const r = validateCliToolName(reserved);
       expect(r.ok).toBe(false);
       if (!r.ok) expect(r.code).toBe('NAME_RESERVED');

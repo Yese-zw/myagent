@@ -49,7 +49,7 @@ describe('codex command context', () => {
   });
 
   it('keeps system-cli on PATH resolution semantics', async () => {
-    tempHome = mkdtempSync(join(tmpdir(), 'myagents-cli-selection-'));
+    tempHome = mkdtempSync(join(tmpdir(), 'lsagent-cli-selection-'));
     const selected = join(tempHome, 'selected');
     const fallback = join(tempHome, 'fallback');
     mkdirSync(selected);
@@ -138,6 +138,7 @@ describe('codex command context', () => {
     expect(context.env.MYAGENTS_INTERNAL_CLI_TOKEN).toBe('internal-sidecar-capability');
     const rules = readFileSync(join(getManagedCodexHome(), 'rules', 'myagents.rules'), 'utf-8');
     expect(rules).toContain('prefix_rule(pattern=["myagents"], decision="allow")');
+    expect(rules).toContain('prefix_rule(pattern=["lsagent"], decision="allow")');
     expect(rules).toContain(JSON.stringify(join(tempHome, '.myagents', 'bin', process.platform === 'win32' ? 'myagents.cmd' : 'myagents')));
   });
 

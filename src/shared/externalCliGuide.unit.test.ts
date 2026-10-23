@@ -7,7 +7,7 @@ import { EXTERNAL_CLI_PUBLIC_CAPABILITIES } from './externalCliCapabilities';
 
 const GUIDE_PATH = resolve(
   process.cwd(),
-  'bundled-guides/external-myagents-cli/SKILL.md',
+  'bundled-guides/external-lsagent-cli/SKILL.md',
 );
 const guide = readFileSync(GUIDE_PATH, 'utf8');
 const documentedInvocations = [
@@ -55,6 +55,6 @@ describe('external LSAGENT CLI guide', () => {
   it('requires the absolute launcher and external token environment variable', () => {
     expect(guide).toContain('CLI 绝对路径');
     expect(guide).toContain('MYAGENTS_API_TOKEN');
-    expect(guide).toContain('PATH 不保证能发现 `myagents`');
+    expect(guide).toContain('PATH 不保证能发现 `lsagent`');
   });
 });

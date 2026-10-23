@@ -104,7 +104,7 @@ describe('Channel handoff contract', () => {
       const result = channelMessageSchema.safeParse(request);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.message).toContain('myagents im send-message --help');
+        expect(result.error.message).toContain('lsagent im send-message --help');
         expect(result.error.message).toContain('target.id');
       }
     }

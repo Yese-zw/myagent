@@ -121,12 +121,12 @@ Workspace 指令可能由 Runtime 原生加载，Codex 的 LSAGENT append 则使
 | `myagents-floating-ball-instructions`    | 小窗回复应简短、桌面相邻上下文                          | `desktop.surface === floating-ball`                |
 | `myagents-generative-ui`                 | Widget 触发规则及按需读取设计契约                       | 全部 `desktop`，包括浮球                           |
 | `myagents-session-events`                | Agent/Session identity、start/send/watch 协作方式       | 全部场景                                           |
-| `myagents-cli-task-automation`           | “以后再做”统一使用 Task Skill/CLI，不用 OS cron         | 全部场景                                           |
-| `myagents-cli-goal`                      | Goal Mode 只在用户明确要求时创建                        | `desktop`，以及私聊 `im` / `agent-channel`         |
-| `myagents-cli-task-exit`                 | 目标完成时用 CLI 提前结束 Task                          | `cron && aiCanExit`                                |
+| `lsagent-cli-task-automation`           | “以后再做”统一使用 Task Skill/CLI，不用 OS cron         | 全部场景                                           |
+| `lsagent-cli-goal`                      | Goal Mode 只在用户明确要求时创建                        | `desktop`，以及私聊 `im` / `agent-channel`         |
+| `lsagent-cli-task-exit`                 | 目标完成时用 CLI 提前结束 Task                          | `cron && aiCanExit`                                |
 | `myagents-channel` | `对话环境` / `消息发送` 两个子标题；渠道身份概念、auto/tool_only、当前直发与跨会话交接、CLI help 导航 | IM/Channel，或具有渠道发送能力的其他场景 |
-| `myagents-cli-record`                    | 仅在用户明确要求“记一下”时创建文字 Record               | `desktop`，以及私聊 `im` / `agent-channel`         |
-| `myagents-cli-vision`                    | 当前模型不能读图时调用图片理解 helper                   | Session 启用 image-understanding 官方工具          |
+| `lsagent-cli-record`                    | 仅在用户明确要求“记一下”时创建文字 Record               | `desktop`，以及私聊 `im` / `agent-channel`         |
+| `lsagent-cli-vision`                    | 当前模型不能读图时调用图片理解 helper                   | Session 启用 image-understanding 官方工具          |
 | `myagents-user-tools`                    | 用户注册 CLI 工具的名称、description 与发现方法         | 实验开关开启且注册表存在 enabled 工具              |
 
 `cron` 与 `registeredAgent` 使用 desktop-style shell I/O 的 channel block，但不因此成为
@@ -282,7 +282,7 @@ payload，而 UI 只展示 envelope 后的 visible tail 或 badge。它适合 Tu
 Plugin 或工具的数据仍需结构化标记、转义并声明为 untrusted context，不能因为被隐藏就
 当成系统指令。
 
-Task 智能讨论采用“薄动态 reminder + product-owned Skill”分工：`TASK_DISCUSSION` 只携带 discussion/workspace/可选 Record identity 和原始 visible tail，`InitialMessage.requiredSystemSkill` 要求 app-owned `myagents-task-alignment` exact source/hash/inventory revision。澄清方法、完整 `task.md` 写作和确认协议留在 Skill；Task 参数事实由 `myagents-task-automation` 与 CLI leaf help 按需披露。不得在 App handler 再复制问卷、参数矩阵或四文档模板，也不得仅靠 slash 文本猜 Skill 已加载。
+Task 智能讨论采用“薄动态 reminder + product-owned Skill”分工：`TASK_DISCUSSION` 只携带 discussion/workspace/可选 Record identity 和原始 visible tail，`InitialMessage.requiredSystemSkill` 要求 app-owned `lsagent-task-alignment` exact source/hash/inventory revision。澄清方法、完整 `task.md` 写作和确认协议留在 Skill；Task 参数事实由 `lsagent-task-automation` 与 CLI leaf help 按需披露。不得在 App handler 再复制问卷、参数矩阵或四文档模板，也不得仅靠 slash 文本猜 Skill 已加载。
 
 ## 其它独立 Prompt
 
@@ -350,7 +350,7 @@ badge、visible tail、标题、预览、搜索和测试 Checklist。
 
 ## Channel 固定提示与逐轮事实
 
-`channelPrompt.ts` 保存固定 S1 渠道身份原则、S2 统一发送能力和 S3 Managed Codex 提问规则；`system-prompt.ts` 按场景/实际能力选入，禁止在稳定 system 段插入本轮 mode、sender、chat 或时间。原 `myagents-cli-im-media` 被统一发送能力取代；两种模式均有工具，区别由每轮 reminder 明示。Managed Codex 没有可用原生卡片时按本轮发送方式提出问题，不能无条件假定文本会回推。
+`channelPrompt.ts` 保存固定 S1 渠道身份原则、S2 统一发送能力和 S3 Managed Codex 提问规则；`system-prompt.ts` 按场景/实际能力选入，禁止在稳定 system 段插入本轮 mode、sender、chat 或时间。原 `lsagent-cli-im-media` 被统一发送能力取代；两种模式均有工具，区别由每轮 reminder 明示。Managed Codex 没有可用原生卡片时按本轮发送方式提出问题，不能无条件假定文本会回推。
 
 每次实际 admission 经 `session-core/channel-context.ts` 捕获有效配置和调用入口，再用 shared renderer 合成；builtin 与 external/DSH 共用同一 schema/模板。DSH 沿既有 root/product-session 注入固定段，逐轮事实仍属于 User reminder。完整协议与快照见 [System Reminder](system_reminder_protocol.md#channel-context)。
 

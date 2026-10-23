@@ -2,7 +2,7 @@
 
 使用场景：Telegram / 钉钉 / 飞书 / 微信 / QQ Agent 不在线、不回消息、社区插件装不上、QR 登录后不生效。
 
-正常 Agent / Channel / Plugin 关系先读 `/myagents-docs/references/agents-channels.md` 与 `tools-skills-plugins.md`。
+正常 Agent / Channel / Plugin 关系先读 `/lsagent-docs/references/agents-channels.md` 与 `tools-skills-plugins.md`。
 
 ## Ground truth
 
@@ -16,11 +16,11 @@
 ## 取证
 
 ```bash
-myagents agent list --json
-myagents agent show <agent-id> --json
-myagents agent channel list <agent-id> --json
-myagents agent runtime-status --json
-myagents plugin list --json
+lsagent agent list --json
+lsagent agent show <agent-id> --json
+lsagent agent channel list <agent-id> --json
+lsagent agent runtime-status --json
+lsagent plugin list --json
 rg -n "\\[telegram\\]|\\[dingtalk\\]|\\[feishu\\]|\\[im\\]|\\[bridge\\]|OpenClaw|qr-login|Gateway|plugin not ready|npm install|session|terminal_reason|tool-attachment" ./logs/unified-*.log | node .claude/skills/support/scripts/redact-log-output.mjs | tail -200
 ```
 

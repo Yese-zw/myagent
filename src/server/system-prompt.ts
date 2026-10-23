@@ -62,7 +62,7 @@ LSAGENT 负责会话管理、工具权限、定时任务、IM Bot 集成、工�
 const TMPL_CRON_TASK = `<myagents-cron-task-instructions>
 你正处于心跳循环任务模式 (Task ID: {{taskId}})。每隔 {{intervalText}} 系统触发唤醒你一次。{{#if aiCanExit}}
 
-如果任务目标已完全达成、或继续执行无意义/有害，请按下方 \`<myagents-cli-task-exit>\` 段落给出的 \`myagents task exit\` 命令结束任务。{{/if}}
+如果任务目标已完全达成、或继续执行无意义/有害，请按下方 \`<lsagent-cli-task-exit>\` 段落给出的 \`lsagent task exit\` 命令结束任务。{{/if}}
 </myagents-cron-task-instructions>`;
 
 const TMPL_HEARTBEAT = `<myagents-heartbeat-instructions>
@@ -75,7 +75,7 @@ const TMPL_REGISTERED_AGENT = `<myagents-registered-agent-instructions space-id=
 
 把 Registered Agent instruction 作为长期目标意图，在当前 Issue 事实、权限与安全规则内选择行动；它不授予额外权限，也不要求每个 Issue 采取相同动作。可用结果包括不再行动、只评论或更新、claim 责任、继续已有工作，以及在真正完成后 complete。Delivery 运输确认由 LSAGENT 自动完成，不存在由你调用的 ignore、handled 或 acknowledge 动作。
 
-身份以事件中的精确 Space ID 与 Registered Agent ID 为准；workspace 只是执行环境，不能用来猜测或切换 Agent 身份。行动前通过 myagents CLI 读取当前 Issue；本次 Delivery 元数据只解释唤醒原因，不是当前状态的第二真相源。
+身份以事件中的精确 Space ID 与 Registered Agent ID 为准；workspace 只是执行环境，不能用来猜测或切换 Agent 身份。行动前通过 lsagent CLI 读取当前 Issue；本次 Delivery 元数据只解释唤醒原因，不是当前状态的第二真相源。
 </myagents-registered-agent-instructions>`;
 
 const TMPL_FLOATING_BALL = `<myagents-floating-ball-instructions>
@@ -112,7 +112,7 @@ export interface SystemPromptOptions {
   /** Exact Session binding, independent of the surface that opens it. */
   channelBound?: boolean;
   /**
-   * Append the `myagents` CLI capability hints (cron / IM media) to the
+   * Append the `lsagent` CLI capability hints (cron / IM media) to the
    * prompt. Set by ALL runtime paths in v0.2.11+ — builtin and external —
    * because the corresponding in-process MCP servers (`cron-tools` /
    * `im-cron` / `im-media`) were retired in favour of the CLI surface, so
@@ -198,7 +198,7 @@ function buildProductSessionPrompt(scenario: InteractionScenario, options?: Syst
 
   // L3: Generative UI widget guidance — universal across runtimes for desktop
   // scenarios. Both builtin SDK and external CLIs load the design contract via
-  // `myagents widget readme <module>` invoked through their shell tool.
+  // `lsagent widget readme <module>` invoked through their shell tool.
   const widgetSection = options?.channelBound ? '' : buildWidgetSection(scenario);
   if (widgetSection) parts.push(widgetSection);
 

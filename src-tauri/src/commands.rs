@@ -338,7 +338,9 @@ pub async fn cmd_shutdown_for_update(
             "[sidecar] Shutdown for update requested".to_string(),
         );
         let _guard = begin_update_shutdown()?;
-        crate::cliproxy::quiesce_for_update().await.map_err(|error| error.message)?;
+        crate::cliproxy::quiesce_for_update()
+            .await
+            .map_err(|error| error.message)?;
         shutdown_for_update_verified(&app_handle, &state)
     }
 }
@@ -969,7 +971,7 @@ const ADMIN_AGENT_VERSION: &str = "29";
 /// that introduced the retire, the entry is harmless to keep (it just
 /// no-ops on absent paths).
 const RETIRED_ADMIN_PATHS: &[&str] = &[
-    // v16: /self-config promoted to global system skill /myagents-cli
+    // v16: /self-config promoted to global system skill /lsagent-cli
     ".claude/skills/self-config",
 ];
 
@@ -1059,7 +1061,7 @@ fn sync_admin_agent_blocking<R: Runtime>(app_handle: AppHandle<R>) -> Result<boo
 //
 // System skills are different: they encode flow-level contracts that
 // must evolve in lockstep with Rust / CLI / shape changes. Example:
-// `/task-implement` used to call `myagents task update-progress <id>
+// `/task-implement` used to call `lsagent task update-progress <id>
 // "..."`; when we removed that CLI in v0.1.69+ the skill had to update
 // in the same release, else existing users' AI calls would fail with
 // "unknown command". The seed-once path can't deliver updates — we
@@ -1071,7 +1073,7 @@ fn sync_admin_agent_blocking<R: Runtime>(app_handle: AppHandle<R>) -> Result<boo
 // matching exclusion list in src/server/index.ts::seedBundledSkills
 // MUST be kept in sync (comment there points back here).
 
-const SYSTEM_SKILLS_VERSION: &str = "61";
+const SYSTEM_SKILLS_VERSION: &str = "62";
 
 /// One process-wide transaction owner for the versioned system-skill
 /// snapshot. Startup automation and ConfigProvider may request convergence at
@@ -1088,52 +1090,52 @@ const SYSTEM_SKILLS: &[&str] = &[
     // v51: one product-owned Task discussion workflow replaces the former
     // alignment/executor pair. Ordinary dispatch now hands task.md directly
     // to the Runtime, so execution no longer depends on a Skill name.
-    "myagents-task-alignment",
+    "lsagent-task-alignment",
     // v10: ultra-research removed — not generic enough to ship as system
     // skill. Existing installs retain the dir at ~/.myagents/skills/
     // ultra-research/ until the user deletes it (no orphan cleanup logic).
     "download-anything",
-    // v52: myagents-cli documents physical local directory/.zip/.skill
+    // v52: lsagent-cli documents physical local directory/.zip/.skill
     // installs and the CLI-owned explicit-relative cwd boundary.
-    // v9: myagents-cli promoted from helper-bundled skill (was at
+    // v9: lsagent-cli promoted from helper-bundled skill (was at
     // bundled-agents/myagents_helper/.claude/skills/self-config/) to a
     // global system skill. Every AI session inside LSAGENT — Chat / IM Bot
     // / Cron / Helper — should be able to drive the product's own
     // capabilities (cron, task center, MCP, Provider, channels, plugins,
     // skills, Cloud Space, widgets) through the CLI. SKILL.md changes track CLI surface
     // changes, so it must force-overwrite on version bumps.
-    "myagents-cli",
+    "lsagent-cli",
     // v49: progressively disclosed contract for the bundled local document
     // converter. It is required because every Runtime must discover the same
     // App-owned job surface without an always-on prompt section.
-    "myagents-anydoc",
+    "lsagent-anydoc",
     // v54: progressive instructions for the Session-scoped local attachment
     // transcription CLI. Identity stays product-injected; the Skill exposes
     // only the public job and artifact contract.
-    "myagents-speech-recognition",
+    "lsagent-speech-recognition",
     // v53: Task automation documents the stable Agent-facing receipt,
     // idempotent run semantics, and existing result channels. Command
     // Detector protocol remains a progressive reference, not a competing
     // Sensor product entry.
-    "myagents-task-automation",
+    "lsagent-task-automation",
     // v35: product-use knowledge shared by every LSAGENT session. It owns
     // stable user-facing concepts, feature relationships, prerequisites and
-    // expected behaviour; live state/actions stay in myagents-cli and the
+    // expected behaviour; live state/actions stay in lsagent-cli and the
     // helper-local support skill owns diagnosis.
-    "myagents-docs",
+    "lsagent-docs",
     // v18: tool-creator — meta-skill for the CLI tool registry (PRD 0.2.36
     // cli_first_tool_registry). Teaches AI to author standards-compliant
     // Agent-CLI tools (tool.json + entry + readme/--help contract) and
-    // register them via `myagents tool add`. System skill because its
+    // register them via `lsagent tool add`. System skill because its
     // contract must track the registry's server-side validation (800-char
     // description cap, reserved names) in lockstep.
     "tool-creator",
     // v33: LSAGENT memory maintenance skills. These are managed flow
     // targets, so their bundled contracts must stay in lockstep with the
     // hidden scheduler, injected-turn prompt, and rule-substrate templates.
-    "myagents-memory-update",
-    "myagents-memory-gardener",
-    "myagents-memory-molt",
+    "lsagent-memory-update",
+    "lsagent-memory-gardener",
+    "lsagent-memory-molt",
     // v50: skill-creator promoted from utility → system skill. Its authoring
     // and evaluation workflow evolves with the bundled scripts, so existing
     // installs must receive updates instead of retaining the seed-once copy.
@@ -1149,7 +1151,22 @@ const SYSTEM_SKILLS: &[&str] = &[
 /// Product-owned system skills whose former independent workflow must not
 /// survive an upgrade. These directories were force-overwritten by LSAGENT,
 /// so removing the exact retired names cannot delete a user-owned skill.
-const RETIRED_SYSTEM_SKILLS: &[&str] = &["myagents-sensor", "task-alignment", "task-implement"];
+const RETIRED_SYSTEM_SKILLS: &[&str] = &[
+    "myagents-sensor",
+    "task-alignment",
+    "task-implement",
+    // v62: product skill ids moved from myagents-* to lsagent-*. These exact
+    // directories were force-written by older app versions.
+    "myagents-task-alignment",
+    "myagents-memory-update",
+    "myagents-memory-gardener",
+    "myagents-memory-molt",
+    "myagents-cli",
+    "myagents-anydoc",
+    "myagents-speech-recognition",
+    "myagents-task-automation",
+    "myagents-docs",
+];
 
 /// Force-sync every system skill from the app bundle to
 /// `~/.myagents/skills/<name>/`. Runs once per `SYSTEM_SKILLS_VERSION`
@@ -1314,7 +1331,7 @@ fn sync_system_skills_blocking<R: Runtime>(app_handle: AppHandle<R>) -> Result<b
     // actually installed. This preserves the existing non-destructive sync
     // guarantee when a bundle is incomplete, while still removing the exact
     // obsolete workflow before the new version stamp is committed.
-    let retired = if skill_dir_is_complete(&skills_dir.join("myagents-task-automation")) {
+    let retired = if skill_dir_is_complete(&skills_dir.join("lsagent-task-automation")) {
         remove_retired_system_skills(&skills_dir)?
     } else {
         Vec::new()
@@ -1603,68 +1620,69 @@ mod system_skills_tests {
 
     #[test]
     fn system_skill_version_keeps_cuse_and_product_skills_aligned() {
-        assert_eq!(SYSTEM_SKILLS_VERSION, "61");
+        assert_eq!(SYSTEM_SKILLS_VERSION, "62");
         assert!(SYSTEM_SKILLS.contains(&"cuse"));
         assert!(!REQUIRED_SYSTEM_SKILLS.contains(&"cuse"));
-        assert!(SYSTEM_SKILLS.contains(&"myagents-task-alignment"));
+        assert!(SYSTEM_SKILLS.contains(&"lsagent-task-alignment"));
         assert!(RETIRED_SYSTEM_SKILLS.contains(&"task-alignment"));
         assert!(RETIRED_SYSTEM_SKILLS.contains(&"task-implement"));
         assert!(SYSTEM_SKILLS.contains(&"skill-creator"));
-        let bundled = include_str!("../../bundled-skills/myagents-cli/SKILL.md");
-        let anydoc = include_str!("../../bundled-skills/myagents-anydoc/SKILL.md");
-        let speech = include_str!("../../bundled-skills/myagents-speech-recognition/SKILL.md");
+        let bundled = include_str!("../../bundled-skills/lsagent-cli/SKILL.md");
+        let anydoc = include_str!("../../bundled-skills/lsagent-anydoc/SKILL.md");
+        let speech = include_str!("../../bundled-skills/lsagent-speech-recognition/SKILL.md");
         let description = bundled
             .split("---")
             .nth(1)
-            .expect("myagents-cli frontmatter");
+            .expect("lsagent-cli frontmatter");
         assert!(!description.to_ascii_lowercase().contains("anydoc"));
         assert!(bundled.contains("AnyDoc"));
-        assert!(bundled.contains("myagents anydoc --help"));
-        assert!(bundled.contains("/myagents-anydoc"));
-        assert!(anydoc.contains("myagents anydoc convert --file <input>"));
-        assert!(bundled.contains("/myagents-speech-recognition"));
-        assert!(speech.contains("myagents speech transcribe --file <input>"));
+        assert!(bundled.contains("lsagent anydoc --help"));
+        assert!(bundled.contains("/lsagent-anydoc"));
+        assert!(anydoc.contains("lsagent anydoc convert --file <input>"));
+        assert!(bundled.contains("/lsagent-speech-recognition"));
+        assert!(speech.contains("lsagent speech transcribe --file <input>"));
         assert!(!speech.contains("--session-id"));
-        assert!(bundled.contains("myagents space list --json"));
-        assert!(bundled.contains("myagents space whoami --space <slug> --json"));
-        assert!(bundled.contains("myagents space goal list --space <slug> --json"));
-        assert!(bundled.contains("myagents space issue update <issueId>"));
+        assert!(bundled.contains("lsagent space list --json"));
+        assert!(bundled.contains("lsagent space whoami --space <slug> --json"));
+        assert!(bundled.contains("lsagent space goal list --space <slug> --json"));
+        assert!(bundled.contains("lsagent space issue update <issueId>"));
         assert!(bundled.contains("--clear-goal"));
         assert!(bundled.contains("只有精确 leaf help 明确声明支持的命令才使用 `--dry-run`"));
         assert!(bundled.contains("所有 Space 业务命令都必须带 `--space <slug>`"));
-        assert!(bundled.contains("myagents goal create --objective-file goal-objective.txt"));
+        assert!(bundled.contains("lsagent goal create --objective-file goal-objective.txt"));
         assert!(bundled.contains("workspace 或系统 temp 均可"));
         assert!(bundled.contains("--max-executions <正整数>"));
-        assert!(bundled.contains("myagents-task-automation"));
-        assert!(bundled.contains("myagents task start <taskId>"));
-        assert!(bundled.contains("myagents agent current --json"));
+        assert!(bundled.contains("lsagent-task-automation"));
+        assert!(bundled.contains("lsagent task start <taskId>"));
+        assert!(bundled.contains("lsagent agent current --json"));
         assert!(bundled.contains("enabled/runtime/runtimeConfig/providerId/model/permissionMode"));
         assert!(bundled.contains("--providerId X --model X"));
         assert!(bundled.contains("--query X --limit N"));
-        assert!(bundled.contains("myagents record create"));
+        assert!(bundled.contains("lsagent record create"));
         assert!(bundled.contains("--sourceRecordId X"));
-        assert!(!bundled.contains("myagents thought create '...'"));
+        assert!(!bundled.contains("lsagent thought create '...'"));
         assert!(!bundled.contains("--sourceThoughtId X"));
         assert!(bundled.contains("没有 30 天恢复或 undelete 承诺"));
         assert!(!bundled.contains("myagents-sensor"));
 
-        let automation = include_str!("../../bundled-skills/myagents-task-automation/SKILL.md");
+        let automation = include_str!("../../bundled-skills/lsagent-task-automation/SKILL.md");
         assert!(automation.contains("Task 与立即执行/Record/Goal 的边界"));
         assert!(!automation.contains("Task 与立即执行/Thought/Goal 的边界"));
         assert!(automation.contains("references/command-detector.md"));
         assert!(automation.contains("--startAt"));
         assert!(automation.contains("默认在 `run` 后约 2 秒"));
         assert!(automation.contains("没有 30 天恢复承诺"));
-        assert!(automation.contains("myagents task readme"));
+        assert!(automation.contains("lsagent task readme"));
         assert!(automation.contains("--maxExecutions 1"));
         assert!(automation.contains("`data.receipt`"));
         assert!(automation.contains("`changed: false`"));
-        assert!(SYSTEM_SKILLS.contains(&"myagents-task-automation"));
+        assert!(SYSTEM_SKILLS.contains(&"lsagent-task-automation"));
 
-        let memory_update = include_str!("../../bundled-skills/myagents-memory-update/SKILL.md");
+        let memory_update = include_str!("../../bundled-skills/lsagent-memory-update/SKILL.md");
         assert!(memory_update.contains("author: LSAGENT"));
-        assert!(memory_update
-            .contains("仅当系统或用户明确指定完整名称 `myagents-memory-update` 时使用"));
+        assert!(
+            memory_update.contains("仅当系统或用户明确指定完整名称 `lsagent-memory-update` 时使用")
+        );
         assert!(memory_update.contains("不要根据任务语义或相似表述自行触发"));
         assert!(memory_update.contains("错误的长期记忆通常比暂时缺失更有害"));
         assert!(memory_update.contains("无法说明未来判断或行动差异的信息，不写"));
@@ -1673,25 +1691,25 @@ mod system_skills_tests {
         assert!(memory_update.contains("不从已有 topic 名称或工作区结构猜测事件归属"));
         assert!(memory_update.contains("不要落盘“未升级偏好”"));
         assert!(memory_update.contains("commit 后 push 当前分支"));
-        assert!(SYSTEM_SKILLS.contains(&"myagents-memory-update"));
+        assert!(SYSTEM_SKILLS.contains(&"lsagent-memory-update"));
 
-        let gardener = include_str!("../../bundled-skills/myagents-memory-gardener/SKILL.md");
+        let gardener = include_str!("../../bundled-skills/lsagent-memory-gardener/SKILL.md");
         assert!(gardener.contains("已有的未提交改动不阻断记忆维护"));
         assert!(gardener.contains("只暂存并提交本次记忆维护产生的改动"));
         assert!(!gardener.contains("存在非本次任务的未提交改动时，只做只读体检"));
 
-        let product_docs = include_str!("../../bundled-skills/myagents-docs/SKILL.md");
-        assert!(product_docs.contains("name: myagents-docs"));
+        let product_docs = include_str!("../../bundled-skills/lsagent-docs/SKILL.md");
+        assert!(product_docs.contains("name: lsagent-docs"));
         assert!(product_docs.contains("author: LSAGENT"));
         assert!(product_docs.contains("它面向软件使用而非源码开发"));
-        assert!(product_docs.contains("随后加载 `/myagents-cli`"));
+        assert!(product_docs.contains("随后加载 `/lsagent-cli`"));
         assert!(product_docs.contains("在内置小助理里加载 `/support`"));
         assert!(product_docs.contains("Record / Task / Cron / Goal"));
-        assert!(SYSTEM_SKILLS.contains(&"myagents-docs"));
+        assert!(SYSTEM_SKILLS.contains(&"lsagent-docs"));
 
         for content in [
-            include_str!("../../bundled-skills/myagents-memory-gardener/SKILL.md"),
-            include_str!("../../bundled-skills/myagents-memory-molt/SKILL.md"),
+            include_str!("../../bundled-skills/lsagent-memory-gardener/SKILL.md"),
+            include_str!("../../bundled-skills/lsagent-memory-molt/SKILL.md"),
         ] {
             assert!(content.contains("author: LSAGENT"));
         }
@@ -1736,36 +1754,36 @@ mod system_skills_tests {
                 include_str!("../../bundled-skills/download-anything/SKILL.md"),
             ),
             (
-                "myagents-cli",
-                include_str!("../../bundled-skills/myagents-cli/SKILL.md"),
+                "lsagent-cli",
+                include_str!("../../bundled-skills/lsagent-cli/SKILL.md"),
             ),
             (
-                "myagents-docs",
-                include_str!("../../bundled-skills/myagents-docs/SKILL.md"),
+                "lsagent-docs",
+                include_str!("../../bundled-skills/lsagent-docs/SKILL.md"),
             ),
             (
-                "myagents-memory-gardener",
-                include_str!("../../bundled-skills/myagents-memory-gardener/SKILL.md"),
+                "lsagent-memory-gardener",
+                include_str!("../../bundled-skills/lsagent-memory-gardener/SKILL.md"),
             ),
             (
-                "myagents-memory-molt",
-                include_str!("../../bundled-skills/myagents-memory-molt/SKILL.md"),
+                "lsagent-memory-molt",
+                include_str!("../../bundled-skills/lsagent-memory-molt/SKILL.md"),
             ),
             (
-                "myagents-memory-update",
-                include_str!("../../bundled-skills/myagents-memory-update/SKILL.md"),
+                "lsagent-memory-update",
+                include_str!("../../bundled-skills/lsagent-memory-update/SKILL.md"),
             ),
             (
-                "myagents-task-automation",
-                include_str!("../../bundled-skills/myagents-task-automation/SKILL.md"),
+                "lsagent-task-automation",
+                include_str!("../../bundled-skills/lsagent-task-automation/SKILL.md"),
             ),
             (
                 "prompt-writer",
                 include_str!("../../bundled-skills/prompt-writer/SKILL.md"),
             ),
             (
-                "myagents-task-alignment",
-                include_str!("../../bundled-skills/myagents-task-alignment/SKILL.md"),
+                "lsagent-task-alignment",
+                include_str!("../../bundled-skills/lsagent-task-alignment/SKILL.md"),
             ),
         ] {
             let yaml = content
@@ -1805,11 +1823,11 @@ mod system_skills_tests {
         let tool_install = include_str!(
             "../../bundled-agents/myagents_helper/.claude/skills/tool-install/SKILL.md"
         );
-        assert!(helper.contains("`/myagents-docs`"));
-        assert!(helper.contains("`/myagents-cli`"));
+        assert!(helper.contains("`/lsagent-docs`"));
+        assert!(helper.contains("`/lsagent-cli`"));
         assert!(helper.contains("`/support`"));
         assert!(helper.contains("`/tool-install`"));
-        assert!(support.contains("先用 `/myagents-docs` 确认正确产品预期"));
+        assert!(support.contains("先用 `/lsagent-docs` 确认正确产品预期"));
         assert!(support.contains("不读取 `~/.myagents/credentials/`"));
         assert!(tool_install.contains("MYAGENTS_NPM_GLOBAL_PREFIX"));
         assert!(tool_install.contains("不写 Agent-CLI Registry"));
@@ -1855,8 +1873,8 @@ mod system_skills_tests {
             }
         }
 
-        assert_reference_closure("bundled-skills/myagents-docs");
-        assert_reference_closure("bundled-skills/myagents-task-automation");
+        assert_reference_closure("bundled-skills/lsagent-docs");
+        assert_reference_closure("bundled-skills/lsagent-task-automation");
         assert_reference_closure("bundled-agents/myagents_helper/.claude/skills/support");
 
         let redactor_cli = include_str!(
@@ -1902,16 +1920,16 @@ mod system_skills_tests {
     fn all_memory_skill_descriptions_require_the_exact_full_name() {
         for (name, content) in [
             (
-                "myagents-memory-update",
-                include_str!("../../bundled-skills/myagents-memory-update/SKILL.md"),
+                "lsagent-memory-update",
+                include_str!("../../bundled-skills/lsagent-memory-update/SKILL.md"),
             ),
             (
-                "myagents-memory-gardener",
-                include_str!("../../bundled-skills/myagents-memory-gardener/SKILL.md"),
+                "lsagent-memory-gardener",
+                include_str!("../../bundled-skills/lsagent-memory-gardener/SKILL.md"),
             ),
             (
-                "myagents-memory-molt",
-                include_str!("../../bundled-skills/myagents-memory-molt/SKILL.md"),
+                "lsagent-memory-molt",
+                include_str!("../../bundled-skills/lsagent-memory-molt/SKILL.md"),
             ),
         ] {
             assert!(
@@ -1967,7 +1985,7 @@ mod system_skills_tests {
             SYSTEM_SKILLS_VERSION,
         )
         .unwrap();
-        fs::remove_file(skills_dir.join("myagents-memory-update").join("SKILL.md")).unwrap();
+        fs::remove_file(skills_dir.join("lsagent-memory-update").join("SKILL.md")).unwrap();
         assert!(ensure_system_skills_installation_current_at(myagents_dir).is_err());
     }
 
@@ -3433,10 +3451,7 @@ fn run_runtime_detection_with_policy(
         },
     );
 
-    for (runtime, binary) in [
-        ("claude-code", "claude"),
-        ("codex", "codex"),
-    ] {
+    for (runtime, binary) in [("claude-code", "claude"), ("codex", "codex")] {
         results.insert(
             runtime.to_string(),
             if distribution.allows_external(runtime) {
@@ -3634,9 +3649,7 @@ fn detect_dsh_runtime_with_lock(
         );
     }
     let root = candidates.into_iter().find(|root| {
-        root.join("runtime-artifact")
-            .join("package.json")
-            .is_file()
+        root.join("runtime-artifact").join("package.json").is_file()
             && root
                 .join("runtime-artifact")
                 .join("runtime-server-process.artifact.mjs")
@@ -3644,13 +3657,19 @@ fn detect_dsh_runtime_with_lock(
     });
     match root {
         Some(root) => {
-            let release_ready =
-                lock.get("release").is_some() && platform_claim == Some("verified");
+            let release_ready = lock.get("release").is_some() && platform_claim == Some("verified");
             RuntimeDetectionResult {
                 installed: true,
                 version,
                 path: Some(root.to_string_lossy().to_string()),
-                readiness: Some(if release_ready { "ready" } else { "unverified-dev-runtime" }.to_string()),
+                readiness: Some(
+                    if release_ready {
+                        "ready"
+                    } else {
+                        "unverified-dev-runtime"
+                    }
+                    .to_string(),
+                ),
                 reason: None,
             }
         }
@@ -3789,7 +3808,11 @@ mod runtime_detection_cache_tests {
         ] {
             let lock = dsh_fixture_lock(claim, release);
             let result = detect_dsh_runtime_with_lock(Some(temporary.path()), &lock);
-            assert!(result.installed, "unexpected DSH detection: {:?}", result.reason);
+            assert!(
+                result.installed,
+                "unexpected DSH detection: {:?}",
+                result.reason
+            );
             assert_eq!(result.readiness.as_deref(), Some(readiness));
             assert_eq!(result.version.as_deref(), Some("fixture-runtime"));
         }
@@ -3803,17 +3826,32 @@ mod runtime_detection_cache_tests {
         let temporary = tempfile::tempdir().unwrap();
         let dsh = dsh_fixture_files(temporary.path());
 
-        let result = detect_dsh_runtime_with_lock(Some(temporary.path()), &dsh_fixture_lock("verified", true));
+        let result = detect_dsh_runtime_with_lock(
+            Some(temporary.path()),
+            &dsh_fixture_lock("verified", true),
+        );
         assert!(result.installed);
         assert_eq!(result.path.as_deref(), dsh.to_str());
     }
 
     #[test]
     fn dsh_platform_target_includes_intel_macos() {
-        assert_eq!(dsh_platform_target_for("macos", "aarch64"), Some("darwin-arm64"));
-        assert_eq!(dsh_platform_target_for("macos", "x86_64"), Some("darwin-x64"));
-        assert_eq!(dsh_platform_target_for("windows", "x86_64"), Some("win32-x64"));
-        assert_eq!(dsh_platform_target_for("linux", "x86_64"), Some("linux-x64"));
+        assert_eq!(
+            dsh_platform_target_for("macos", "aarch64"),
+            Some("darwin-arm64")
+        );
+        assert_eq!(
+            dsh_platform_target_for("macos", "x86_64"),
+            Some("darwin-x64")
+        );
+        assert_eq!(
+            dsh_platform_target_for("windows", "x86_64"),
+            Some("win32-x64")
+        );
+        assert_eq!(
+            dsh_platform_target_for("linux", "x86_64"),
+            Some("linux-x64")
+        );
     }
 
     #[test]

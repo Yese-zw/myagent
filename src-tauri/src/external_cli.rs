@@ -8,10 +8,10 @@ use std::sync::{Mutex, OnceLock};
 use tauri::Emitter;
 
 const CONFIG_KEY: &str = "externalCliAccess";
-const EXTERNAL_CLI_SKILL_DIR: &str = "external-myagents-cli";
+const EXTERNAL_CLI_SKILL_DIR: &str = "external-lsagent-cli";
 const EXTERNAL_CLI_SKILL_FILE: &str = "SKILL.md";
 const EXTERNAL_CLI_SKILL_CONTENT: &str =
-    include_str!("../../bundled-guides/external-myagents-cli/SKILL.md");
+    include_str!("../../bundled-guides/external-lsagent-cli/SKILL.md");
 pub const INTERNAL_TOKEN_HEADER: &str = "x-myagents-internal-cli-token";
 pub const INTERNAL_TOKEN_ENV: &str = "MYAGENTS_INTERNAL_CLI_TOKEN";
 

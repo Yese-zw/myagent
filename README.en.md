@@ -41,7 +41,7 @@ No server of your own is needed. Connect the computers you already have, with yo
 This document covers **0.5.0**. Check the [website](https://myagents.io) and [Releases](https://github.com/hAcKlyc/MyAgents/releases) for available downloads and release notes.
 
 1. **Install the app**: macOS 13+ (Apple Silicon / Intel) and Windows 10+ are supported. Download the appropriate installer; no separate Node.js installation or server setup is required.
-2. **Connect a model**: in Settings → Model Providers, sign in to a supported subscription or configure a model API, then select a compatible runtime and model. See the [model and runtime guide](bundled-skills/myagents-docs/references/models-providers-runtimes.md).
+2. **Connect a model**: in Settings → Model Providers, sign in to a supported subscription or configure a model API, then select a compatible runtime and model. See the [model and runtime guide](bundled-skills/lsagent-docs/references/models-providers-runtimes.md).
 3. **Choose a workspace and create an Agent**: use your own project folder or start with the included Mino template, then enable the Skills and tools you need.
 4. **Start working**: bring your materials, explain the goal, and keep refining the direction in conversation. Ask your Agent to create a Task for work that should continue on a schedule.
 
@@ -72,13 +72,13 @@ An example request:
 
 > Every morning, check for new material in this workspace. If anything has changed, summarize it and flag decisions I need to make; otherwise, stay quiet. Confirm how to check for changes and where to save the results with me before creating the task.
 
-Tasks determine when work is triggered. For ongoing research, execution, and verification within the current session, use **Goal Mode**. See the [task and automation guide](bundled-skills/myagents-docs/references/automation.md).
+Tasks determine when work is triggered. For ongoing research, execution, and verification within the current session, use **Goal Mode**. See the [task and automation guide](bundled-skills/lsagent-docs/references/automation.md).
 
 ### People use the GUI; Agents arrange work through the CLI
 
 Manage Agents, Tasks, and records in the interface. Agents running inside LSAGENT can use the `myagents` CLI to create tasks, call other Agents, read status, and write back results. Requests in conversation can become actual work arrangements.
 
-Other Agents you install can connect too. Enable External Access in Settings and authorize access with a token to use the public CLI capabilities. See the [external Agent integration guide](bundled-guides/external-myagents-cli/SKILL.md).
+Other Agents you install can connect too. Enable External Access in Settings and authorize access with a token to use the public CLI capabilities. See the [external Agent integration guide](bundled-guides/external-lsagent-cli/SKILL.md).
 
 ### Work with Agents through your messaging apps
 
@@ -86,7 +86,7 @@ Connect a messaging platform to an Agent workspace through Channels. Feishu, Din
 
 ![Channel settings for Feishu, DingTalk, Telegram, and additional messaging platforms](specs/assets/readme/v050-im-channels-zh.png)
 
-*Add a Channel to a workspace or install the platform plugin you need. See the [Agent and Channel guide](bundled-skills/myagents-docs/references/agents-channels.md) for configuration.*
+*Add a Channel to a workspace or install the platform plugin you need. See the [Agent and Channel guide](bundled-skills/lsagent-docs/references/agents-channels.md) for configuration.*
 
 ### Hand over work through Space
 
@@ -94,7 +94,7 @@ Space provides Issues, shared goals (Space Goals), shared Skills, and tools. Org
 
 Participating Agents register an identity in Space, claim work, and execute in their own local environments. You keep working closely with your Agents while collaborators work with theirs, coordinating through shared goals and deliverables.
 
-GitHub, online documents, and other workplace services can also participate through the tools you configure. See the [Space guide](bundled-skills/myagents-docs/references/cloud-space.md).
+GitHub, online documents, and other workplace services can also participate through the tools you configure. See the [Space guide](bundled-skills/lsagent-docs/references/cloud-space.md).
 
 ## More capabilities
 
@@ -108,7 +108,7 @@ GitHub, online documents, and other workplace services can also participate thro
 | Desktop entry points | Use the main workbench, the built-in assistant, or a floating desktop window for full work sessions and quick questions. |
 | Native desktop control | Enable the optional Cuse global Skill and CLI on macOS / Windows so Agents can interact with the desktop. |
 
-Learn more: [Models and runtimes](bundled-skills/myagents-docs/references/models-providers-runtimes.md) · [Skills, tools, and plugins](bundled-skills/myagents-docs/references/tools-skills-plugins.md) · [Agents and Channels](bundled-skills/myagents-docs/references/agents-channels.md) · [Records and Tasks](bundled-skills/myagents-docs/references/automation.md)
+Learn more: [Models and runtimes](bundled-skills/lsagent-docs/references/models-providers-runtimes.md) · [Skills, tools, and plugins](bundled-skills/lsagent-docs/references/tools-skills-plugins.md) · [Agents and Channels](bundled-skills/lsagent-docs/references/agents-channels.md) · [Records and Tasks](bundled-skills/lsagent-docs/references/automation.md)
 
 The detailed usage guides linked here are currently maintained in Chinese.
 
@@ -141,7 +141,7 @@ The LSAGENT client is free and open source. Model subscriptions, APIs, and exter
 
 ### Can external Agents use every capability?
 
-External access is off by default. Once enabled and authorized, external Agents can use the public commands for Agents, sessions, Tasks, Records, and other supported capabilities. See the [integration guide](bundled-guides/external-myagents-cli/SKILL.md) for the exact scope, which differs from the full set available to Agents inside the app.
+External access is off by default. Once enabled and authorized, external Agents can use the public commands for Agents, sessions, Tasks, Records, and other supported capabilities. See the [integration guide](bundled-guides/external-lsagent-cli/SKILL.md) for the exact scope, which differs from the full set available to Agents inside the app.
 
 ## Development and contributing
 

@@ -92,13 +92,13 @@ class VisionToolError extends Error {
 }
 
 export function getVisionToolReadme(): string {
-  return `myagents vision — official image-understanding helper
+  return `lsagent vision — official image-understanding helper
 
 Usage:
-  myagents vision analyze --image <path> [--image <path> ...] [--prompt "..."] [--json]
-  myagents vision analyze --image <path> --prompt-file <workspace-relative-text-file>
-  myagents vision analyze --image @myagents_files/screenshot.png --prompt "Read the error message"
-  myagents vision readme
+  lsagent vision analyze --image <path> [--image <path> ...] [--prompt "..."] [--json]
+  lsagent vision analyze --image <path> --prompt-file <workspace-relative-text-file>
+  lsagent vision analyze --image @myagents_files/screenshot.png --prompt "Read the error message"
+  lsagent vision readme
 
 The tool only accepts local image paths inside the current LSAGENT workspace.
 Use @myagents_files/... paths when the conversation shows attached images as

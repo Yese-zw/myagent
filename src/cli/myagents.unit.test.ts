@@ -108,7 +108,7 @@ describe('Session observation CLI', () => {
   });
 });
 
-describe('myagents CLI port authority', () => {
+describe('lsagent CLI port authority', () => {
   it('keeps --port above inherited Session or Rust-injected Global ports', () => {
     expect(resolveCliPort('32003', '32002')).toBe('32003');
     expect(resolveCliPort(undefined, '32002')).toBe('32002');
@@ -146,7 +146,7 @@ describe('CLI dry-run admission', () => {
 
 describe('public external CLI declaration', () => {
   it('accepts the bundled external guide examples through the public CLI grammar', () => {
-    const guide = readFileSync(join(process.cwd(), 'bundled-guides/external-myagents-cli/SKILL.md'), 'utf8');
+    const guide = readFileSync(join(process.cwd(), 'bundled-guides/external-lsagent-cli/SKILL.md'), 'utf8');
     const invocations = [...guide.matchAll(/^<CLI> ([^\n]+)$/gm)]
       .map(([, invocation]) => invocation.trim())
       .filter(invocation => invocation !== '--help' && !invocation.endsWith(' --help'));
@@ -249,7 +249,7 @@ describe('public external CLI declaration', () => {
       const aliases = 'aliases' in capability ? capability.aliases : [];
       for (const command of [capability.command, ...aliases]) {
         const help = publicCliHelp(command.split(' '));
-        expect(help, command).toContain(`myagents ${command}`);
+        expect(help, command).toContain(`lsagent ${command}`);
         expect(help, command).toContain('Purpose:');
         expect(help, command).toContain('Effect:');
         expect(help, command).toContain('Result:');
@@ -258,11 +258,11 @@ describe('public external CLI declaration', () => {
         expect(help, command).not.toContain('[fields]');
       }
     }
-    expect(publicCliHelp(['task', 'remove'])).not.toContain('myagents task delete');
+    expect(publicCliHelp(['task', 'remove'])).not.toContain('lsagent task delete');
   });
 });
 
-describe('myagents CLI port authority', () => {
+describe('lsagent CLI port authority', () => {
   it('rejects a missing or invalid Session route while preserving explicit terminal routing', () => {
     expect(validateCliRouting('31417', 'product-a')).toBeUndefined();
     expect(validateCliRouting('31417', undefined)).toBeUndefined();
@@ -358,7 +358,7 @@ describe('skill source normalization', () => {
   });
 });
 
-describe('myagents CLI command grammar', () => {
+describe('lsagent CLI command grammar', () => {
   it.each(['diagnose', 'vision', 'im'])('identifies bare %s as missing a subcommand', group => {
     expect(validateCliCommand([group])).toMatchObject({ code: 'SUBCOMMAND_REQUIRED' });
     expect(validateCliCommand([group], true)).toBeUndefined();
@@ -381,7 +381,7 @@ describe('myagents CLI command grammar', () => {
     expect(validateCliCommand(['definitely-unknown'])).toMatchObject({
       code: 'UNKNOWN_COMMAND_GROUP',
       error: expect.stringContaining('definitely-unknown'),
-      suggestedCommand: 'myagents --help',
+      suggestedCommand: 'lsagent --help',
     });
   });
 
@@ -389,7 +389,7 @@ describe('myagents CLI command grammar', () => {
     expect(validateCliCommand(['mcp', 'definitely-unknown'])).toMatchObject({
       code: 'UNKNOWN_COMMAND',
       error: expect.stringContaining('mcp definitely-unknown'),
-      suggestedCommand: 'myagents mcp --help',
+      suggestedCommand: 'lsagent mcp --help',
     });
     expect(validateCliCommand(['mcp', 'oauth', 'start'])).toBeUndefined();
     expect(validateCliCommand(['space', 'issue', 'comment', 'get'])).toBeUndefined();
@@ -409,7 +409,7 @@ describe('myagents CLI command grammar', () => {
       .toBe('anydoc/status');
     expect(validateCliCommand(['document'])).toMatchObject({
       code: 'UNKNOWN_COMMAND_GROUP',
-      suggestedCommand: 'myagents anydoc --help',
+      suggestedCommand: 'lsagent anydoc --help',
     });
   });
 
@@ -420,12 +420,12 @@ describe('myagents CLI command grammar', () => {
     expect(buildRoute('speech', 'wait', ['speech_01'])).toBe('speech/status');
     expect(validateCliCommand(['speech', 'unknown'])).toMatchObject({
       code: 'UNKNOWN_COMMAND',
-      suggestedCommand: 'myagents speech --help',
+      suggestedCommand: 'lsagent speech --help',
     });
   });
 });
 
-describe('myagents CLI AnyDoc contracts', () => {
+describe('lsagent CLI AnyDoc contracts', () => {
   it('resolves source and output paths locally without forwarding CLI-only wait', () => {
     const parsed = parseArgs([
       'anydoc',
@@ -493,8 +493,8 @@ describe('myagents CLI AnyDoc contracts', () => {
         },
       }, false);
       const output = log.mock.calls.flat().join('\n');
-      expect(output).toContain('myagents anydoc status 20260815_7f3a91c2b6d4');
-      expect(output).toContain('myagents anydoc cancel 20260815_7f3a91c2b6d4');
+      expect(output).toContain('lsagent anydoc status 20260815_7f3a91c2b6d4');
+      expect(output).toContain('lsagent anydoc cancel 20260815_7f3a91c2b6d4');
       expect(output).toContain('/tmp/out/document.md');
     } finally {
       log.mockRestore();
@@ -618,7 +618,7 @@ describe('myagents CLI AnyDoc contracts', () => {
   });
 });
 
-describe('myagents CLI speech contracts', () => {
+describe('lsagent CLI speech contracts', () => {
   it('resolves local paths without forwarding CLI-only wait or caller scope', () => {
     const parsed = parseArgs([
       'speech',
@@ -704,8 +704,8 @@ describe('myagents CLI speech contracts', () => {
       }, false);
 
       const output = log.mock.calls.flat().join('\n');
-      expect(output).toContain('myagents speech status speech_01');
-      expect(output).toContain('myagents speech cancel speech_01');
+      expect(output).toContain('lsagent speech status speech_01');
+      expect(output).toContain('lsagent speech cancel speech_01');
       expect(output).toContain('Transcript: unavailable');
       expect(output).not.toContain('/workspace/transcripts/speech_failed/transcript.md');
     } finally {
@@ -714,18 +714,18 @@ describe('myagents CLI speech contracts', () => {
   });
 });
 
-describe('myagents CLI Sidecar capability diagnostics', () => {
+describe('lsagent CLI Sidecar capability diagnostics', () => {
   it('turns Global Sidecar reload rejection into an actionable Session-only error', () => {
     expect(adminHttpErrorResult('reload', 404, 'Not Found')).toMatchObject({
       success: false,
       code: 'SESSION_SIDECAR_REQUIRED',
       error: expect.stringContaining('Session Sidecar'),
-      suggestedCommand: 'myagents reload --help',
+      suggestedCommand: 'lsagent reload --help',
     });
   });
 });
 
-describe('myagents CLI Task notification updates', () => {
+describe('lsagent CLI Task notification updates', () => {
   it('sends only provided notification fields in the single update mutation', () => {
     expect(buildRequestBody('task', 'update', ['task-1'], {
       notificationDesktop: 'false',
@@ -762,7 +762,7 @@ describe('myagents CLI Task notification updates', () => {
   });
 });
 
-describe('myagents CLI Task comments', () => {
+describe('lsagent CLI Task comments', () => {
   it('keeps an explicit Task identity for injected follow-up turns', () => {
     process.env.MYAGENTS_SESSION_ID = 'session-comment';
     expect(buildRequestBody('task', 'comment', ['task-1'], {
@@ -785,7 +785,7 @@ describe('myagents CLI Task comments', () => {
   });
 });
 
-describe('myagents CLI Task provider overrides', () => {
+describe('lsagent CLI Task provider overrides', () => {
   it('forwards the original task.md file path so Rust can re-read app-owned discussion candidates', () => {
     const dir = mkdtempSync(join(tmpdir(), 'myagents-task-candidate-'));
     const file = join(dir, 'task.md');
@@ -825,7 +825,7 @@ describe('myagents CLI Task provider overrides', () => {
   });
 });
 
-describe('myagents CLI Task Detector contracts', () => {
+describe('lsagent CLI Task Detector contracts', () => {
   const trigger = {
     source: { type: 'time' },
     detector: {
@@ -962,8 +962,8 @@ describe('myagents CLI Task Detector contracts', () => {
     expect(buildRequestBody('task', 'exit', [], { reason: 'complete' })).toEqual({
       reason: 'complete',
     });
-    expect(TOP_HELP).toContain('myagents task start <taskId>');
-    expect(TOP_HELP).toContain('myagents task exit --reason');
+    expect(TOP_HELP).toContain('lsagent task start <taskId>');
+    expect(TOP_HELP).toContain('lsagent task exit --reason');
   });
 
   it('rejects malformed values on canonical scheduled Task aliases', () => {
@@ -1174,7 +1174,7 @@ describe('myagents CLI Task Detector contracts', () => {
   });
 });
 
-describe('myagents CLI Task dispatch output', () => {
+describe('lsagent CLI Task dispatch output', () => {
   it.each(['run', 'rerun'])('hides only the internal %s attempt ordinal and preserves the semantic receipt', (action) => {
     const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
     try {
@@ -1212,10 +1212,10 @@ describe('myagents CLI Task dispatch output', () => {
   });
 });
 
-describe('myagents CLI Space issue contracts', () => {
+describe('lsagent CLI Space issue contracts', () => {
   it('advertises the modern Space Issue entry without the stale legacy issue alias', () => {
     expect(TOP_HELP).toContain('space     Discover Cloud Goals and manage Space Issues/attachments');
-    expect(TOP_HELP).toContain('myagents space issue view <issueId> --space <slug> --comments --json');
+    expect(TOP_HELP).toContain('lsagent space issue view <issueId> --space <slug> --comments --json');
     expect(TOP_HELP).not.toContain('issue     Legacy read-only alias for Space issue view');
   });
 
@@ -1350,8 +1350,8 @@ describe('myagents CLI Space issue contracts', () => {
   it('keeps canonical Record requests and legacy Thought aliases distinct', () => {
     expect(TOP_HELP).toContain('record    Manage unified text and audio Records');
     expect(TOP_HELP).toContain('thought   Legacy compatibility alias');
-    expect(TOP_HELP).toContain('myagents record list');
-    expect(TOP_HELP).not.toContain('  myagents thought list');
+    expect(TOP_HELP).toContain('lsagent record list');
+    expect(TOP_HELP).not.toContain('  lsagent thought list');
     expect(buildRoute('record', 'list', [])).toBe('record/list');
     expect(buildRoute('record', 'create', [])).toBe('record/create');
     expect(buildRequestBody('record', 'list', [], {
@@ -1403,7 +1403,7 @@ describe('myagents CLI Space issue contracts', () => {
     const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
     try {
       printResult('space', 'whoami', { success: true, data: {
-        space: { slug: 'myagents', name: 'LSAGENT' },
+        space: { slug: 'lsagent', name: 'LSAGENT' },
         actor: { type: 'registered_agent', id: 'agent-1', name: 'Mino', source: 'registered_agent_session',
           owner: { name: 'Ethan', role: 'owner' } },
       } }, false);
@@ -1458,7 +1458,7 @@ describe('myagents CLI Space issue contracts', () => {
       expect(output).toContain('status: stopped');
       expect(output).toContain('description: Check the inbox');
       expect(output).toContain('task.md: /tmp/task.md');
-      expect(output).toContain('myagents task get task-123');
+      expect(output).toContain('lsagent task get task-123');
     } finally {
       log.mockRestore();
     }
@@ -1488,7 +1488,7 @@ describe('myagents CLI Space issue contracts', () => {
       expect(() => buildRequestBody('thought', 'list', [], { kind: 'audio' }))
         .toThrow('process.exit(1)');
       expect(error).toHaveBeenLastCalledWith(
-        'Error: thought list does not support --kind. Use myagents record list --kind text|audio.',
+        'Error: thought list does not support --kind. Use lsagent record list --kind text|audio.',
       );
     } finally {
       exit.mockRestore();
@@ -1718,12 +1718,12 @@ describe('myagents CLI Space issue contracts', () => {
         success: false,
         error: 'Goal is archived.',
         suggestion: 'List active Goals and retry.',
-        suggestedCommand: 'myagents space goal list --space official --json',
+        suggestedCommand: 'lsagent space goal list --space official --json',
       }, false);
       expect(error.mock.calls.map(call => String(call[0]))).toEqual([
         'Error: Goal is archived.',
         'Suggestion: List active Goals and retry.',
-        '  \u2192 Run: myagents space goal list --space official --json',
+        '  \u2192 Run: lsagent space goal list --space official --json',
       ]);
     } finally {
       error.mockRestore();
@@ -1761,7 +1761,7 @@ describe('myagents CLI Space issue contracts', () => {
           && positional[2] === 'attachment';
         const expectedCommand = positional.slice(0, nestedIssueLeaf ? 4 : 3).join(' ');
         expect(JSON.parse(String(log.mock.calls.at(-1)?.[0]))).toMatchObject({
-          suggestion: expect.stringContaining(`Read myagents ${expectedCommand} --help`),
+          suggestion: expect.stringContaining(`Read lsagent ${expectedCommand} --help`),
         });
       }
       expect(() => rejectUnsupportedSpaceDryRun(
@@ -1954,8 +1954,8 @@ describe('myagents CLI Space issue contracts', () => {
         success: false,
         code: 'SPACE_REQUIRED',
         error: 'This command requires --space <slug>.',
-        suggestion: 'Run `myagents space list --json`, then retry with one returned slug.',
-        suggestedCommand: 'myagents space list --json',
+        suggestion: 'Run `lsagent space list --json`, then retry with one returned slug.',
+        suggestedCommand: 'lsagent space list --json',
       });
     } finally {
       log.mockRestore();
@@ -2016,11 +2016,11 @@ describe('myagents CLI Space issue contracts', () => {
   });
 });
 
-describe('myagents CLI Agent / Session collaboration contracts', () => {
+describe('lsagent CLI Agent / Session collaboration contracts', () => {
   it('advertises Agent discovery and fresh Session collaboration at top level', () => {
     expect(TOP_HELP).toContain('agent     Discover local/network Agents');
     expect(TOP_HELP).toContain('session   Discover, start, message, and observe');
-    expect(TOP_HELP).toContain('myagents session start --agent <agentId>');
+    expect(TOP_HELP).toContain('lsagent session start --agent <agentId>');
   });
 
   it('builds explicit Agent discovery and Session list requests', () => {
@@ -2212,7 +2212,7 @@ describe('myagents CLI Agent / Session collaboration contracts', () => {
         sessionId: 'session-new',
         messageId: 'message-1',
         recoveryHint: {
-          recoveryCommand: 'myagents session list --agent agent-1',
+          recoveryCommand: 'lsagent session list --agent agent-1',
           message: 'Check whether the new Session materialized; do not automatically resend.',
         },
       }, false);
@@ -2220,14 +2220,14 @@ describe('myagents CLI Agent / Session collaboration contracts', () => {
       expect(output).toContain('session-new');
       expect(output).toContain('message-1');
       expect(output).toContain('do not automatically resend');
-      expect(output).toContain('myagents session list --agent agent-1');
+      expect(output).toContain('lsagent session list --agent agent-1');
     } finally {
       error.mockRestore();
     }
   });
 });
 
-describe('myagents CLI Goal file inputs', () => {
+describe('lsagent CLI Goal file inputs', () => {
   it('reads shell-sensitive objective and reason text from local files', () => {
     const dir = mkdtempSync(join(process.cwd(), '.goal-cli-test-'));
     try {
@@ -2417,7 +2417,7 @@ describe('myagents CLI Goal file inputs', () => {
   });
 });
 
-describe('myagents CLI parseArgs', () => {
+describe('lsagent CLI parseArgs', () => {
   it('normalizes file-only Goal flags to camelCase', () => {
     expect(parseArgs([
       'goal',
@@ -2534,7 +2534,7 @@ describe('myagents CLI parseArgs', () => {
   });
 });
 
-describe('myagents CLI IM contracts', () => {
+describe('lsagent CLI IM contracts', () => {
   it('serializes the advertised send-media file flag as one scalar path', () => {
     for (const args of [
       ['im', 'send-media', '--file', '/tmp/chart.png', '--caption', 'Daily chart'],
@@ -2594,7 +2594,7 @@ describe('myagents CLI IM contracts', () => {
   });
 });
 
-describe('myagents CLI cron time handling', () => {
+describe('lsagent CLI cron time handling', () => {
   it('forwards every supported Task runtime override on cron add and update', () => {
     const runtimeConfig = '{"source":"system-cli","model":"gpt-5.6-sol"}';
     expect(buildRequestBody('cron', 'add', [], {
@@ -2647,7 +2647,7 @@ describe('myagents CLI cron time handling', () => {
         imaginaryRouting: 'silent-drop',
       })).toThrow('process.exit(2)');
       expect(error).toHaveBeenCalledWith(
-        'Error: myagents cron add does not support --imaginary-routing.',
+        'Error: lsagent cron add does not support --imaginary-routing.',
       );
     } finally {
       exit.mockRestore();
@@ -2757,7 +2757,7 @@ describe('myagents CLI cron time handling', () => {
     try {
       expect(() => normalizeScheduleFlag('{"kind":"loop"}')).toThrow('process.exit(2)');
       expect(error).toHaveBeenCalledWith(expect.stringContaining('Goal Mode'));
-      expect(error).toHaveBeenCalledWith(expect.stringContaining('myagents goal create --objective-file'));
+      expect(error).toHaveBeenCalledWith(expect.stringContaining('lsagent goal create --objective-file'));
     } finally {
       exit.mockRestore();
       error.mockRestore();

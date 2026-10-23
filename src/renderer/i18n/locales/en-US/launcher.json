@@ -1,8 +1,7 @@
 {
   "brand": {
     "providerPrompt": {
-      "prefix": "✨ One step to start your AI journey —",
-      "configure": "Configure a model provider →"
+      "prefix": "✨ One step to start your AI journey"
     }
   },
   "toasts": {

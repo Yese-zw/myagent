@@ -9,7 +9,7 @@ import { sub2api, sub2apiErrorCode, type Sub2apiAccount, type Sub2apiAgreement, 
 import AgreementDocumentView from './AgreementDocumentView';
 import { useSub2apiAccount } from './useSub2apiAccount';
 
-const field = 'w-full rounded-lg border border-[var(--line)] bg-[var(--paper)] px-3 py-2 text-sm text-[var(--ink)] outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 disabled:opacity-60';
+const field = 'w-full rounded-lg border border-[var(--line)] bg-[var(--paper)] px-3 py-2 text-sm text-[var(--ink)] outline-none placeholder:text-[var(--ink-muted)] focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 disabled:opacity-60';
 const secondary = 'rounded-lg px-3 py-2 text-sm font-medium text-[var(--ink-muted)] hover:bg-[var(--hover-bg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] disabled:opacity-50';
 const primary = 'rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-medium text-[var(--on-accent)] hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50';
 
@@ -148,8 +148,8 @@ export function Sub2apiAccountDialog({ account, settings, onAccount, onClose }: 
               {splitEmail ? (
                 <div className="flex rounded-lg border border-[var(--line)] bg-[var(--paper)] focus-within:border-[var(--accent)] focus-within:ring-2 focus-within:ring-[var(--accent)]/20">
                   <input ref={emailInput} id="sub2api-email" name="email" type="text" autoComplete="username" autoFocus required maxLength={64} value={emailLocal}
-                    disabled={busy} placeholder={t('sub2api.emailLocal')} onChange={event => setEmailLocal(event.target.value.replace(/@.*$/, ''))}
-                    className="min-w-0 flex-1 select-text rounded-l-lg bg-transparent px-3 py-2 text-sm text-[var(--ink)] outline-none disabled:opacity-60" />
+                    disabled={busy} placeholder={t('sub2api.emailLocalPlaceholder')} onChange={event => setEmailLocal(event.target.value.replace(/@.*$/, ''))}
+                    className="min-w-0 flex-1 select-text rounded-l-lg bg-transparent px-3 py-2 text-sm text-[var(--ink)] outline-none placeholder:text-[var(--ink-muted)] disabled:opacity-60" />
                   <CustomSelect
                     value={emailDomain || domains[0]}
                     options={domains.map(item => ({ value: item, label: `@${item}` }))}
@@ -163,19 +163,24 @@ export function Sub2apiAccountDialog({ account, settings, onAccount, onClose }: 
                 </div>
               ) : (
                 <input ref={emailInput} id="sub2api-email" name="email" type="email" autoComplete="email" autoFocus required maxLength={320} value={email}
-                  disabled={busy} onChange={event => setEmail(event.target.value)} className={`${field} select-text`} />
+                  disabled={busy} placeholder={t(mode === 'register' ? 'sub2api.emailRegisterPlaceholder' : 'sub2api.emailPlaceholder')}
+                  onChange={event => setEmail(event.target.value)} className={`${field} select-text`} />
               )}
             </div>
             <div><label htmlFor="sub2api-password" className="mb-1.5 block text-sm font-medium text-[var(--ink)]">{t('sub2api.password')}</label>
               <input id="sub2api-password" name="password" type="password" autoComplete={mode === 'login' ? 'current-password' : 'new-password'} required
-                minLength={mode === 'register' ? 6 : undefined} maxLength={1024} value={password} disabled={busy} onChange={event => setPassword(event.target.value)} className={`${field} select-text`} /></div>
+                minLength={mode === 'register' ? 6 : undefined} maxLength={1024} value={password} disabled={busy}
+                placeholder={t(mode === 'register' ? 'sub2api.passwordRegisterPlaceholder' : 'sub2api.passwordPlaceholder')}
+                onChange={event => setPassword(event.target.value)} className={`${field} select-text`} /></div>
             {mode === 'register' && <>
               <div><label htmlFor="sub2api-confirmation" className="mb-1.5 block text-sm font-medium text-[var(--ink)]">{t('sub2api.confirmPassword')}</label>
-                <input id="sub2api-confirmation" type="password" autoComplete="new-password" required value={confirmation} disabled={busy} onChange={event => setConfirmation(event.target.value)} className={`${field} select-text`} /></div>
+                <input id="sub2api-confirmation" type="password" autoComplete="new-password" required value={confirmation} disabled={busy}
+                  placeholder={t('sub2api.confirmPasswordPlaceholder')}
+                  onChange={event => setConfirmation(event.target.value)} className={`${field} select-text`} /></div>
               {settings?.email_verify_enabled && <div>
                 <label htmlFor="sub2api-code" className="mb-1.5 block text-sm font-medium text-[var(--ink)]">{t('sub2api.verifyCode')}</label>
                 <div className="flex gap-2"><input id="sub2api-code" type="text" autoComplete="one-time-code" inputMode="numeric" required maxLength={12} value={verifyCode}
-                  disabled={busy} onChange={event => setVerifyCode(event.target.value)} className={`${field} min-w-0 flex-1 select-text`} />
+                  disabled={busy} placeholder={t('sub2api.verifyCodePlaceholder')} onChange={event => setVerifyCode(event.target.value)} className={`${field} min-w-0 flex-1 select-text`} />
                   <button type="button" disabled={busy || remaining > 0 || !resolvedEmail.includes('@')} className={`${secondary} shrink-0 border border-[var(--line)]`}
                     onClick={() => void perform(async () => {
                       const seconds = await sub2api.sendCode(resolvedEmail); if (mounted.current) { setRemaining(seconds); setNotice(t('sub2api.codeSent')); }

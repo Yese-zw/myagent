@@ -221,7 +221,7 @@ describe('Record Admin routing', () => {
       expect(await response.json()).toEqual({ success: true, data: records });
       expect(managementApiMocks.managementApi).toHaveBeenLastCalledWith('/api/record/list?kind=text&limit=5');
     }
-    const recoveryHint = { recoveryCommand: 'myagents status', message: 'Retry when storage is available' };
+    const recoveryHint = { recoveryCommand: 'lsagent status', message: 'Retry when storage is available' };
     managementApiMocks.managementApi.mockResolvedValueOnce({ ok: false, error: 'Record store unavailable', recoveryHint });
     const response = await handler(new Request('http://localhost/api/admin/record/list', { method: 'POST', body: '{}' }));
     expect(await response.json()).toMatchObject({ success: false, error: 'Record store unavailable', recoveryHint });
@@ -285,7 +285,7 @@ describe('admin-api help registry', () => {
     expect(record).toContain('--kind text|audio');
     expect(record).toContain('New workflows use this command');
     expect(thought).toContain('Legacy compatibility alias');
-    expect(thought).toContain("New Agent workflows use\n'myagents record'");
+    expect(thought).toContain("New Agent workflows use\n'lsagent record'");
   });
 
   it('provides exact multi-level AnyDoc help without a readme command', async () => {
@@ -300,7 +300,7 @@ describe('admin-api help registry', () => {
 
     for (const leaf of ['convert', 'status', 'wait', 'cancel', 'list']) {
       const text = String((handleHelp({ path: ['anydoc', leaf] }).data as { text?: string })?.text ?? '');
-      expect(text).toContain(`myagents anydoc ${leaf}`);
+      expect(text).toContain(`lsagent anydoc ${leaf}`);
       expect(text).toContain('WHEN TO CALL');
       expect(text).toContain('EFFECT');
       expect(text).toContain('OPTIONS');
@@ -328,7 +328,7 @@ describe('admin-api help registry', () => {
 
     for (const leaf of ['transcribe', 'status', 'wait', 'cancel', 'list']) {
       const text = String((handleHelp({ path: ['speech', leaf] }).data as { text?: string })?.text ?? '');
-      expect(text).toContain(`myagents speech ${leaf}`);
+      expect(text).toContain(`lsagent speech ${leaf}`);
       expect(text).not.toContain('--session-id');
       expect(text).not.toMatch(/^\s*--workspace\b/m);
     }
@@ -346,7 +346,7 @@ describe('admin-api help registry', () => {
       ['config', 'set'],
     ]) {
       const text = String((handleHelp({ path }).data as { text?: string })?.text ?? '');
-      expect(text).toContain(`myagents ${path.join(' ')}`);
+      expect(text).toContain(`lsagent ${path.join(' ')}`);
       expect(text).toContain('--dry-run');
       expect(text).toMatch(/without (writing|persisting)|does not (write|persist)/i);
     }
@@ -355,7 +355,7 @@ describe('admin-api help registry', () => {
   it('distinguishes API-key and subscription verification in exact model verify help', async () => {
     const { handleHelp } = await import('./admin-api');
     const text = String((handleHelp({ path: ['model', 'verify'] }).data as { text?: string })?.text ?? '');
-    expect(text).toContain('myagents model verify');
+    expect(text).toContain('lsagent model verify');
     expect(text).toContain('API-key');
     expect(text).toContain('subscription');
   });
@@ -374,7 +374,7 @@ describe('admin-api help registry', () => {
     for (const path of leaves) {
       const result = handleHelp({ path });
       const text = String((result.data as { text?: string })?.text ?? '');
-      expect(text).toContain(`myagents ${path.join(' ')}`);
+      expect(text).toContain(`lsagent ${path.join(' ')}`);
       expect(text).toContain('WHEN TO CALL');
       expect(text).toContain('EFFECT');
       expect(text).toContain('OPTIONS');
@@ -403,11 +403,11 @@ describe('admin-api help registry', () => {
       const text = String((handleHelp({ path }).data as { text: string }).text);
       const parent = String((handleHelp({ path: path.slice(0, 1) }).data as { text: string }).text);
       expect(text).not.toBe(parent);
-      expect(text).toContain(`myagents ${path.join(' ')}`);
+      expect(text).toContain(`lsagent ${path.join(' ')}`);
       expect(text).toContain('--');
     }
     const shared = String((handleHelp({ path: ['model', 'list'] }).data as { text: string }).text);
-    expect(shared).toContain('shared "myagents model" reference');
+    expect(shared).toContain('shared "lsagent model" reference');
     expect(shared).toContain('not a separate help page');
     const agentHelp = String((handleHelp({ path: ['agent'] }).data as { text: string }).text);
     expect(agentHelp).toContain('network-diagnose');
@@ -424,7 +424,7 @@ describe('admin-api help registry', () => {
       ['agent', 'show', 'agent-id'], ['space', 'issue', 'view', 'issue-id'],
     ]) {
       const text = String((handleHelp({ path }).data as { text: string }).text);
-      expect(text).not.toContain('shared "myagents');
+      expect(text).not.toContain('shared "lsagent');
     }
     const info = String((handleHelp({ path: ['skill', 'info'] }).data as { text: string }).text);
     expect(info).toContain('skill list for enabled');
@@ -458,7 +458,7 @@ describe('admin-api help registry', () => {
     ];
     for (const path of leaves) {
       const text = String((handleHelp({ path }).data as { text?: string })?.text ?? '');
-      expect(text).toContain(`myagents ${path.join(' ')}`);
+      expect(text).toContain(`lsagent ${path.join(' ')}`);
       expect(text).toContain('WHEN TO CALL');
       expect(text).toContain('EFFECT');
       expect(text).toContain('OPTIONS');
@@ -484,26 +484,26 @@ describe('admin-api help registry', () => {
     expect(text).not.toContain('send-media <path>');
   });
 
-  it('documents the official vision command group for myagents vision --help', async () => {
+  it('documents the official vision command group for lsagent vision --help', async () => {
     const { handleHelp } = await import('./admin-api');
 
     const result = handleHelp({ path: ['vision'] });
     const text = (result.data as { text?: string } | undefined)?.text ?? '';
 
     expect(result.success).toBe(true);
-    expect(text).toContain('myagents vision');
+    expect(text).toContain('lsagent vision');
     expect(text).toContain('analyze');
     expect(text).not.toContain('Unknown command group');
   });
 
-  it('documents Goal Mode for myagents goal --help', async () => {
+  it('documents Goal Mode for lsagent goal --help', async () => {
     const { handleHelp } = await import('./admin-api');
 
     const result = handleHelp({ path: ['goal'] });
     const text = (result.data as { text?: string } | undefined)?.text ?? '';
 
     expect(result.success).toBe(true);
-    expect(text).toContain('myagents goal');
+    expect(text).toContain('lsagent goal');
     expect(text).toContain('Goal Mode');
     expect(text).toContain('create --objective');
     expect(text).toContain('--deadline <ISO-8601-with-offset>');
@@ -541,14 +541,14 @@ describe('admin-api help registry', () => {
     const cronText = (cron.data as { text?: string } | undefined)?.text ?? '';
 
     expect(task.success).toBe(true);
-    expect(taskText).toContain('myagents-task-automation');
+    expect(taskText).toContain('lsagent-task-automation');
     expect(taskText).toContain('always');
     expect(taskText).toContain('command Detector');
-    expect(taskText).toContain('myagents task exit');
+    expect(taskText).toContain('lsagent task exit');
     expect(taskText).toContain('deduplicated');
     expect(taskText).toContain('event.id was already handled');
     expect(cron.success).toBe(true);
-    expect(cronText).toContain('myagents task readme');
+    expect(cronText).toContain('lsagent task readme');
     expect(cronText).toContain('Compatibility');
   });
 
@@ -572,7 +572,7 @@ describe('admin-api help registry', () => {
     const { handleHelp } = await import('./admin-api');
     const result = handleHelp({ path: [command] });
     expect(result.success).toBe(true);
-    expect((result.data as { text: string }).text).toContain(`myagents ${command}`);
+    expect((result.data as { text: string }).text).toContain(`lsagent ${command}`);
     expect((result.data as { text: string }).text).toContain('--json');
   });
 
@@ -605,12 +605,12 @@ describe('admin-api help registry', () => {
     const text = (result.data as { text?: string } | undefined)?.text ?? '';
 
     expect(result.success).toBe(true);
-    expect(text).toContain('myagents space issue attachment add');
+    expect(text).toContain('lsagent space issue attachment add');
     expect(text).toContain('WHEN TO CALL');
     expect(text).toContain('ACTOR AND PERMISSIONS');
     expect(text).toContain('FILE SAFETY');
     expect(text).toContain('--space <slug>');
-    expect(text).not.toContain('myagents space — Work with');
+    expect(text).not.toContain('lsagent space — Work with');
   });
 
   it('provides an independent Agent contract for every Space Issue leaf', async () => {
@@ -629,7 +629,7 @@ describe('admin-api help registry', () => {
       const text = (result.data as { text?: string } | undefined)?.text ?? '';
       expect(text, path.join(' ')).toContain('WHEN TO CALL');
       expect(text, path.join(' ')).toContain('RECOVERY');
-      expect(text, path.join(' ')).not.toContain('myagents space — Work with');
+      expect(text, path.join(' ')).not.toContain('lsagent space — Work with');
     }
   });
 
@@ -659,8 +659,8 @@ describe('admin-api help registry', () => {
     expect(updateText).toContain('--clear-goal');
     expect(updateText).toContain('does not change workflow state, assignee, claim');
     expect(updateText).toContain('does not support --dry-run');
-    expect(goalText).not.toContain('myagents space — Discover');
-    expect(updateText).not.toContain('myagents space — Discover');
+    expect(goalText).not.toContain('lsagent space — Discover');
+    expect(updateText).not.toContain('lsagent space — Discover');
   });
 
   it('keeps Space group and related Issue help aligned on discovery, Inbox, and Goal output', async () => {
@@ -1315,7 +1315,7 @@ describe('admin-api cron create', () => {
     });
 
     expect(result.success).toBe(false);
-    expect(result.error).toContain('Use myagents goal create');
+    expect(result.error).toContain('Use lsagent goal create');
     expect(managementApiMocks.managementApi).not.toHaveBeenCalled();
   });
 });
@@ -1474,9 +1474,9 @@ describe('admin-api accepted task attempt analytics', () => {
           statusMeaning: expect.stringContaining('scheduler is enabled'),
           resultAccess: {
             mode: 'execution-session',
-            inspectTaskCommand: 'myagents task get task-run-accepted --json',
-            inspectRunsCommand: 'myagents task runs task-run-accepted --limit 5 --full --json',
-            inspectCommentsCommand: 'myagents task comments task-run-accepted --limit 50 --json',
+            inspectTaskCommand: 'lsagent task get task-run-accepted --json',
+            inspectRunsCommand: 'lsagent task runs task-run-accepted --limit 5 --full --json',
+            inspectCommentsCommand: 'lsagent task comments task-run-accepted --limit 50 --json',
           },
         },
       },
@@ -3317,7 +3317,7 @@ describe('admin-api MCP add contract', () => {
     expect(result).toMatchObject({
       success: false,
       error: expect.stringContaining('mcp add only creates new servers'),
-      recoveryHint: { recoveryCommand: 'myagents mcp show existing-server' },
+      recoveryHint: { recoveryCommand: 'lsagent mcp show existing-server' },
     });
     expect(readConfig()).toMatchObject({
       mcpServers: [original],
@@ -3357,7 +3357,7 @@ describe('admin-api MCP connectivity test', () => {
     expect(await handleMcpTest({ id: 'ddg-search' })).toMatchObject({
       success: false,
       error: expect.stringContaining('disabled globally'),
-      recoveryHint: { recoveryCommand: 'myagents mcp enable ddg-search --scope global' },
+      recoveryHint: { recoveryCommand: 'lsagent mcp enable ddg-search --scope global' },
     });
   });
 
@@ -3947,7 +3947,7 @@ describe('admin-api MCP remove/disable legacy HTTP servers', () => {
     managementApiMocks.managementApi.mockResolvedValueOnce({
       ok: false,
       error: 'Task store unavailable',
-      recoveryHint: { recoveryCommand: 'myagents status', message: 'retry later' },
+      recoveryHint: { recoveryCommand: 'lsagent status', message: 'retry later' },
     });
 
     const result = await handleMcpRemove({ id: 'yuandian-law' });
@@ -3955,7 +3955,7 @@ describe('admin-api MCP remove/disable legacy HTTP servers', () => {
     const project = readJson(join(scratch, '.myagents', 'projects.json'))[0];
 
     expect(result.success).toBe(false);
-    expect(result.recoveryHint).toEqual({ recoveryCommand: 'myagents status', message: 'retry later' });
+    expect(result.recoveryHint).toEqual({ recoveryCommand: 'lsagent status', message: 'retry later' });
     expect((config.mcpServers as Array<Record<string, unknown>>).map(s => s.id)).toEqual(['yuandian-law']);
     expect(config.mcpEnabledServers).toEqual(['yuandian-law']);
     expect(project.mcpEnabledServers).toEqual(['yuandian-law']);
@@ -4332,7 +4332,7 @@ describe('admin-api Agent / Session discovery', () => {
     const { handleHelp } = await import('./admin-api');
     for (const path of [['im'], ['im', 'readme']]) {
       const text = String((handleHelp({ path }).data as { text?: string })?.text ?? '');
-      expect(text).toContain('myagents session get <sessionId>');
+      expect(text).toContain('lsagent session get <sessionId>');
       expect(text).toContain('recorded');
       expect(text).toContain('platform');
     }
@@ -4639,7 +4639,7 @@ describe('admin-api Agent workspace archive', () => {
     expect(result.success).toBe(false);
     expect(result.error).toContain('archived workspace');
     expect(result.recoveryHint).toMatchObject({
-      recoveryCommand: 'myagents agent unarchive agent-1',
+      recoveryCommand: 'lsagent agent unarchive agent-1',
     });
     const config = readConfig();
     expect((config.agents as Array<Record<string, unknown>>)[0].enabled).toBe(false);

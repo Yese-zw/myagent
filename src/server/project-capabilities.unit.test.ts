@@ -155,16 +155,16 @@ describe('effective project capabilities', () => {
 
   it('keeps required system Skills enabled and rejects disabling them', async () => {
     const { home, workspace } = makeFixture();
-    write(join(home, '.myagents', 'skills', 'myagents-cli', 'SKILL.md'), skill('myagents-cli', 'required'));
+    write(join(home, '.myagents', 'skills', 'lsagent-cli', 'SKILL.md'), skill('lsagent-cli', 'required'));
 
     const snapshot = resolveEffectiveProjectCapabilities(workspace);
     expect(snapshot.enabledSkills).toContainEqual(expect.objectContaining({
-      id: 'global:skill:myagents-cli',
+      id: 'global:skill:lsagent-cli',
       required: true,
     }));
     await expect(setProjectCapabilityEnabled({
       workspacePath: workspace,
-      capabilityId: 'global:skill:myagents-cli',
+      capabilityId: 'global:skill:lsagent-cli',
       enabled: false,
     })).rejects.toThrow('Required system Skill cannot be disabled');
   });
@@ -175,12 +175,12 @@ describe('effective project capabilities', () => {
     expect(resolveEffectiveProjectCapabilities(workspace)).toMatchObject({
       agentId: '',
       enabledSkills: expect.arrayContaining([
-        expect.objectContaining({ canonicalName: 'myagents-cli' }),
+        expect.objectContaining({ canonicalName: 'lsagent-cli' }),
       ]),
     });
     await expect(setProjectCapabilityEnabled({
       workspacePath: workspace,
-      capabilityId: 'global:skill:myagents-cli',
+      capabilityId: 'global:skill:lsagent-cli',
       enabled: true,
     })).rejects.toThrow('unique Project owner');
   });
@@ -256,7 +256,7 @@ describe('effective project capabilities', () => {
     expect(resolveEffectiveProjectCapabilities(workspace).agentId).toBe('');
     await expect(setProjectCapabilityEnabled({
       workspacePath: workspace,
-      capabilityId: 'global:skill:myagents-cli',
+      capabilityId: 'global:skill:lsagent-cli',
       enabled: true,
     })).rejects.toThrow('claimed by multiple Projects');
   });
@@ -265,7 +265,7 @@ describe('effective project capabilities', () => {
     const { home, workspace } = makeFixture();
     write(
       join(home, '.myagents', 'skills', 'not-system-owned', 'SKILL.md'),
-      skill('myagents-cli', 'not the official install'),
+      skill('lsagent-cli', 'not the official install'),
     );
     const snapshot = resolveEffectiveProjectCapabilities(workspace);
     expect(snapshot.candidates).not.toContainEqual(expect.objectContaining({
