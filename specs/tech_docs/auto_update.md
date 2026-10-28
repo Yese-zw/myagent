@@ -84,7 +84,8 @@ verified-clean handoff 只证明进程与锁已释放，安装资源的完整替
 
 ## 网络与发布契约
 
-- Updater endpoint、公钥和 capability 以 `src-tauri/tauri.conf.json` 及 capability 配置为准。
+- Updater endpoint 由 `updater.rs::update_endpoint()` 从打包的 `src/shared/sub2api-defaults.json` 派生为 `{serverUrl}/api/v1/app/update/{target}`；清单由 sub2api 后台「App 更新」编辑并以 Tauri dynamic-server 格式返回，204 表示无更新。发布流程见 [`../guides/sub2api_update_release.md`](../guides/sub2api_update_release.md)。
+- 公钥和 capability 以 `src-tauri/tauri.conf.json` 及 capability 配置为准。
 - 外部更新请求属于 general network owner，使用 `proxy_config` 的 general helper；loopback 不参与更新下载。
 - 清单、artifact、签名和版本必须由 release workflow 一起发布。文档不复制域名目录结构和示例 JSON，以免与 workflow 漂移。
 - 应用拒绝降级；server/CDN 返回的 stale version 不能覆盖更高的当前版本或 pending version。

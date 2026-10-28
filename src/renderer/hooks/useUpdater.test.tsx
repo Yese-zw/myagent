@@ -56,3 +56,16 @@ it('does not log the expected development updater rejection as an error', async 
     expect(error).not.toHaveBeenCalled();
   } finally { unmount(); error.mockRestore(); mocks.invoke.mockReset(); }
 });
+
+it('treats a 204 manifest response as up to date without downloading', async () => {
+  mocks.platform = 'darwin-aarch64';
+  mocks.invoke.mockImplementation(async (command: string) => {
+    if (command === 'test_update_connectivity') return 'URL: x\nStatus: 204 No Content\n=== JSON Validation ===\n✗ JSON parse error: EOF';
+    return null;
+  });
+  const { result, unmount } = renderHook(() => useUpdater());
+  try {
+    await act(async () => { expect(await result.current.checkForUpdate()).toBe('up-to-date'); });
+    expect(mocks.invoke).not.toHaveBeenCalledWith('check_and_download_update');
+  } finally { unmount(); mocks.invoke.mockReset(); }
+});

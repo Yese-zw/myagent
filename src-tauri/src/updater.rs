@@ -425,6 +425,22 @@ pub struct DownloadProgress {
     pub percent: Option<u32>,
 }
 
+/// Update manifest URL for `target`, served by the packaged sub2api origin.
+///
+/// The release is edited in the sub2api admin (Settings → App → App update)
+/// and served as a Tauri dynamic-server manifest; 204 means "no update".
+/// The origin is the same packaged `sub2api-defaults.json` the account and
+/// gateway use, so a build only ever talks to its own deployment.
+fn update_endpoint(target: &str) -> Result<reqwest::Url, String> {
+    let defaults: serde_json::Value =
+        serde_json::from_str(include_str!("../../src/shared/sub2api-defaults.json"))
+            .map_err(|e| format!("Invalid sub2api defaults: {}", e))?;
+    let server = crate::sub2api::normalize_server_url(defaults["serverUrl"].as_str().unwrap_or(""))
+        .map_err(|_| "Invalid sub2api serverUrl in sub2api-defaults.json".to_string())?;
+    reqwest::Url::parse(&format!("{server}/api/v1/app/update/{target}"))
+        .map_err(|e| format!("Invalid update endpoint: {}", e))
+}
+
 /// Build an updater with user's proxy configuration applied.
 /// Reads proxy settings from ~/.myagents/config.json:
 /// - Proxy enabled → `.proxy(url)`
@@ -437,6 +453,8 @@ fn build_updater_with_proxy(app: &AppHandle) -> Result<tauri_plugin_updater::Upd
     let mut builder = app
         .updater_builder()
         .target(target.to_string())
+        .endpoints(vec![update_endpoint(target)?])
+        .map_err(|e| format!("Invalid update endpoint: {}", e))?
         .timeout(std::time::Duration::from_secs(15));
 
     if let Some(proxy_settings) = proxy_config::read_proxy_settings_for_general_requests() {
@@ -522,8 +540,10 @@ async fn check_and_download_silently(app: &AppHandle) -> Result<Option<String>, 
     logger::info(
         app,
         format!(
-            "[Updater] Checking for updates... Current: v{}, Target: {}, Endpoint: https://download.myagents.io/update/{}.json",
-            current_version, target, target
+            "[Updater] Checking for updates... Current: v{}, Target: {}, Endpoint: {}",
+            current_version,
+            target,
+            update_endpoint(target).map(|u| u.to_string()).unwrap_or_default()
         ),
     );
 
@@ -1206,14 +1226,14 @@ pub async fn test_update_connectivity(app: AppHandle) -> Result<String, String> 
     // Detect architecture
     let target = get_update_target();
 
-    let url = format!("https://download.myagents.io/update/{}.json", target);
+    let url = update_endpoint(target)?.to_string();
     logger::info(
         &app,
         format!("[Updater] Testing HTTP connectivity to: {}", url),
     );
 
     // Build a reqwest client with user's proxy configuration. Updater talks
-    // to R2 — external host, system proxy wanted.
+    // to the sub2api origin — external host, system proxy wanted.
     let current_version = app.package_info().version.to_string();
     #[allow(clippy::disallowed_methods)]
     let builder = reqwest::Client::builder()
@@ -1294,6 +1314,17 @@ pub async fn test_update_connectivity(app: AppHandle) -> Result<String, String> 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn update_endpoint_uses_packaged_sub2api_origin() {
+        let defaults: serde_json::Value =
+            serde_json::from_str(include_str!("../../src/shared/sub2api-defaults.json")).unwrap();
+        let server = defaults["serverUrl"].as_str().unwrap().trim_end_matches('/');
+        assert_eq!(
+            update_endpoint("darwin-aarch64").unwrap().as_str(),
+            format!("{server}/api/v1/app/update/darwin-aarch64")
+        );
+    }
 
     #[test]
     fn updates_require_a_supported_release_package() {

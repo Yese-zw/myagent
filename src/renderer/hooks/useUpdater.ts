@@ -115,6 +115,10 @@ export function useUpdater(): UseUpdaterResult {
         try {
             // Step 1: Get remote version
             const result = await invoke('test_update_connectivity') as string;
+            // 204 = the server has no release published for this platform.
+            if (/Status:\s*204\b/.test(result)) {
+                return 'up-to-date';
+            }
             const versionMatch = result.match(/version:\s*([^\n]+)/);
             if (!versionMatch) {
                 throw new Error(updaterText('remoteVersionParseFailed'));
