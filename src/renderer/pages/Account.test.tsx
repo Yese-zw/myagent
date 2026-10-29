@@ -49,25 +49,12 @@ describe('sub2api account workspace', () => {
     expect(await screen.findByLabelText('Email')).toHaveValue('user@example.test');
   });
 
-  it('creates and refreshes a key, toggles its state, and deletes it', async () => {
-    const user = userEvent.setup();
-    mocks.accountApi.mockImplementation(async (operation: string) => {
-      if (operation === 'keys') return { items: [{ id: 7, name: 'Primary', key: 'sk-live', status: 'active', created_at: '2026-10-20T00:00:00Z' }], total: 1, page: 1, page_size: 20 };
-      if (operation === 'create-key') return { key: 'sk-new' };
-      return dashboardPayload(operation);
-    });
+  it('does not offer API key management', async () => {
+    mocks.accountApi.mockImplementation(async (operation: string) => dashboardPayload(operation));
     render(<Account isActive />);
-    await user.click(await screen.findByRole('button', { name: 'API keys' }));
-    await screen.findByText('Primary');
-    await user.type(screen.getByLabelText('Key name'), 'Test key');
-    await user.click(screen.getByRole('button', { name: 'Create key' }));
-    await waitFor(() => expect(mocks.accountApi).toHaveBeenCalledWith('create-key', { name: 'Test key' }));
-    await user.click(screen.getByRole('button', { name: 'Disable' }));
-    await waitFor(() => expect(mocks.accountApi).toHaveBeenCalledWith('update-key', { id: 7, status: 'inactive' }));
-    await user.click(screen.getByRole('button', { name: 'Delete' }));
-    const confirmButtons = screen.getAllByRole('button', { name: 'Delete' });
-    await user.click(confirmButtons[confirmButtons.length - 1]);
-    await waitFor(() => expect(mocks.accountApi).toHaveBeenCalledWith('delete-key', { id: 7 }));
+    expect(await screen.findByRole('heading', { name: 'Dashboard' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'API keys' })).not.toBeInTheDocument();
+    expect(mocks.accountApi).not.toHaveBeenCalledWith('keys', expect.anything());
   });
 
   it('does not show a loading banner while a tab is fetching', async () => {
@@ -79,7 +66,7 @@ describe('sub2api account workspace', () => {
     expect(screen.getByRole('heading', { name: 'Dashboard' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Refresh' })).toHaveAttribute('aria-busy', 'true');
     expect(screen.getByRole('status', { name: 'Refresh' })).toBeInTheDocument();
-    await userEvent.setup().click(screen.getByRole('button', { name: 'API keys' }));
+    await userEvent.setup().click(screen.getByRole('button', { name: 'Usage history' }));
     expect(screen.queryByText(/Loading/)).not.toBeInTheDocument();
     expect(screen.getByRole('status', { name: 'Refresh' })).toBeInTheDocument();
     resolveDashboard({});

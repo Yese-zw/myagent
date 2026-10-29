@@ -462,21 +462,29 @@ impl HeartbeatRunner {
             return false;
         }
 
-        let (port, _is_new_sidecar) = match SessionRouter::ensure_sidecar(
-            router, &session_key, app_handle, sidecar_manager,
-        ).await {
-            Ok(result) => {
-                let _ = health::persist_router_active_sessions(
-                    health, router, "heartbeat-ensure-sidecar",
-                ).await;
-                result
-            }
-            Err(e) => {
-                ulog_warn!("[heartbeat] Failed to ensure sidecar for {}: {}", self.bot_label, e);
-                *self.executing.lock().await = false;
-                return false;
-            }
-        };
+        let (port, _is_new_sidecar) =
+            match SessionRouter::ensure_sidecar(router, &session_key, app_handle, sidecar_manager)
+                .await
+            {
+                Ok(result) => {
+                    let _ = health::persist_router_active_sessions(
+                        health,
+                        router,
+                        "heartbeat-ensure-sidecar",
+                    )
+                    .await;
+                    result
+                }
+                Err(e) => {
+                    ulog_warn!(
+                        "[heartbeat] Failed to ensure sidecar for {}: {}",
+                        self.bot_label,
+                        e
+                    );
+                    *self.executing.lock().await = false;
+                    return false;
+                }
+            };
 
         // Touch session activity BEFORE the HTTP call.
         // ensure_sidecar sets last_active when creating a new sidecar, but NOT when

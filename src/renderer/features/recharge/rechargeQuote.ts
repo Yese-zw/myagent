@@ -190,3 +190,20 @@ export function formatPayment(amount: number, currency?: string, locale?: string
 
 export function formatUsd(amount: unknown) { const n = Number(amount); return `$${(Number.isFinite(n) ? n : 0).toFixed(2)}`; }
 export function formatPercent(value: number) { return String(Number(value.toFixed(2))); }
+
+/** Smallest payment amount (to the cent) whose base credit covers `usd`.
+ *  The desktop page lets users pick the USD they want credited; the gateway
+ *  still takes the order in payment currency and re-quotes it. */
+export function payAmountForCredit(info: Pick<CheckoutInfo, 'balance_recharge_multiplier'>, usd: number) {
+  if (!Number.isFinite(usd) || usd <= 0) return 0;
+  const rate = info.balance_recharge_multiplier;
+  // Credit is rounded to the cent, so it reaches `usd` once amount × rate ≥ usd − 0.005.
+  let amount = Math.max(0.01, ceil((usd - 0.005) / rate));
+  while (round(amount * rate) + EPSILON < usd) amount = round(amount + 0.01);
+  return amount;
+}
+
+/** USD credited for a payment amount before promotions (for range hints). */
+export function creditForPayAmount(info: Pick<CheckoutInfo, 'balance_recharge_multiplier'>, amount: number) {
+  return Number.isFinite(amount) && amount > 0 ? round(amount * info.balance_recharge_multiplier) : 0;
+}

@@ -2,11 +2,18 @@ import { invoke } from '@tauri-apps/api/core';
 import { isTauriEnvironment } from '@/utils/browserMock';
 
 export interface Sub2apiUser { id: number; email: string; username: string }
-export interface Sub2apiAccount { serverUrl: string; user: Sub2apiUser | null }
+export interface Sub2apiAccount {
+  serverUrl: string;
+  user: Sub2apiUser | null;
+  /** Group of the gateway key in use; changes when the user switches it on the website. */
+  appGroupId?: number | null;
+}
 export interface Sub2apiAgreement { id: string; title: string; content_md: string }
 export interface Sub2apiSettings {
   site_name: string;
   site_logo?: string;
+  /** Community-group image from general settings. Empty when unset. */
+  community_group_image?: string;
   registration_enabled: boolean;
   email_verify_enabled: boolean;
   invitation_code_enabled: boolean;
@@ -16,6 +23,9 @@ export interface Sub2apiSettings {
   login_agreement_documents: Sub2apiAgreement[];
   balance_low_notify_enabled?: boolean;
   balance_low_notify_threshold?: number;
+  /** Product name from the server's App settings; empty = built-in name. */
+  app_name?: string;
+  app_default_group_id?: number;
 }
 export interface Sub2apiAuthInput {
   email: string; password: string; verifyCode: string; invitationCode: string; affCode?: string; agreed: boolean;

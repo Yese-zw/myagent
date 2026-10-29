@@ -176,6 +176,7 @@
     "modelsLoadFailed": "Could not refresh available models.",
     "modelContext": "Context {{value}}",
     "modelOutput": "Output {{value}}",
+    "modelPrice": {"current": "Your price", "official": "Official", "discount": "{{percent}}% off", "unit": "USD per 1M tokens", "unitShort": "per 1M tokens (input / output)", "perRequest": "{{price}} per request", "kind": "Price type", "tier": "Context tier", "input": "Input", "output": "Output", "cache": "Cache", "cacheWrite": "Write", "cacheRead": "Read", "savings": "{{discount}} vs. official"},
     "redeemPlaceholder": "Enter a redemption code",
     "redeem": "Redeem",
     "redeemSuccess": "Code redeemed successfully",
@@ -206,7 +207,8 @@
       "CODEX_APP_NOT_FOUND": "Codex desktop app was not found. Install the ChatGPT or Codex app first.",
       "CODEX_APP_UNSUPPORTED": "Launching the Codex desktop app is not supported on this system.",
       "LAUNCH_FAILED": "Couldn't start the Codex desktop app. Try again.",
-      "GATEWAY_KEY_MISSING": "This account has no usable API key. Sign in again and retry."
+      "GATEWAY_KEY_MISSING": "This account has no usable API key. Sign in again and retry.",
+      "APP_NOT_CONFIGURED": "The server has no App default group yet (System Settings > App). Contact the administrator."
     },
     "launchCodex": {
       "label": "Go to Codex",

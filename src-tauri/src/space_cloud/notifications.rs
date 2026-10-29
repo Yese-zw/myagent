@@ -99,7 +99,9 @@ impl NotificationItem {
 
     fn created_at(&self) -> &str {
         match self {
-            Self::Announcement { created_at, .. } | Self::TaskAgentComment { created_at, .. } => created_at,
+            Self::Announcement { created_at, .. } | Self::TaskAgentComment { created_at, .. } => {
+                created_at
+            }
         }
     }
 
@@ -199,7 +201,10 @@ where
     Ok(raw
         .into_iter()
         .filter_map(|value| {
-            let kind = value.get("kind").and_then(|kind| kind.as_str()).unwrap_or("");
+            let kind = value
+                .get("kind")
+                .and_then(|kind| kind.as_str())
+                .unwrap_or("");
             match kind {
                 "announcement" | "task_agent_comment" => serde_json::from_value(value).ok(),
                 _ => None,

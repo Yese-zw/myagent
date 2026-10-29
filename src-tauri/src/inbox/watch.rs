@@ -159,7 +159,9 @@ pub async fn register_session_watch(
             final_state: None,
             terminal_reason: None,
             latest_result: None,
-            turn_id: None, terminal_status: None, coalesced: false,
+            turn_id: None,
+            terminal_status: None,
+            coalesced: false,
         };
     };
 
@@ -192,7 +194,9 @@ pub async fn register_session_watch(
                     final_state: None,
                     terminal_reason: None,
                     latest_result: body.latest_result,
-                    turn_id: body.turn_id, terminal_status: body.terminal_status, coalesced: body.coalesced,
+                    turn_id: body.turn_id,
+                    terminal_status: body.terminal_status,
+                    coalesced: body.coalesced,
                 };
             }
 
@@ -208,7 +212,9 @@ pub async fn register_session_watch(
                 final_state: body.final_state,
                 terminal_reason: body.terminal_reason,
                 latest_result: body.latest_result,
-                turn_id: body.turn_id, terminal_status: body.terminal_status, coalesced: body.coalesced,
+                turn_id: body.turn_id,
+                terminal_status: body.terminal_status,
+                coalesced: body.coalesced,
             };
         }
         Err(e) => {
@@ -226,9 +232,10 @@ pub async fn register_session_watch(
                 final_state: Some("registration_failed".to_string()),
                 terminal_reason: Some("watch_registration_failed".to_string()),
                 latest_result: None,
-            turn_id: None, terminal_status: None, coalesced: false,
+                turn_id: None,
+                terminal_status: None,
+                coalesced: false,
             }
         }
     }
 }
-

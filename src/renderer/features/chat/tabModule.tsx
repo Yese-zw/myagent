@@ -71,6 +71,7 @@ export interface ChatRenderBinding {
   onSidecarConfigAdopted: (tabId: string) => void;
   onFilePreviewIntentConsumed: (tabId: string, intentId: string) => void;
   sessionNotificationBadgeCounts?: ReadonlyMap<string, number>;
+  onOpenRecharge?: () => void;
 }
 
 const ChatTabRenderer = memo(function ChatTabRenderer({
@@ -127,6 +128,7 @@ const ChatTabRenderer = memo(function ChatTabRenderer({
             }
             sessionNotificationBadgeCounts={binding.sessionNotificationBadgeCounts}
             onOpenHistoryTag={binding.onOpenHistoryTag}
+            onOpenRecharge={binding.onOpenRecharge}
           />
         </Suspense>
       )}

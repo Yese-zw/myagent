@@ -27,7 +27,7 @@ beforeEach(async () => {
   await i18n.changeLanguage('en-US');
   mocks.settings.mockResolvedValue(settings);
   mocks.account.mockResolvedValue(account);
-  mocks.gateway.mockResolvedValue({ baseUrl: 'https://lingsiai.vip/v1', apiKey: 'sk-test-key' });
+  mocks.gateway.mockResolvedValue({ baseUrl: 'https://api.lingsiai.cn/v1', apiKey: 'sk-test-key' });
 });
 
 describe('native sub2api account form', () => {

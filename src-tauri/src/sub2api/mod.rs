@@ -33,6 +33,9 @@ pub struct AccountUser {
 pub struct AccountSnapshot {
     pub server_url: String,
     pub user: Option<AccountUser>,
+    /// Group of the gateway key in use. Changes when the user switches their
+    /// App group on the website, so the Renderer knows to re-sync the gateway.
+    pub app_group_id: Option<u64>,
 }
 
 #[derive(Clone, Serialize, Debug)]
@@ -58,6 +61,9 @@ pub(crate) struct Grant {
     user: AccountUser,
     #[serde(default)]
     api_key: String,
+    /// Group `api_key` was provisioned in; 0 when unknown (older credential files).
+    #[serde(default)]
+    app_group_id: u64,
 }
 
 #[derive(Default)]
@@ -88,6 +94,8 @@ pub struct PublicSettings {
     pub site_name: String,
     /// Website logo. May be an absolute URL, a root-relative path, or a data URL.
     pub site_logo: String,
+    /// Community-group image from general settings. Empty when unset.
+    pub community_group_image: String,
     pub registration_enabled: bool,
     pub email_verify_enabled: bool,
     pub invitation_code_enabled: bool,
@@ -101,6 +109,10 @@ pub struct PublicSettings {
     pub aliyun_captcha_enabled: bool,
     pub balance_low_notify_enabled: bool,
     pub balance_low_notify_threshold: f64,
+    /// Product name configured in the server's "App" settings; empty = built-in name.
+    pub app_name: String,
+    /// Group the App provisions keys in unless the user picked one; 0 = not configured.
+    pub app_default_group_id: u64,
 }
 
 #[derive(Deserialize)]
@@ -136,24 +148,20 @@ pub fn normalize_server_url(raw: &str) -> Result<String> {
 
 struct PackagedDefaults {
     server_url: String,
-    default_group_id: u64,
 }
+
+/// Built-in product name, used when the server has no App name configured.
+const DEFAULT_APP_NAME: &str = "LSAGENT";
 
 fn packaged_defaults() -> Result<PackagedDefaults> {
     let defaults: Value =
         serde_json::from_str(include_str!("../../../src/shared/sub2api-defaults.json"))
             .map_err(|_| AuthError::new("STORE_ERROR"))?;
-    // Deployment identity is owned by the packaged configuration. User
-    // config and Renderer commands cannot redirect the origin or key group.
+    // The packaged origin is the only deployment input. User config and
+    // Renderer commands cannot redirect it; everything else (App name, key
+    // group) is read from that origin's settings.
     let server_url = normalize_server_url(defaults["serverUrl"].as_str().unwrap_or(""))?;
-    let default_group_id = defaults["defaultGroupId"]
-        .as_u64()
-        .filter(|id| *id > 0)
-        .ok_or_else(|| AuthError::new("STORE_ERROR"))?;
-    Ok(PackagedDefaults {
-        server_url,
-        default_group_id,
-    })
+    Ok(PackagedDefaults { server_url })
 }
 
 async fn read_saved_state() -> Result<AccountState> {
@@ -230,6 +238,11 @@ impl Sub2apiAccount {
         AccountSnapshot {
             server_url: state.server_url.clone(),
             user: state.grant.as_ref().map(|grant| grant.user.clone()),
+            app_group_id: state
+                .grant
+                .as_ref()
+                .map(|grant| grant.app_group_id)
+                .filter(|id| *id > 0),
         }
     }
 }
@@ -371,6 +384,7 @@ fn account_api_request(
         "toggle-notify-email" => ("user/notify-email/toggle".into(), reqwest::Method::PUT),
         "keys" => ("keys".into(), reqwest::Method::GET),
         "groups" => ("groups/available".into(), reqwest::Method::GET),
+        "model-plaza" => ("model-plaza".into(), reqwest::Method::GET),
         "create-key" => ("keys".into(), reqwest::Method::POST),
         "update-key" | "delete-key" | "cancel-order" | "get-order" | "announcement-read" => {
             let id = payload
@@ -422,9 +436,9 @@ fn account_api_request(
             if name.is_empty() || name.len() > 100 {
                 return Err(AuthError::new("INVALID_INPUT"));
             }
-            let group_id = packaged_defaults()?.default_group_id;
+            // The group is resolved from the server in `authenticated_api`;
+            // the Renderer cannot choose it.
             payload.retain(|key, _| key == "name");
-            payload.insert("group_id".into(), json!(group_id));
         }
         "send-notify-email-code"
         | "verify-notify-email"
@@ -553,6 +567,12 @@ async fn authenticated_api(
         .grant
         .clone()
         .ok_or_else(|| AuthError::new("UNAUTHORIZED"))?;
+    if operation == "create-key" {
+        let group_id = resolve_app_group_id(&grant).await?;
+        if let Some(Value::Object(object)) = payload.as_mut() {
+            object.insert("group_id".into(), json!(group_id));
+        }
+    }
     if operation == "create-order" {
         if let Some(Value::Object(object)) = payload.as_mut() {
             object.insert(
@@ -734,7 +754,11 @@ fn gateway_base_url(server_url: &str) -> String {
     format!("{server_url}/v1")
 }
 
-async fn remember_gateway_key(manager: &Sub2apiAccount, api_key: String) -> Result<String> {
+async fn remember_gateway_key(
+    manager: &Sub2apiAccount,
+    api_key: String,
+    group_id: u64,
+) -> Result<String> {
     let mut grant = manager
         .state
         .lock()
@@ -743,6 +767,9 @@ async fn remember_gateway_key(manager: &Sub2apiAccount, api_key: String) -> Resu
         .clone()
         .ok_or_else(|| AuthError::new("UNAUTHORIZED"))?;
     grant.api_key = api_key.clone();
+    if group_id > 0 {
+        grant.app_group_id = group_id;
+    }
     save_grant(Some(grant.clone())).await?;
     manager.state.lock().await.grant = Some(grant);
     Ok(api_key)
@@ -797,16 +824,71 @@ async fn list_account_keys(manager: &Sub2apiAccount) -> Result<Vec<Value>> {
     Ok(collected)
 }
 
-/// Login and registration both require a key in the packaged default group,
-/// the same group assigned when registration creates `LSAGENT`. Keys in other
-/// groups do not satisfy this, and a stored secret is not used until the
-/// server list has been checked.
+/// Effective App group: the user's own choice from their web profile, else
+/// the server's App default. The packaged build carries no group.
+fn effective_app_group_id(user_group_id: u64, default_group_id: u64) -> Result<u64> {
+    [user_group_id, default_group_id]
+        .into_iter()
+        .find(|id| *id > 0)
+        .ok_or_else(|| AuthError::new("APP_NOT_CONFIGURED"))
+}
+
+async fn resolve_app_group_id(grant: &Grant) -> Result<u64> {
+    // Servers without per-user App groups answer 404; fall back to the default.
+    let user_group_id = match request(
+        &grant.server_url,
+        "user/app-group",
+        None,
+        Some(&grant.access_token),
+    )
+    .await
+    {
+        Ok(value) => json_u64(value.get("group_id")).unwrap_or(0),
+        Err(error) if error.code == "UNAUTHORIZED" => return Err(error),
+        Err(_) => 0,
+    };
+    let default_group_id = if user_group_id > 0 {
+        0
+    } else {
+        settings(&grant.server_url).await?.app_default_group_id
+    };
+    effective_app_group_id(user_group_id, default_group_id)
+}
+
+async fn app_key_name(server: &str) -> String {
+    match settings(server).await {
+        Ok(settings) if !settings.app_name.trim().is_empty() => {
+            settings.app_name.trim().chars().take(100).collect()
+        }
+        _ => DEFAULT_APP_NAME.to_owned(),
+    }
+}
+
+async fn create_app_key(manager: &Sub2apiAccount, server: &str, group_id: u64) -> Result<String> {
+    let name = app_key_name(server).await;
+    let created = authenticated_api(manager, "create-key", Some(json!({ "name": name }))).await?;
+    let api_key =
+        extract_gateway_key(&created).ok_or_else(|| AuthError::new("INVALID_RESPONSE"))?;
+    remember_gateway_key(manager, api_key, group_id).await
+}
+
+/// Login and registration both require a key in the App group (the user's
+/// web-profile choice, else the server's App default). Keys in other groups do
+/// not satisfy this, and a stored secret is not used until the server list has
+/// been checked.
 async fn ensure_registration_group_key(manager: &Sub2apiAccount) -> Result<String> {
-    let group_id = packaged_defaults()?.default_group_id;
+    let grant = manager
+        .state
+        .lock()
+        .await
+        .grant
+        .clone()
+        .ok_or_else(|| AuthError::new("UNAUTHORIZED"))?;
+    let group_id = resolve_app_group_id(&grant).await?;
     let items = list_account_keys(manager).await?;
     if let Some(existing) = find_registration_group_key(&items, group_id) {
         if let Some(secret) = listed_key_secret(existing) {
-            return remember_gateway_key(manager, secret).await;
+            return remember_gateway_key(manager, secret, group_id).await;
         }
         let grant = manager
             .state
@@ -816,18 +898,52 @@ async fn ensure_registration_group_key(manager: &Sub2apiAccount) -> Result<Strin
             .clone()
             .ok_or_else(|| AuthError::new("UNAUTHORIZED"))?;
         if let Some(stored) = usable_gateway_key(&grant.api_key) {
-            return remember_gateway_key(manager, stored).await;
+            return remember_gateway_key(manager, stored, group_id).await;
         }
         if let Some(stored) = stored_gateway_key(grant.user.id).await? {
-            return remember_gateway_key(manager, stored).await;
+            return remember_gateway_key(manager, stored, group_id).await;
         }
         return Err(AuthError::new("GATEWAY_KEY_MISSING"));
     }
-    let created =
-        authenticated_api(manager, "create-key", Some(json!({"name": "LSAGENT"}))).await?;
-    let api_key =
-        extract_gateway_key(&created).ok_or_else(|| AuthError::new("INVALID_RESPONSE"))?;
-    remember_gateway_key(manager, api_key).await
+    create_app_key(manager, &grant.server_url, group_id).await
+}
+
+/// Follow a group switch made on the website: when the key in use is listed
+/// in another group than the effective App group, move to a key in that group.
+/// Returns whether the gateway key changed. A masked listing cannot prove
+/// which group the key is in, so it is left alone.
+async fn sync_app_group_key(manager: &Sub2apiAccount) -> Result<bool> {
+    let grant = manager
+        .state
+        .lock()
+        .await
+        .grant
+        .clone()
+        .ok_or_else(|| AuthError::new("UNAUTHORIZED"))?;
+    let current = match usable_gateway_key(&grant.api_key) {
+        Some(key) => key,
+        None => return Ok(false),
+    };
+    let group_id = resolve_app_group_id(&grant).await?;
+    let items = list_account_keys(manager).await?;
+    let current_item = items
+        .iter()
+        .find(|item| listed_key_secret(item).as_deref() == Some(current.as_str()));
+    let current_group = current_item.and_then(key_group_id);
+    match current_group {
+        Some(listed) if listed == group_id => {
+            if grant.app_group_id != group_id {
+                remember_gateway_key(manager, current, group_id).await?;
+                return Ok(true);
+            }
+            Ok(false)
+        }
+        Some(_) => {
+            let next = ensure_registration_group_key(manager).await?;
+            Ok(next != current)
+        }
+        None => Ok(false),
+    }
 }
 
 /// Reuse a stored gateway secret. Callers that must not create a key use this
@@ -841,10 +957,10 @@ async fn provision_gateway_key(manager: &Sub2apiAccount, allow_create: bool) -> 
         .clone()
         .ok_or_else(|| AuthError::new("UNAUTHORIZED"))?;
     if let Some(existing) = usable_gateway_key(&grant.api_key) {
-        return remember_gateway_key(manager, existing).await;
+        return remember_gateway_key(manager, existing, 0).await;
     }
     if let Some(existing) = stored_gateway_key(grant.user.id).await? {
-        return remember_gateway_key(manager, existing).await;
+        return remember_gateway_key(manager, existing, 0).await;
     }
     let listed = authenticated_api(manager, "keys", None).await?;
     if account_has_keys(&listed) {
@@ -853,11 +969,8 @@ async fn provision_gateway_key(manager: &Sub2apiAccount, allow_create: bool) -> 
     if !allow_create {
         return Err(AuthError::new("GATEWAY_KEY_MISSING"));
     }
-    let created =
-        authenticated_api(manager, "create-key", Some(json!({"name": "LSAGENT"}))).await?;
-    let api_key =
-        extract_gateway_key(&created).ok_or_else(|| AuthError::new("INVALID_RESPONSE"))?;
-    remember_gateway_key(manager, api_key).await
+    let group_id = resolve_app_group_id(&grant).await?;
+    create_app_key(manager, &grant.server_url, group_id).await
 }
 
 #[derive(Clone, Serialize)]
@@ -939,6 +1052,14 @@ pub async fn cmd_sub2api_get_account(
                     grant.user = user;
                     save_grant(Some(grant.clone())).await?;
                     manager.state.lock().await.grant = Some(grant);
+                    // Pick up an App group switched on the website.
+                    match sync_app_group_key(&manager).await {
+                        Ok(true) => notify(&app),
+                        Ok(false) => {}
+                        Err(error) => {
+                            crate::ulog_warn!("[sub2api] app group sync failed code={}", error.code)
+                        }
+                    }
                 }
                 Err(error) if error.code == "UNAUTHORIZED" || error.code == "USER_DISABLED" => {
                     save_grant(None).await?;
@@ -1039,6 +1160,7 @@ pub async fn cmd_sub2api_authenticate(
             .to_owned(),
         user,
         api_key: reused_key.clone().unwrap_or_default(),
+        app_group_id: 0,
     };
     if grant.refresh_token.len() > 16_384 {
         return Err(AuthError::new("INVALID_RESPONSE"));
@@ -1105,7 +1227,7 @@ pub async fn cmd_sub2api_launch_codex(
     manager: State<'_, Sub2apiAccount>,
 ) -> Result<bool> {
     require_main(&window)?;
-    let (base_url, api_key) = {
+    let (base_url, api_key, server_url) = {
         let _operation = manager.operation.lock().await;
         manager.initialize().await?;
         let api_key = provision_gateway_key(&manager, false).await?;
@@ -1117,11 +1239,17 @@ pub async fn cmd_sub2api_launch_codex(
             .as_ref()
             .map(|grant| grant.server_url.clone())
             .ok_or_else(|| AuthError::new("UNAUTHORIZED"))?;
-        (gateway_base_url(&server_url), api_key)
+        (gateway_base_url(&server_url), api_key, server_url)
     };
-    let outcome = tokio::task::spawn_blocking(move || codex_launch::launch(&base_url, &api_key))
-        .await
-        .map_err(|_| AuthError::new("LAUNCH_FAILED"))??;
+    let provider_name = match settings(&server_url).await {
+        Ok(public) => codex_launch::provider_display_name(&public.site_name, &base_url),
+        Err(_) => codex_launch::provider_display_name("", &base_url),
+    };
+    let outcome = tokio::task::spawn_blocking(move || {
+        codex_launch::launch(&base_url, &api_key, &provider_name)
+    })
+    .await
+    .map_err(|_| AuthError::new("LAUNCH_FAILED"))??;
     Ok(matches!(
         outcome,
         codex_launch::LaunchOutcome::AlreadyRunning

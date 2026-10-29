@@ -169,7 +169,13 @@ impl<R: tauri::Runtime> CliProxyManager<R> {
             let state = self.state.lock().await;
             state.accounts.active.is_some() && !state.accounts.disconnecting && !state.shutting_down
         };
-        if has_account && self.components.controls().await?.allows(cfg!(debug_assertions)) {
+        if has_account
+            && self
+                .components
+                .controls()
+                .await?
+                .allows(cfg!(debug_assertions))
+        {
             self.ensure_active().await?;
             crate::ulog_info!("[cliproxy] retained account process ready");
         }
@@ -345,7 +351,9 @@ impl<R: tauri::Runtime> CliProxyManager<R> {
             }
         }
         let installed = self.components.bundled_installed()?;
-        self.components.ingest_controls(&installed.approval, "bundled").await?;
+        self.components
+            .ingest_controls(&installed.approval, "bundled")
+            .await?;
         self.components.allowed(&installed).await?;
         if let Some(current) = &snapshot.current {
             let has_accounts = {
@@ -391,9 +399,7 @@ impl<R: tauri::Runtime> CliProxyManager<R> {
             .find_map(|item| {
                 item.component().ok().and_then(|component| {
                     let artifact = component
-                        .artifact(
-                            super::manifest::platform()?,
-                            &self.components.app_version)
+                        .artifact(super::manifest::platform()?, &self.components.app_version)
                         .ok()?;
                     controls
                         .as_ref()
@@ -1919,7 +1925,8 @@ impl<R: tauri::Runtime> CliProxyManager<R> {
             self.emit();
             return Ok(());
         }
-        let Some(installed) = Installed::select(approved, "updated", &self.components.app_version)? else {
+        let Some(installed) = Installed::select(approved, "updated", &self.components.app_version)?
+        else {
             self.components.set_update("idle", None, None);
             self.project_config().await?;
             return Ok(());
@@ -2738,13 +2745,18 @@ mod tests {
         let fixture = Fixture::new().await;
         fixture.manager.state.lock().await.ready = false;
         let initialization = fixture.manager.account_operation.lock().await;
-        let mut request = Box::pin(fixture.manager.acquire_owned(BindingRequest {
-            sidecar_id: "sidecar".to_owned(),
-            operation_id: Uuid::new_v4().to_string(),
-            model: "model-a".to_owned(),
-        }, 7));
-        assert!(poll_fn(|cx| Poll::Ready(request.as_mut().poll(cx).is_pending())).await,
-            "binding must join startup instead of reporting an unready component");
+        let mut request = Box::pin(fixture.manager.acquire_owned(
+            BindingRequest {
+                sidecar_id: "sidecar".to_owned(),
+                operation_id: Uuid::new_v4().to_string(),
+                model: "model-a".to_owned(),
+            },
+            7,
+        ));
+        assert!(
+            poll_fn(|cx| Poll::Ready(request.as_mut().poll(cx).is_pending())).await,
+            "binding must join startup instead of reporting an unready component"
+        );
         fixture.manager.state.lock().await.ready = true;
         drop(initialization);
         // No executable is installed in this fixture. Selection may fail only
@@ -2765,7 +2777,16 @@ mod tests {
         let fixture = Fixture::new().await;
         fixture.manager.state.lock().await.ready = false;
         fixture.manager.shutdown().await.unwrap();
-        assert_eq!(fixture.manager.initialize_serialized(false).await.err().unwrap().code, "cancelled");
+        assert_eq!(
+            fixture
+                .manager
+                .initialize_serialized(false)
+                .await
+                .err()
+                .unwrap()
+                .code,
+            "cancelled"
+        );
         assert!(!fixture.manager.state.lock().await.ready);
     }
 

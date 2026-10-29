@@ -46,7 +46,7 @@ describe('packaged gateway provider env', () => {
     writeFileSync(join(home, '.myagents', 'credentials', 'sub2api.json'), JSON.stringify({
       schema_version: 1,
       grant: {
-        server_url: 'https://lingsiai.vip',
+        server_url: 'https://api.lingsiai.cn',
         access_token: 'token',
         refresh_token: 'refresh',
         user: { id: 1, email: 'a@example.com', username: 'Ada' },
@@ -60,7 +60,7 @@ describe('packaged gateway provider env', () => {
       providerApiKeys: {},
     });
     expect(env?.apiKey).toBe('sk-grant-shared-key');
-    expect(env?.baseUrl).toBe('https://lingsiai.vip/v1');
+    expect(env?.baseUrl).toBe('https://api.lingsiai.cn/v1');
   });
 
   it('does not disable the packaged gateway when it appears in disabledProviderIds', () => {

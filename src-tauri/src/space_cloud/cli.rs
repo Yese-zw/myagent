@@ -1368,9 +1368,7 @@ pub(super) async fn resolve_space_cli_context(
             .as_ref()
             .map(AuthenticatedSpaceSession::session_token)
             .map(ToString::to_string)
-            .ok_or_else(|| {
-                "SPACE_REAUTH_REQUIRED: LSAGENT Space login is required.".to_string()
-            })?,
+            .ok_or_else(|| "SPACE_REAUTH_REQUIRED: LSAGENT Space login is required.".to_string())?,
         workspace_id: workspace_id
             .map(str::trim)
             .filter(|value| !value.is_empty())

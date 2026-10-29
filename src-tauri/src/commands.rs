@@ -1073,7 +1073,7 @@ fn sync_admin_agent_blocking<R: Runtime>(app_handle: AppHandle<R>) -> Result<boo
 // matching exclusion list in src/server/index.ts::seedBundledSkills
 // MUST be kept in sync (comment there points back here).
 
-const SYSTEM_SKILLS_VERSION: &str = "62";
+const SYSTEM_SKILLS_VERSION: &str = "63";
 
 /// One process-wide transaction owner for the versioned system-skill
 /// snapshot. Startup automation and ConfigProvider may request convergence at
@@ -1146,6 +1146,11 @@ const SYSTEM_SKILLS: &[&str] = &[
     // improvements. System status trades user customisation (overwritten on
     // every version bump) for keeping the methodology current.
     "prompt-writer",
+    // v63: writing / data-viz skills shipped with the app (author LSAGENT).
+    "lieflat-less-ai-tone",
+    "lieflat-charts",
+    "lieflat-gongwen",
+    "writing-dna-skill",
 ];
 
 /// Product-owned system skills whose former independent workflow must not
@@ -1620,7 +1625,7 @@ mod system_skills_tests {
 
     #[test]
     fn system_skill_version_keeps_cuse_and_product_skills_aligned() {
-        assert_eq!(SYSTEM_SKILLS_VERSION, "62");
+        assert_eq!(SYSTEM_SKILLS_VERSION, "63");
         assert!(SYSTEM_SKILLS.contains(&"cuse"));
         assert!(!REQUIRED_SYSTEM_SKILLS.contains(&"cuse"));
         assert!(SYSTEM_SKILLS.contains(&"lsagent-task-alignment"));

@@ -101,9 +101,15 @@ impl SignedManifest {
         if manifest.schema_version != 1 || manifest.controls.policy_revision == 0 {
             return Err(Error::contract());
         }
-        let floors: Vec<_> = manifest.releases.iter().map(|release| release.compatibility.min_app_version.as_str()).collect();
+        let floors: Vec<_> = manifest
+            .releases
+            .iter()
+            .map(|release| release.compatibility.min_app_version.as_str())
+            .collect();
         policy::select_release_index("0.0.0", &floors).map_err(|_| Error::contract())?;
-        if manifest.releases.is_empty() { return Err(Error::contract()); }
+        if manifest.releases.is_empty() {
+            return Err(Error::contract());
+        }
         // Do not validate component compatibility here. Applicable controls
         // must first be persisted even when this component cannot run here.
         Ok(manifest)
@@ -127,7 +133,11 @@ pub(super) fn merge_controls(current: Option<&Controls>, incoming: &Controls) ->
 
 impl Manifest {
     pub fn select(&self, app: &str) -> Result<Option<&Component>> {
-        let floors: Vec<_> = self.releases.iter().map(|r| r.compatibility.min_app_version.as_str()).collect();
+        let floors: Vec<_> = self
+            .releases
+            .iter()
+            .map(|r| r.compatibility.min_app_version.as_str())
+            .collect();
         let index = policy::select_release_index(app, &floors).map_err(|_| Error::contract())?;
         Ok(index.map(|index| &self.releases[index]))
     }

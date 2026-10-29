@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { MyAgentsLogotype } from '@/components/brand/MyAgentsLogotype';
 import CustomSelect from '@/components/CustomSelect';
-import { CloseIcon, LoaderIcon, UserIcon } from '@/components/icons';
+import { CloseIcon, KeyIcon, LoaderIcon, LockIcon, UserIcon } from '@/components/icons';
 import OverlayBackdrop from '@/components/OverlayBackdrop';
 import { useCloseLayer } from '@/hooks/useCloseLayer';
 import { isImeComposingEvent } from '@/utils/imeKeyboard';
@@ -9,9 +10,39 @@ import { sub2api, sub2apiErrorCode, type Sub2apiAccount, type Sub2apiAgreement, 
 import AgreementDocumentView from './AgreementDocumentView';
 import { useSub2apiAccount } from './useSub2apiAccount';
 
-const field = 'w-full rounded-lg border border-[var(--line)] bg-[var(--paper)] px-3 py-2 text-sm text-[var(--ink)] outline-none placeholder:text-[var(--ink-muted)] focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 disabled:opacity-60';
-const secondary = 'rounded-lg px-3 py-2 text-sm font-medium text-[var(--ink-muted)] hover:bg-[var(--hover-bg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] disabled:opacity-50';
-const primary = 'rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-medium text-[var(--on-accent)] hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50';
+const field = 'w-full rounded-xl border border-[var(--line)] bg-[var(--paper)] px-3 py-2.5 text-sm text-[var(--ink)] outline-none placeholder:text-[var(--ink-muted)] transition-colors focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 disabled:opacity-60';
+const iconField = `${field} pl-10`;
+const secondary = 'rounded-xl px-3 py-2 text-sm font-medium text-[var(--ink-muted)] transition-colors hover:bg-[var(--hover-bg)] hover:text-[var(--ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] disabled:opacity-50';
+const primary = 'rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-[var(--on-accent)] shadow-[var(--shadow-xs)] transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50';
+
+function AccountField({
+  id,
+  label,
+  hint,
+  badge,
+  children,
+}: {
+  id: string;
+  label: string;
+  hint?: string;
+  badge?: string;
+  children: ReactNode;
+}) {
+  return (
+    <div>
+      <label htmlFor={id} className="mb-1.5 flex items-center gap-2 text-sm font-medium text-[var(--ink)]">
+        {label}
+        {badge && (
+          <span className="rounded-full bg-[var(--paper-inset)] px-2 py-0.5 text-[11px] font-normal text-[var(--ink-muted)]">
+            {badge}
+          </span>
+        )}
+      </label>
+      {children}
+      {hint && <p className="mt-1.5 text-xs leading-5 text-[var(--ink-muted)]">{hint}</p>}
+    </div>
+  );
+}
 
 export default function Sub2apiAccountEntry({ expanded, onOpenAccount }: { expanded: boolean; onOpenAccount?: () => void }) {
   const { t } = useTranslation('app');
@@ -114,9 +145,12 @@ export function Sub2apiAccountDialog({ account, settings, onAccount, onClose }: 
     && (!splitEmail || !!resolvedEmail)
     && (mode === 'login' || !invitationRequired || invitationCode.trim().length > 0);
 
+  const signedName = account.user?.username || account.user?.email.split('@')[0] || account.user?.email || '';
+  const signedInitial = signedName.slice(0, 1).toUpperCase();
+
   return <OverlayBackdrop portal className="z-[260] px-4 py-6" onClose={busy || document ? undefined : onClose}>
     <section role="dialog" aria-modal="true" aria-labelledby="sub2api-account-title"
-      className="relative z-10 max-h-full w-full max-w-md overflow-y-auto rounded-xl border border-[var(--line)] bg-[var(--paper-elevated)] p-6 shadow-xl"
+      className="relative z-10 max-h-full w-full max-w-[26rem] overflow-y-auto rounded-2xl border border-[var(--line)] bg-[var(--paper-elevated)] shadow-[var(--shadow-xl)]"
       onKeyDown={event => {
         if (event.key === 'Escape' && !isImeComposingEvent(event) && !document) {
           event.preventDefault();
@@ -124,32 +158,49 @@ export function Sub2apiAccountDialog({ account, settings, onAccount, onClose }: 
           if (!busy) onClose();
         }
       }}>
-        <div className="mb-5 flex items-start justify-between gap-3">
-          <div><h2 id="sub2api-account-title" className="text-lg font-semibold text-[var(--ink)]">{t('sub2api.title')}</h2>
-            <p className="mt-1 text-sm text-[var(--ink-muted)]">{account.user ? t('sub2api.signedIn') : t('sub2api.subtitle')}</p></div>
-          <button type="button" onClick={onClose} disabled={busy} aria-label={t('sub2api.close')} className={secondary}><CloseIcon className="h-4 w-4" /></button>
+        <div className="relative overflow-hidden border-b border-[var(--line)] px-6 pb-5 pt-6">
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,var(--accent-warm-muted),transparent_42%),linear-gradient(180deg,var(--accent-warm-subtle),transparent_70%)]" />
+          <div className="relative flex items-start gap-3 pr-10">
+            <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--paper)] shadow-[var(--shadow-xs)]">
+              <MyAgentsLogotype variant="compact" className="h-8 w-8 object-contain" />
+            </span>
+            <div className="min-w-0">
+              <h2 id="sub2api-account-title" className="font-display text-xl font-semibold tracking-tight text-[var(--ink)]">{t('sub2api.title')}</h2>
+              <p className="mt-1 text-sm leading-6 text-[var(--ink-muted)]">{account.user ? t('sub2api.signedIn') : t('sub2api.subtitle')}</p>
+            </div>
+          </div>
+          <button type="button" onClick={onClose} disabled={busy} aria-label={t('sub2api.close')}
+            className="absolute right-3 top-3 z-20 inline-flex h-9 w-9 items-center justify-center rounded-full text-[var(--ink-muted)] transition-colors hover:bg-[var(--hover-bg)] hover:text-[var(--ink)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] disabled:opacity-50">
+            <CloseIcon className="h-4 w-4" />
+          </button>
         </div>
 
+        <div className="px-6 py-5">
         {account.user ? <div className="space-y-4">
-          <div className="rounded-lg bg-[var(--paper-inset)] p-4"><p className="font-medium text-[var(--ink)]">{account.user.username || account.user.email}</p>
-            <p className="mt-1 break-all text-sm text-[var(--ink-muted)]">{account.user.email}</p></div>
-          <button type="button" disabled={busy} className={`${secondary} w-full`} onClick={() => void perform(async () => {
+          <div className="flex items-center gap-3 rounded-2xl border border-[var(--line)] bg-[var(--paper)] p-4">
+            <span aria-hidden="true" className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-[var(--accent-warm-muted)] text-sm font-semibold text-[var(--accent)]">{signedInitial}</span>
+            <div className="min-w-0">
+              <p className="truncate font-medium text-[var(--ink)]">{account.user.username || account.user.email}</p>
+              <p className="mt-0.5 break-all text-sm text-[var(--ink-muted)]">{account.user.email}</p>
+            </div>
+          </div>
+          <button type="button" disabled={busy} className={`${secondary} w-full border border-[var(--line)]`} onClick={() => void perform(async () => {
             const next = await sub2api.logout(); if (mounted.current) { onAccount(next); setNotice(t('sub2api.signedOut')); }
           })}>{t('sub2api.signOut')}</button>
         </div> : <>
-          <div role="tablist" aria-label={t('sub2api.authMode')} className="mb-5 grid grid-cols-2 rounded-lg bg-[var(--paper-inset)] p-1">
+          <div role="tablist" aria-label={t('sub2api.authMode')} className="mb-5 grid grid-cols-2 rounded-xl bg-[var(--paper-inset)] p-1">
             {(['login', 'register'] as const).map(value => <button type="button" role="tab" key={value} aria-selected={mode === value}
               disabled={busy || (value === 'register' && !!settings && !settings.registration_enabled)} onClick={() => switchMode(value)}
-              className={`${secondary} ${mode === value ? 'bg-[var(--paper-elevated)] text-[var(--ink)] shadow-sm' : ''}`}>{t(`sub2api.${value}`)}</button>)}
+              className={`${secondary} ${mode === value ? 'bg-[var(--paper-elevated)] text-[var(--ink)] shadow-[var(--shadow-xs)]' : ''}`}>{t(`sub2api.${value}`)}</button>)}
           </div>
           <form onSubmit={event => void submit(event)} className="space-y-4">
-            <div>
-              <label htmlFor="sub2api-email" className="mb-1.5 block text-sm font-medium text-[var(--ink)]">{t('sub2api.email')}</label>
+            <AccountField id="sub2api-email" label={t('sub2api.email')}>
               {splitEmail ? (
-                <div className="flex rounded-lg border border-[var(--line)] bg-[var(--paper)] focus-within:border-[var(--accent)] focus-within:ring-2 focus-within:ring-[var(--accent)]/20">
+                <div className="flex rounded-xl border border-[var(--line)] bg-[var(--paper)] focus-within:border-[var(--accent)] focus-within:ring-2 focus-within:ring-[var(--accent)]/20">
+                  <span className="flex items-center pl-3 text-[var(--ink-subtle)]" aria-hidden="true"><UserIcon className="h-4 w-4" /></span>
                   <input ref={emailInput} id="sub2api-email" name="email" type="text" autoComplete="username" autoFocus required maxLength={64} value={emailLocal}
                     disabled={busy} placeholder={t('sub2api.emailLocalPlaceholder')} onChange={event => setEmailLocal(event.target.value.replace(/@.*$/, ''))}
-                    className="min-w-0 flex-1 select-text rounded-l-lg bg-transparent px-3 py-2 text-sm text-[var(--ink)] outline-none placeholder:text-[var(--ink-muted)] disabled:opacity-60" />
+                    className="min-w-0 flex-1 select-text bg-transparent px-2.5 py-2.5 text-sm text-[var(--ink)] outline-none placeholder:text-[var(--ink-muted)] disabled:opacity-60" />
                   <CustomSelect
                     value={emailDomain || domains[0]}
                     options={domains.map(item => ({ value: item, label: `@${item}` }))}
@@ -158,47 +209,62 @@ export function Sub2apiAccountDialog({ account, settings, onAccount, onClose }: 
                     disabled={busy}
                     compact
                     popoverMinWidth={180}
-                    className="max-w-[40%] shrink-0 [&_button]:h-full [&_button]:w-auto [&_button]:max-w-full [&_button]:gap-1 [&_button]:rounded-none [&_button]:rounded-r-[7px] [&_button]:border-0 [&_button]:border-l [&_button]:border-[var(--line)] [&_button]:bg-[var(--paper-inset)] [&_button]:px-2 [&_button]:py-2 [&_button]:text-sm [&_button]:hover:border-[var(--line)] [&_button>span]:min-w-0 [&_button>span]:flex-none"
+                    className="max-w-[40%] shrink-0 [&_button]:h-full [&_button]:w-auto [&_button]:max-w-full [&_button]:gap-1 [&_button]:rounded-none [&_button]:rounded-r-[11px] [&_button]:border-0 [&_button]:border-l [&_button]:border-[var(--line)] [&_button]:bg-[var(--paper-inset)] [&_button]:px-2 [&_button]:py-2.5 [&_button]:text-sm [&_button]:hover:border-[var(--line)] [&_button>span]:min-w-0 [&_button>span]:flex-none"
                   />
                 </div>
               ) : (
-                <input ref={emailInput} id="sub2api-email" name="email" type="email" autoComplete="email" autoFocus required maxLength={320} value={email}
-                  disabled={busy} placeholder={t(mode === 'register' ? 'sub2api.emailRegisterPlaceholder' : 'sub2api.emailPlaceholder')}
-                  onChange={event => setEmail(event.target.value)} className={`${field} select-text`} />
+                <div className="relative">
+                  <UserIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--ink-subtle)]" aria-hidden="true" />
+                  <input ref={emailInput} id="sub2api-email" name="email" type="email" autoComplete="email" autoFocus required maxLength={320} value={email}
+                    disabled={busy} placeholder={t(mode === 'register' ? 'sub2api.emailRegisterPlaceholder' : 'sub2api.emailPlaceholder')}
+                    onChange={event => setEmail(event.target.value)} className={`${iconField} select-text`} />
+                </div>
               )}
-            </div>
-            <div><label htmlFor="sub2api-password" className="mb-1.5 block text-sm font-medium text-[var(--ink)]">{t('sub2api.password')}</label>
-              <input id="sub2api-password" name="password" type="password" autoComplete={mode === 'login' ? 'current-password' : 'new-password'} required
-                minLength={mode === 'register' ? 6 : undefined} maxLength={1024} value={password} disabled={busy}
-                placeholder={t(mode === 'register' ? 'sub2api.passwordRegisterPlaceholder' : 'sub2api.passwordPlaceholder')}
-                onChange={event => setPassword(event.target.value)} className={`${field} select-text`} /></div>
+            </AccountField>
+            <AccountField id="sub2api-password" label={t('sub2api.password')}>
+              <div className="relative">
+                <LockIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--ink-subtle)]" aria-hidden="true" />
+                <input id="sub2api-password" name="password" type="password" autoComplete={mode === 'login' ? 'current-password' : 'new-password'} required
+                  minLength={mode === 'register' ? 6 : undefined} maxLength={1024} value={password} disabled={busy}
+                  placeholder={t(mode === 'register' ? 'sub2api.passwordRegisterPlaceholder' : 'sub2api.passwordPlaceholder')}
+                  onChange={event => setPassword(event.target.value)} className={`${iconField} select-text`} />
+              </div>
+            </AccountField>
             {mode === 'register' && <>
-              <div><label htmlFor="sub2api-confirmation" className="mb-1.5 block text-sm font-medium text-[var(--ink)]">{t('sub2api.confirmPassword')}</label>
-                <input id="sub2api-confirmation" type="password" autoComplete="new-password" required value={confirmation} disabled={busy}
-                  placeholder={t('sub2api.confirmPasswordPlaceholder')}
-                  onChange={event => setConfirmation(event.target.value)} className={`${field} select-text`} /></div>
-              {settings?.email_verify_enabled && <div>
-                <label htmlFor="sub2api-code" className="mb-1.5 block text-sm font-medium text-[var(--ink)]">{t('sub2api.verifyCode')}</label>
-                <div className="flex gap-2"><input id="sub2api-code" type="text" autoComplete="one-time-code" inputMode="numeric" required maxLength={12} value={verifyCode}
-                  disabled={busy} placeholder={t('sub2api.verifyCodePlaceholder')} onChange={event => setVerifyCode(event.target.value)} className={`${field} min-w-0 flex-1 select-text`} />
-                  <button type="button" disabled={busy || remaining > 0 || !resolvedEmail.includes('@')} className={`${secondary} shrink-0 border border-[var(--line)]`}
+              <AccountField id="sub2api-confirmation" label={t('sub2api.confirmPassword')}>
+                <div className="relative">
+                  <LockIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--ink-subtle)]" aria-hidden="true" />
+                  <input id="sub2api-confirmation" type="password" autoComplete="new-password" required value={confirmation} disabled={busy}
+                    placeholder={t('sub2api.confirmPasswordPlaceholder')}
+                    onChange={event => setConfirmation(event.target.value)} className={`${iconField} select-text`} />
+                </div>
+              </AccountField>
+              {settings?.email_verify_enabled && <AccountField id="sub2api-code" label={t('sub2api.verifyCode')}>
+                <div className="flex gap-2">
+                  <input id="sub2api-code" type="text" autoComplete="one-time-code" inputMode="numeric" required maxLength={12} value={verifyCode}
+                    disabled={busy} placeholder={t('sub2api.verifyCodePlaceholder')} onChange={event => setVerifyCode(event.target.value)} className={`${field} min-w-0 flex-1 select-text`} />
+                  <button type="button" disabled={busy || remaining > 0 || !resolvedEmail.includes('@')} className={`${secondary} shrink-0 border border-[var(--line)] bg-[var(--paper)] px-3`}
                     onClick={() => void perform(async () => {
                       const seconds = await sub2api.sendCode(resolvedEmail); if (mounted.current) { setRemaining(seconds); setNotice(t('sub2api.codeSent')); }
-                    })}>{remaining > 0 ? `${remaining}s` : t('sub2api.sendCode')}</button></div>
-              </div>}
-              <div>
-                <label htmlFor="sub2api-invitation" className="mb-1.5 flex items-center gap-2 text-sm font-medium text-[var(--ink)]">
-                  {t('sub2api.invitation')}
-                  {!invitationRequired && <span className="rounded-full bg-[var(--paper-inset)] px-2 py-0.5 text-[11px] font-normal text-[var(--ink-muted)]">{t('sub2api.optional')}</span>}
-                </label>
-                <input id="sub2api-invitation" type="text" autoComplete="off" maxLength={64} required={invitationRequired}
-                  value={invitationCode} disabled={busy} placeholder={t('sub2api.invitationPlaceholder')}
-                  onChange={event => setInvitationCode(event.target.value)} className={`${field} select-text`} />
-                <p className="mt-1.5 text-xs text-[var(--ink-muted)]">{invitationRequired ? t('sub2api.invitationRequiredHint') : t('sub2api.invitationOptionalHint')}</p>
-              </div>
+                    })}>{remaining > 0 ? `${remaining}s` : t('sub2api.sendCode')}</button>
+                </div>
+              </AccountField>}
+              <AccountField
+                id="sub2api-invitation"
+                label={t('sub2api.invitation')}
+                badge={invitationRequired ? undefined : t('sub2api.optional')}
+                hint={invitationRequired ? t('sub2api.invitationRequiredHint') : t('sub2api.invitationOptionalHint')}
+              >
+                <div className="relative">
+                  <KeyIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--ink-subtle)]" aria-hidden="true" />
+                  <input id="sub2api-invitation" type="text" autoComplete="off" maxLength={64} required={invitationRequired}
+                    value={invitationCode} disabled={busy} placeholder={t('sub2api.invitationPlaceholder')}
+                    onChange={event => setInvitationCode(event.target.value)} className={`${iconField} select-text`} />
+                </div>
+              </AccountField>
             </>}
             {settings?.login_agreement_enabled && <div className="flex items-start gap-2 text-[13px] leading-5 text-[var(--ink-muted)]">
-              <input id="sub2api-agreed" type="checkbox" checked={agreed} disabled={busy} onChange={event => setAgreed(event.target.checked)} className="mt-1 accent-[var(--accent)]" />
+              <input id="sub2api-agreed" type="checkbox" checked={agreed} disabled={busy} onChange={event => setAgreed(event.target.checked)} className="mt-1 h-4 w-4 accent-[var(--accent)]" />
               <p className="min-w-0">
                 <label htmlFor="sub2api-agreed" className="cursor-pointer">{t('sub2api.agree')} </label>
                 {settings.login_agreement_documents.map((item, index) => (
@@ -209,13 +275,14 @@ export function Sub2apiAccountDialog({ account, settings, onAccount, onClose }: 
                 ))}
               </p>
             </div>}
-            <button type="submit" disabled={!allowSubmit} className={`${primary} flex w-full items-center justify-center gap-2`}>
+            <button type="submit" disabled={!allowSubmit} className={`${primary} flex h-11 w-full items-center justify-center gap-2`}>
               {busy && <LoaderIcon className="h-4 w-4 animate-spin" />}{busy ? t('sub2api.processing') : t(`sub2api.${mode}`)}
             </button>
           </form>
         </>}
-        {error != null && <div role="alert" className="mt-4 rounded-lg bg-[var(--paper-inset)] p-3 text-sm text-[var(--error)]">{errorMessage(error)}</div>}
+        {error != null && <div role="alert" className="mt-4 rounded-xl border border-[var(--error)]/15 bg-[var(--error-bg)] px-3 py-2.5 text-sm text-[var(--error)]">{errorMessage(error)}</div>}
         {!!notice && <p role="status" className="mt-3 text-sm text-[var(--ink-muted)]">{notice}</p>}
+        </div>
       </section>
     {document && <AgreementDocumentView documents={settings?.login_agreement_documents ?? [document]} current={document} onSelect={setDocument} onClose={() => setDocument(null)} />}
   </OverlayBackdrop>;

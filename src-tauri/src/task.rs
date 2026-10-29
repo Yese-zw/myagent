@@ -3174,7 +3174,9 @@ impl TaskStore {
             return Err("cannot refresh a managed prompt during an unresolved execution".into());
         }
         let inner = self.inner.read().await;
-        let task = inner.get(id).ok_or_else(|| format!("task not found: {id}"))?;
+        let task = inner
+            .get(id)
+            .ok_or_else(|| format!("task not found: {id}"))?;
         if task.deleted || !is_managed_task(task) {
             return Err("only live system-managed Tasks own generated prompts".into());
         }
@@ -5418,11 +5420,9 @@ pub async fn cmd_task_read_discussion_input(
     let root = crate::app_dirs::myagents_data_dir()
         .ok_or("cannot resolve LSAGENT data dir")?
         .join("task-discussions");
-    tauri::async_runtime::spawn_blocking(move || {
-        read_discussion_input_under(&root, &discussion_id)
-    })
-    .await
-    .map_err(|error| format!("read discussion input task failed: {error}"))?
+    tauri::async_runtime::spawn_blocking(move || read_discussion_input_under(&root, &discussion_id))
+        .await
+        .map_err(|error| format!("read discussion input task failed: {error}"))?
 }
 
 const TASK_DISCUSSION_CANDIDATE_MAX_BYTES: u64 = 1024 * 1024;
@@ -8069,11 +8069,14 @@ mod tests {
         assert!(
             validate_task_execution_routing(&None, &None, &Some("codex".into()), &managed,).is_ok()
         );
-        assert!(
-            validate_task_execution_routing(&None, &None, &Some("claude-code".into()), &managed,)
-                .unwrap_err()
-                .contains("requires runtime=codex")
-        );
+        assert!(validate_task_execution_routing(
+            &None,
+            &None,
+            &Some("claude-code".into()),
+            &managed,
+        )
+        .unwrap_err()
+        .contains("requires runtime=codex"));
         assert!(validate_task_execution_routing(
             &None,
             &None,

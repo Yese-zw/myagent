@@ -28,7 +28,10 @@ pub(super) struct Installed {
 
 impl Installed {
     pub fn component(&self) -> Result<Component> {
-        self.approval.verify()?.releases.into_iter()
+        self.approval
+            .verify()?
+            .releases
+            .into_iter()
             .find(|release| release.compatibility.min_app_version == self.min_app_version)
             .ok_or_else(Error::contract)
     }
@@ -110,12 +113,20 @@ impl ComponentStore {
         let mut manifest = approval.verify()?;
         let source: serde_json::Value = serde_json::from_str(include_str!(
             "../../../src/shared/managed-cliproxy-source.json"
-        )).map_err(|_| Error::contract())?;
+        ))
+        .map_err(|_| Error::contract())?;
         // The source lock owns the bundled baseline, not the online update target.
-        manifest.releases.retain(|r| source["version"] == r.version && source["commit"] == r.commit);
-        let release = manifest.select(&self.app_version)?.ok_or_else(Error::contract)?;
-        Ok(Installed { min_app_version: release.compatibility.min_app_version.clone(),
-            approval, source: "bundled".to_owned() })
+        manifest
+            .releases
+            .retain(|r| source["version"] == r.version && source["commit"] == r.commit);
+        let release = manifest
+            .select(&self.app_version)?
+            .ok_or_else(Error::contract)?;
+        Ok(Installed {
+            min_app_version: release.compatibility.min_app_version.clone(),
+            approval,
+            source: "bundled".to_owned(),
+        })
     }
     pub fn new(
         data: &Path,
@@ -216,7 +227,8 @@ impl ComponentStore {
         let component = installed.component()?;
         let artifact = component.artifact(
             manifest::platform().ok_or_else(Error::contract)?,
-            &self.app_version)?;
+            &self.app_version,
+        )?;
         if controls.revoked(&component.version, &artifact.sha256) {
             return Err(Error::new("component_revoked", "需要更新模型组件后使用"));
         }
@@ -236,7 +248,8 @@ impl ComponentStore {
         let component = installed.component()?;
         let artifact = component.artifact(
             manifest::platform().ok_or_else(Error::contract)?,
-            &self.app_version)?;
+            &self.app_version,
+        )?;
         let directory = self.directory(installed)?;
         validate_installed(&directory, artifact)?;
         Ok(directory.join(&artifact.executable))
@@ -281,8 +294,7 @@ impl ComponentStore {
             .transpose()?;
         for retained in next.pending.iter().chain(next.current.iter()) {
             let component = retained.component()?;
-            if let Ok(artifact) = component.artifact(platform, &self.app_version)
-            {
+            if let Ok(artifact) = component.artifact(platform, &self.app_version) {
                 let revoked = controls
                     .as_ref()
                     .is_some_and(|c| c.revoked(&component.version, &artifact.sha256));
@@ -454,7 +466,8 @@ impl ComponentStore {
         let component = installed.component()?;
         let artifact = component.artifact(
             manifest::platform().ok_or_else(Error::contract)?,
-            &self.app_version)?;
+            &self.app_version,
+        )?;
         let destination = self.directory(installed)?;
         if self.executable(installed).is_ok() {
             if !manual && self.failed_attempt(installed).await? {
@@ -704,7 +717,10 @@ mod tests {
     }
     #[test]
     #[cfg(any(
-        all(target_os = "macos", any(target_arch = "aarch64", target_arch = "x86_64")),
+        all(
+            target_os = "macos",
+            any(target_arch = "aarch64", target_arch = "x86_64")
+        ),
         all(target_os = "windows", target_arch = "x86_64")
     ))]
     fn installed_selection_remains_fixed_across_app_and_sdk_changes() {
@@ -719,12 +735,19 @@ mod tests {
             .unwrap()
             .artifact(manifest::platform().unwrap(), "99.0.0")
             .is_ok());
-        assert_eq!(installed.component().unwrap().compatibility.min_app_version, "0.4.17");
-        let updated = Installed::select(signed_fixture(), "updated", "0.4.20").unwrap().unwrap();
+        assert_eq!(
+            installed.component().unwrap().compatibility.min_app_version,
+            "0.4.17"
+        );
+        let updated = Installed::select(signed_fixture(), "updated", "0.4.20")
+            .unwrap()
+            .unwrap();
         assert_eq!(updated.min_app_version, "0.4.20");
         assert_eq!(updated.component().unwrap().compatibility.revision, 2);
         assert_eq!(installed.component().unwrap().compatibility.revision, 1);
-        assert!(Installed::select(signed_fixture(), "updated", "0.4.16").unwrap().is_none());
+        assert!(Installed::select(signed_fixture(), "updated", "0.4.16")
+            .unwrap()
+            .is_none());
         let mut modified = signed_fixture();
         modified.json.push(' ');
         assert!(modified.verify().is_err());
@@ -756,7 +779,10 @@ mod tests {
     }
     #[tokio::test]
     #[cfg(any(
-        all(target_os = "macos", any(target_arch = "aarch64", target_arch = "x86_64")),
+        all(
+            target_os = "macos",
+            any(target_arch = "aarch64", target_arch = "x86_64")
+        ),
         all(target_os = "windows", target_arch = "x86_64")
     ))]
     async fn immutable_pointer_reuse_does_not_create_a_duplicate_update_and_gc_keeps_current() {

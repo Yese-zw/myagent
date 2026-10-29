@@ -110,6 +110,7 @@ import {
 import { useConfig } from '@/hooks/useConfig';
 import { SubscriptionProviderInfo } from './components/SubscriptionProviderInfo';
 import { useHelperAgentModelDefaults } from '@/hooks/useHelperAgentModelDefaults';
+import { useCommunityGroupImage } from '@/features/account/useCommunityGroupImage';
 import { useAutostart } from '@/hooks/useAutostart';
 import { getBuildVersions } from '@/utils/debug';
 import { copyPlainText } from '@/utils/clipboard';
@@ -158,7 +159,6 @@ import {
   runFloatingBallToggleTransaction,
 } from '@/floating-ball/nativeFloatingBall';
 import {
-  MYAGENTS_RELEASES_URL,
   PLAYWRIGHT_DEVICE_PRESETS,
 } from './settingsSections';
 import {
@@ -826,53 +826,10 @@ export default function Settings({
       .catch(() => setAppVersion('unknown'));
   }, [mode]);
 
-  // QR code URL for user community section
-  // Tauri: Downloads on first launch and caches locally, CDN in browser
-  const [qrCodeDataUrl, setQrCodeDataUrl] = useState<string | null>(null);
-  const [qrCodeLoading, setQrCodeLoading] = useState(false);
+  const communityGroupImage = useCommunityGroupImage();
   const [logExporting, setLogExporting] = useState(false);
   const [showBugReport, setShowBugReport] = useState(false);
   const helperAgentDefaults = useHelperAgentModelDefaults();
-
-  // Load QR code when entering about section
-  useEffect(() => {
-    if (activeSection !== 'about') return;
-
-    let cancelled = false;
-    setQrCodeLoading(true);
-
-    if (isTauriEnvironment()) {
-      // Tauri mode: Call backend API to download & cache QR code
-      // The API downloads from CDN on first call, then serves from cache
-      apiGetJson<{ success: boolean; dataUrl?: string }>('/api/assets/qr-code')
-        .then((result) => {
-          if (cancelled) return;
-          if (result.success && result.dataUrl) {
-            setQrCodeDataUrl(result.dataUrl);
-          }
-        })
-        .catch((error) => {
-          if (cancelled) return;
-          console.error('[Settings] Failed to load QR code:', error);
-          // Silently fail - QR code section will remain hidden
-        })
-        .finally(() => {
-          if (!cancelled) setQrCodeLoading(false);
-        });
-    } else {
-      // Browser mode: Direct CDN URL
-      setQrCodeDataUrl(
-        'https://download.myagents.io/assets/feedback_qr_code.png',
-      );
-      setQrCodeLoading(false);
-    }
-
-    return () => {
-      cancelled = true;
-      setQrCodeDataUrl(null); // 统一清理，避免内存泄漏
-      setQrCodeLoading(false);
-    };
-  }, [activeSection]);
 
   // Developer section unlock state
   const [devSectionVisible, setDevSectionVisible] = useState(
@@ -4873,8 +4830,10 @@ export default function Settings({
         />
       )}
 
-      {/* Right content area — h-full ensures height is explicit for WebKit scroll */}
-      <div className="h-full flex-1 overflow-y-auto overscroll-contain">
+      {/* Right content area — h-full ensures height is explicit for WebKit scroll.
+       *  A stable gutter keeps the centered tabs from shifting sideways when a
+       *  switch moves between sections with and without a vertical scrollbar. */}
+      <div className="h-full flex-1 overflow-y-auto overscroll-contain [scrollbar-gutter:stable]">
         {mode === 'capabilities' && (
           <>
             <header
@@ -6030,7 +5989,7 @@ export default function Settings({
                   >
                     <MyAgentsLogotype
                       className="launcher-hero-logotype"
-                      title="LSAGENT"
+                      title="灵思AGENT"
                     />
                   </h1>
                   <div className="mt-1 flex items-center gap-2">
@@ -6067,12 +6026,6 @@ export default function Settings({
                         )}
                       </button>
                     )}
-                    <ExternalLink
-                      href={MYAGENTS_RELEASES_URL}
-                      className="rounded-lg bg-[var(--paper-inset)] px-2 py-0.5 text-xs text-[var(--ink-secondary)] transition-colors hover:bg-[var(--paper-elevated)]"
-                    >
-                      {tSettings('about.releaseNotes')}
-                    </ExternalLink>
                   </div>
                   <p className="mt-3 text-base text-[var(--ink-secondary)]">
                     {tSettings('about.slogan')}
@@ -6207,8 +6160,7 @@ export default function Settings({
                 </div>
               </div>
 
-              {/* User Community QR Code - Show loading state, then image when ready */}
-              {(qrCodeLoading || qrCodeDataUrl) && (
+              {communityGroupImage && (
                 <div className="rounded-xl border border-[var(--line)] bg-[var(--paper-elevated)] p-5">
                   <div className="flex flex-col items-center text-center">
                     <p className="text-sm font-medium text-[var(--ink)]">
@@ -6217,17 +6169,11 @@ export default function Settings({
                     <p className="mt-1 text-xs text-[var(--ink-muted)]">
                       {tSettings('about.communityDescription')}
                     </p>
-                    {qrCodeLoading ? (
-                      <div className="mt-4 h-36 w-36 flex items-center justify-center">
-                        <LoaderIcon className="h-8 w-8 animate-spin text-[var(--ink-muted)]" />
-                      </div>
-                    ) : (
-                      <img
-                        src={qrCodeDataUrl!}
-                        alt={tSettings('about.communityQrAlt')}
-                        className="mt-4 h-36 w-36 rounded-lg"
-                      />
-                    )}
+                    <img
+                      src={communityGroupImage}
+                      alt={tSettings('about.communityQrAlt')}
+                      className="mt-4 h-36 w-36 rounded-lg object-contain"
+                    />
                   </div>
                 </div>
               )}

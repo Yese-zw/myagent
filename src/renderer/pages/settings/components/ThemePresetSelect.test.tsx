@@ -16,13 +16,13 @@ describe('ThemePresetSelect', () => {
       />,
     );
 
-    const trigger = screen.getByRole('button', { name: /LSAGENT Classic2/ });
+    const trigger = screen.getByRole('button', { name: /灵思AGENT Classic2/ });
     fireEvent.click(trigger);
-    const defaultBlackOption = screen.getAllByRole('button', { name: 'LSAGENT Classic2' })
+    const defaultBlackOption = screen.getAllByRole('button', { name: '灵思AGENT Classic2' })
       .find(candidate => candidate !== trigger);
     expect(defaultBlackOption).toBeDefined();
-    expect(screen.getByRole('button', { name: 'LSAGENT Light' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'LSAGENT Classic' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '灵思AGENT Light' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '灵思AGENT Classic' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Sage' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Claude' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Absolutely' })).not.toBeInTheDocument();
@@ -34,7 +34,7 @@ describe('ThemePresetSelect', () => {
     expect(swatchGroup).not.toBeNull();
     expect(swatchGroup?.children).toHaveLength(2);
     expect(swatchGroup?.children[0]).toHaveStyle({ backgroundColor: '#111111' });
-    const label = within(defaultBlackOption!).getByText('LSAGENT Classic2');
+    const label = within(defaultBlackOption!).getByText('灵思AGENT Classic2');
     const indicator = defaultBlackOption?.querySelector('[data-selected-indicator]');
     expect(indicator).not.toBeNull();
     expect(label.compareDocumentPosition(indicator!) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0);
@@ -57,12 +57,12 @@ describe('ThemePresetSelect', () => {
       />,
     );
 
-    const trigger = screen.getByRole('button', { name: /LSAGENT Classic/ });
+    const trigger = screen.getByRole('button', { name: /灵思AGENT Classic/ });
     fireEvent.click(trigger);
     fireEvent.click(screen.getByRole('button', { name: 'Linear' }));
 
-    expect(trigger).toHaveTextContent('LSAGENT Classic');
+    expect(trigger).toHaveTextContent('灵思AGENT Classic');
     await waitFor(() => expect(onPersistError).toHaveBeenCalledWith(failure));
-    expect(trigger).toHaveTextContent('LSAGENT Classic');
+    expect(trigger).toHaveTextContent('灵思AGENT Classic');
   });
 });

@@ -3227,23 +3227,33 @@ mod tests {
         let bridge = ImPlatform::OpenClaw("openclaw-weixin".into());
         assert!(private_message_allowed_after_adapter(&bridge, "peer", &[]));
         assert!(private_message_allowed_after_adapter(
-            &bridge, "peer", &["peer".into()]
+            &bridge,
+            "peer",
+            &["peer".into()]
         ));
         assert!(!private_message_allowed_after_adapter(
-            &bridge, "other", &["peer".into()]
+            &bridge,
+            "other",
+            &["peer".into()]
         ));
         // The adapter accepted Telegram's case-insensitive username. Its numeric
         // sender ID must not be subjected to a second, incompatible comparison.
         assert!(private_message_allowed_after_adapter(
-            &ImPlatform::Telegram, "123", &["Alice".into()]
+            &ImPlatform::Telegram,
+            "123",
+            &["Alice".into()]
         ));
         // Native adapters retain their own admission policy; this layer cannot
         // reinterpret an empty list or add a command-only restriction.
         assert!(private_message_allowed_after_adapter(
-            &ImPlatform::Feishu, "peer", &[]
+            &ImPlatform::Feishu,
+            "peer",
+            &[]
         ));
         assert!(private_message_allowed_after_adapter(
-            &ImPlatform::Dingtalk, "peer", &[]
+            &ImPlatform::Dingtalk,
+            "peer",
+            &[]
         ));
     }
 

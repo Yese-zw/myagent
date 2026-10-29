@@ -719,7 +719,8 @@ async fn fetch_limited_bytes(
 ) -> Result<Vec<u8>, String> {
     validate_download_url(url)?;
     crate::resource_download::fetch_limited_bytes(client, url, max_bytes, label)
-        .await.map_err(|error| error.to_string())
+        .await
+        .map_err(|error| error.to_string())
 }
 
 async fn download_to_file_with_hash(
@@ -733,8 +734,16 @@ async fn download_to_file_with_hash(
 ) -> Result<(u64, String), String> {
     validate_download_url(url)?;
     crate::resource_download::download_to_file_with_hash(
-        client, url, path, max_bytes, progress_total_bytes, attempt_timeout, on_progress,
-    ).await.map_err(|error| error.to_string())
+        client,
+        url,
+        path,
+        max_bytes,
+        progress_total_bytes,
+        attempt_timeout,
+        on_progress,
+    )
+    .await
+    .map_err(|error| error.to_string())
 }
 
 fn validate_downloaded_artifact_digest(
@@ -2932,8 +2941,8 @@ pub async fn cmd_managed_codex_logout() -> Result<ManagedCodexStatus, String> {
 
 #[cfg(test)]
 mod tests {
-    use std::io::Write;
     use super::*;
+    use std::io::Write;
 
     fn valid_artifact(platform: &str) -> ManagedCodexArtifact {
         ManagedCodexArtifact {

@@ -4,11 +4,15 @@ use std::collections::BTreeSet;
 
 pub fn version(value: &str) -> Result<[u64; 3], &'static str> {
     let parts: Vec<_> = value.split('.').collect();
-    if parts.len() != 3 { return Err("Expected a numeric x.y.z version"); }
+    if parts.len() != 3 {
+        return Err("Expected a numeric x.y.z version");
+    }
     let mut result = [0; 3];
     for (index, part) in parts.iter().enumerate() {
-        if part.is_empty() || (part.len() > 1 && part.starts_with('0'))
-            || !part.bytes().all(|byte| byte.is_ascii_digit()) {
+        if part.is_empty()
+            || (part.len() > 1 && part.starts_with('0'))
+            || !part.bytes().all(|byte| byte.is_ascii_digit())
+        {
             return Err("Invalid version component");
         }
         result[index] = part.parse().map_err(|_| "Version component overflow")?;
@@ -22,7 +26,9 @@ pub fn select_release_index(app: &str, minimums: &[&str]) -> Result<Option<usize
     let mut best = None;
     for (index, minimum) in minimums.iter().enumerate() {
         let minimum = version(minimum)?;
-        if !seen.insert(minimum) { return Err("Duplicate minimum App version"); }
+        if !seen.insert(minimum) {
+            return Err("Duplicate minimum App version");
+        }
         if minimum <= app && best.is_none_or(|(_, previous)| minimum > previous) {
             best = Some((index, minimum));
         }

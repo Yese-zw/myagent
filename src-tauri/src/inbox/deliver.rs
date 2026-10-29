@@ -120,7 +120,11 @@ pub async fn cmd_inbox_deliver(
 }
 
 /// HTTP POST the message to target sidecar's `/api/inbox/drain`.
-async fn http_post_drain(port: u16, message: &PendingInboxMessage, network_handoff: bool) -> DeliverOutcome {
+async fn http_post_drain(
+    port: u16,
+    message: &PendingInboxMessage,
+    network_handoff: bool,
+) -> DeliverOutcome {
     let url = format!("http://127.0.0.1:{}/api/inbox/drain", port);
     let client = crate::local_http::json_client(Duration::from_secs(30));
     let message_id = message.message_id.clone();
@@ -141,11 +145,26 @@ async fn http_post_drain(port: u16, message: &PendingInboxMessage, network_hando
                 .json::<DrainResponse>()
                 .await
                 .map_err(|error| error.to_string());
-            let outcome = drain_ack_outcome_for_handoff(message, status.as_u16(), acknowledgement, network_handoff);
+            let outcome = drain_ack_outcome_for_handoff(
+                message,
+                status.as_u16(),
+                acknowledgement,
+                network_handoff,
+            );
             match &outcome {
-                DeliverOutcome::Delivered { .. } => ulog_info!("[inbox] delivered msg_id={} (port {})", message_id, port),
-                DeliverOutcome::Rejected { reason } => ulog_warn!("[inbox] target rejected message {} with HTTP {}: {}", message_id, status.as_u16(), reason),
-                DeliverOutcome::Unconfirmed { reason } | DeliverOutcome::DeliveryFailed { reason } => ulog_warn!("[inbox] {} (msg_id={})", reason, message_id),
+                DeliverOutcome::Delivered { .. } => {
+                    ulog_info!("[inbox] delivered msg_id={} (port {})", message_id, port)
+                }
+                DeliverOutcome::Rejected { reason } => ulog_warn!(
+                    "[inbox] target rejected message {} with HTTP {}: {}",
+                    message_id,
+                    status.as_u16(),
+                    reason
+                ),
+                DeliverOutcome::Unconfirmed { reason }
+                | DeliverOutcome::DeliveryFailed { reason } => {
+                    ulog_warn!("[inbox] {} (msg_id={})", reason, message_id)
+                }
                 DeliverOutcome::SessionNotFound => {}
             }
             outcome
@@ -168,9 +187,14 @@ fn ambiguous_delivery_outcome(message: &PendingInboxMessage, reason: String) -> 
     ambiguous_handoff_outcome(message, reason, false)
 }
 
-fn ambiguous_handoff_outcome(message: &PendingInboxMessage, reason: String, network_handoff: bool) -> DeliverOutcome {
-    let channel_handoff = message.session_event.as_ref().is_some_and(|event|
-        event["type"] == "send.request" && event["channelHandoff"].is_object());
+fn ambiguous_handoff_outcome(
+    message: &PendingInboxMessage,
+    reason: String,
+    network_handoff: bool,
+) -> DeliverOutcome {
+    let channel_handoff = message.session_event.as_ref().is_some_and(|event| {
+        event["type"] == "send.request" && event["channelHandoff"].is_object()
+    });
     if network_handoff || channel_handoff || message.source_kind == InboxSourceKind::ExternalCli {
         DeliverOutcome::Unconfirmed { reason }
     } else {
@@ -187,7 +211,12 @@ fn drain_ack_outcome(
     drain_ack_outcome_for_handoff(message, status, acknowledgement, false)
 }
 
-fn drain_ack_outcome_for_handoff(message: &PendingInboxMessage, status: u16, acknowledgement: Result<DrainResponse, String>, network_handoff: bool) -> DeliverOutcome {
+fn drain_ack_outcome_for_handoff(
+    message: &PendingInboxMessage,
+    status: u16,
+    acknowledgement: Result<DrainResponse, String>,
+    network_handoff: bool,
+) -> DeliverOutcome {
     match acknowledgement {
         Ok(DrainResponse {
             accepted: false,
@@ -541,9 +570,18 @@ async fn deliver_with_resume_policy<F>(
 where
     F: FnOnce(&str) -> bool,
 {
-    match prepare_delivery(app_handle,manager,message,resume_workspace_path,birth_policy,session_metadata_exists).await {
-        Ok(prepared)=>prepared.admit(app_handle,None,||Ok(())).await,
-        Err(outcome)=>outcome,
+    match prepare_delivery(
+        app_handle,
+        manager,
+        message,
+        resume_workspace_path,
+        birth_policy,
+        session_metadata_exists,
+    )
+    .await
+    {
+        Ok(prepared) => prepared.admit(app_handle, None, || Ok(())).await,
+        Err(outcome) => outcome,
     }
 }
 
@@ -551,84 +589,185 @@ where
 /// permit is acquired after releasing the lifecycle lock, while the transient
 /// owner keeps the prepared process alive. Local delivery retains its lock.
 pub(crate) struct PreparedDelivery {
-    message:PendingInboxMessage,
-    manager:ManagedSidecarManager,
-    port:u16,
-    process_generation:u64,
-    owner:Option<SidecarOwner>,
-    lifecycle:Option<std::sync::Arc<crate::sidecar::SessionLifecycleGuard>>,
-    birth_policy:SessionBirthPolicy,
+    message: PendingInboxMessage,
+    manager: ManagedSidecarManager,
+    port: u16,
+    process_generation: u64,
+    owner: Option<SidecarOwner>,
+    lifecycle: Option<std::sync::Arc<crate::sidecar::SessionLifecycleGuard>>,
+    birth_policy: SessionBirthPolicy,
 }
 impl Drop for PreparedDelivery {
     fn drop(&mut self) {
         self.lifecycle.take();
-        if let Some(owner)=self.owner.take() {crate::sidecar::schedule_release_session_sidecar(self.manager.clone(),self.message.to_session_id.clone(),owner);}
+        if let Some(owner) = self.owner.take() {
+            crate::sidecar::schedule_release_session_sidecar(
+                self.manager.clone(),
+                self.message.to_session_id.clone(),
+                owner,
+            );
+        }
     }
 }
 impl PreparedDelivery {
-    pub(crate) fn release_lifecycle_for_network(&mut self){self.lifecycle.take();}
-    pub(crate) async fn admit<G:FnOnce()->Result<(),String>>(self,app:&AppHandle,
-        reference:Option<super::types::NetworkReturnReference>,guard:G)->DeliverOutcome {
-        self.admit_handoff(app,reference,guard,false).await
+    pub(crate) fn release_lifecycle_for_network(&mut self) {
+        self.lifecycle.take();
     }
-    pub(crate) async fn admit_network<G:FnOnce()->Result<(),String>>(self,app:&AppHandle,
-        reference:Option<super::types::NetworkReturnReference>,guard:G)->DeliverOutcome {
-        self.admit_handoff(app,reference,guard,true).await
+    pub(crate) async fn admit<G: FnOnce() -> Result<(), String>>(
+        self,
+        app: &AppHandle,
+        reference: Option<super::types::NetworkReturnReference>,
+        guard: G,
+    ) -> DeliverOutcome {
+        self.admit_handoff(app, reference, guard, false).await
     }
-    async fn admit_handoff<G:FnOnce()->Result<(),String>>(mut self,app:&AppHandle,
-        reference:Option<super::types::NetworkReturnReference>,guard:G,network_handoff:bool)->DeliverOutcome {
-        let to_sid=self.message.to_session_id.clone();
-        if self.lifecycle.is_none(){self.lifecycle=Some(std::sync::Arc::new(crate::sidecar::acquire_session_lifecycle(&[&to_sid]).await));}
-        if !self.manager.lock().is_ok_and(|state|state.is_live(&to_sid,self.process_generation)) {
-            return DeliverOutcome::Rejected {reason:"TARGET_GENERATION_CHANGED".into()};
+    pub(crate) async fn admit_network<G: FnOnce() -> Result<(), String>>(
+        self,
+        app: &AppHandle,
+        reference: Option<super::types::NetworkReturnReference>,
+        guard: G,
+    ) -> DeliverOutcome {
+        self.admit_handoff(app, reference, guard, true).await
+    }
+    async fn admit_handoff<G: FnOnce() -> Result<(), String>>(
+        mut self,
+        app: &AppHandle,
+        reference: Option<super::types::NetworkReturnReference>,
+        guard: G,
+        network_handoff: bool,
+    ) -> DeliverOutcome {
+        let to_sid = self.message.to_session_id.clone();
+        if self.lifecycle.is_none() {
+            self.lifecycle = Some(std::sync::Arc::new(
+                crate::sidecar::acquire_session_lifecycle(&[&to_sid]).await,
+            ));
+        }
+        if !self
+            .manager
+            .lock()
+            .is_ok_and(|state| state.is_live(&to_sid, self.process_generation))
+        {
+            return DeliverOutcome::Rejected {
+                reason: "TARGET_GENERATION_CHANGED".into(),
+            };
         }
         // Re-read durable identity after a network wait; an owner token keeps
         // a process alive but cannot authorize recreating a deleted Session.
-        if self.birth_policy==SessionBirthPolicy::ExistingOnly
-            &&crate::sidecar::runtime_identity::resolve_session_runtime_identity_full(&to_sid).is_none()
-            && !self.manager.lock().is_ok_and(|state| state.session_has_owners_other_than(&to_sid, self.owner.as_ref())) {
+        if self.birth_policy == SessionBirthPolicy::ExistingOnly
+            && crate::sidecar::runtime_identity::resolve_session_runtime_identity_full(&to_sid)
+                .is_none()
+            && !self.manager.lock().is_ok_and(|state| {
+                state.session_has_owners_other_than(&to_sid, self.owner.as_ref())
+            })
+        {
             return DeliverOutcome::SessionNotFound;
         }
-        if let Err(reason)=guard(){return DeliverOutcome::Rejected {reason};}
-        self.message.network_return=reference;
-        let app=app.clone();
+        if let Err(reason) = guard() {
+            return DeliverOutcome::Rejected { reason };
+        }
+        self.message.network_return = reference;
+        let app = app.clone();
         // Last local handoff: the original Inbox must finish its true ACK and
         // BackgroundCompletion transfer even if its network caller disappears.
         tauri::async_runtime::spawn(async move {
-            let outcome=http_post_drain(self.port,&self.message,network_handoff).await;
-            start_headless_completion_if_admitted(&app,&self.manager,&to_sid,&outcome);
-            if let Some(owner)=self.owner.take(){release_transient_owner(&self.manager,&to_sid,&owner).await;}
-            self.lifecycle.take();outcome
-        }).await.unwrap_or(DeliverOutcome::Unconfirmed {reason:"ADMISSION_UNCONFIRMED".into()})
+            let outcome = http_post_drain(self.port, &self.message, network_handoff).await;
+            start_headless_completion_if_admitted(&app, &self.manager, &to_sid, &outcome);
+            if let Some(owner) = self.owner.take() {
+                release_transient_owner(&self.manager, &to_sid, &owner).await;
+            }
+            self.lifecycle.take();
+            outcome
+        })
+        .await
+        .unwrap_or(DeliverOutcome::Unconfirmed {
+            reason: "ADMISSION_UNCONFIRMED".into(),
+        })
     }
 }
-pub(crate) async fn prepare_existing_delivery(app:&AppHandle,manager:&ManagedSidecarManager,message:PendingInboxMessage,
-    path:std::path::PathBuf)->Result<PreparedDelivery,DeliverOutcome> {
-    prepare_delivery(app,manager,message,Some(path),SessionBirthPolicy::ExistingOnly,|session|
-        crate::sidecar::runtime_identity::resolve_session_runtime_identity_full(session).is_some()).await
+pub(crate) async fn prepare_existing_delivery(
+    app: &AppHandle,
+    manager: &ManagedSidecarManager,
+    message: PendingInboxMessage,
+    path: std::path::PathBuf,
+) -> Result<PreparedDelivery, DeliverOutcome> {
+    prepare_delivery(
+        app,
+        manager,
+        message,
+        Some(path),
+        SessionBirthPolicy::ExistingOnly,
+        |session| {
+            crate::sidecar::runtime_identity::resolve_session_runtime_identity_full(session)
+                .is_some()
+        },
+    )
+    .await
 }
-async fn prepare_delivery<F:FnOnce(&str)->bool>(app:&AppHandle,manager:&ManagedSidecarManager,message:PendingInboxMessage,
-    path:Option<std::path::PathBuf>,birth_policy:SessionBirthPolicy,metadata_exists:F)->Result<PreparedDelivery,DeliverOutcome> {
-    let to_sid=message.to_session_id.clone();
-    let lifecycle=std::sync::Arc::new(crate::sidecar::acquire_session_lifecycle(&[&to_sid]).await);
-    if !session_target_is_eligible(birth_policy,||manager.lock().is_ok_and(|state|state.session_has_owners(&to_sid))||metadata_exists(&to_sid)) {
+async fn prepare_delivery<F: FnOnce(&str) -> bool>(
+    app: &AppHandle,
+    manager: &ManagedSidecarManager,
+    message: PendingInboxMessage,
+    path: Option<std::path::PathBuf>,
+    birth_policy: SessionBirthPolicy,
+    metadata_exists: F,
+) -> Result<PreparedDelivery, DeliverOutcome> {
+    let to_sid = message.to_session_id.clone();
+    let lifecycle =
+        std::sync::Arc::new(crate::sidecar::acquire_session_lifecycle(&[&to_sid]).await);
+    if !session_target_is_eligible(birth_policy, || {
+        manager
+            .lock()
+            .is_ok_and(|state| state.session_has_owners(&to_sid))
+            || metadata_exists(&to_sid)
+    }) {
         return Err(DeliverOutcome::SessionNotFound);
     }
-    let owner=SidecarOwner::Agent(format!("inbox-deliver-{}",uuid::Uuid::new_v4()));
+    let owner = SidecarOwner::Agent(format!("inbox-deliver-{}", uuid::Uuid::new_v4()));
     // Install the RAII owner before an await that can be cancelled.
-    let mut prepared=PreparedDelivery {message,manager:manager.clone(),port:0,process_generation:0,
-        owner:Some(owner.clone()),lifecycle:Some(lifecycle.clone()),birth_policy};
-    let healthy=manager.lock().ok().and_then(|mut state| {
-        state.attach_owner_to_healthy_session(&to_sid,owner.clone()).map(|port|(port,state.generation_for(&to_sid).expect("attached live session")))
-    });
-    let (port,generation)=if let Some(binding)=healthy {binding}else {
-        let path=path.ok_or(DeliverOutcome::SessionNotFound)?;
-        let result=crate::sidecar::ensure_session_sidecar_with_runtime_identity_override_lifecycle_held(
-            lifecycle,app.clone(),manager.clone(),to_sid,path,owner,None,None).await
-            .map_err(|_|DeliverOutcome::DeliveryFailed {reason:"TARGET_PREPARATION_FAILED".into()})?;
-        (result.port,result.generation)
+    let mut prepared = PreparedDelivery {
+        message,
+        manager: manager.clone(),
+        port: 0,
+        process_generation: 0,
+        owner: Some(owner.clone()),
+        lifecycle: Some(lifecycle.clone()),
+        birth_policy,
     };
-    prepared.port=port;prepared.process_generation=generation;
+    let healthy = manager.lock().ok().and_then(|mut state| {
+        state
+            .attach_owner_to_healthy_session(&to_sid, owner.clone())
+            .map(|port| {
+                (
+                    port,
+                    state
+                        .generation_for(&to_sid)
+                        .expect("attached live session"),
+                )
+            })
+    });
+    let (port, generation) = if let Some(binding) = healthy {
+        binding
+    } else {
+        let path = path.ok_or(DeliverOutcome::SessionNotFound)?;
+        let result =
+            crate::sidecar::ensure_session_sidecar_with_runtime_identity_override_lifecycle_held(
+                lifecycle,
+                app.clone(),
+                manager.clone(),
+                to_sid,
+                path,
+                owner,
+                None,
+                None,
+            )
+            .await
+            .map_err(|_| DeliverOutcome::DeliveryFailed {
+                reason: "TARGET_PREPARATION_FAILED".into(),
+            })?;
+        (result.port, result.generation)
+    };
+    prepared.port = port;
+    prepared.process_generation = generation;
     Ok(prepared)
 }
 
@@ -858,7 +997,12 @@ mod tests {
     #[tokio::test]
     async fn channel_handoff_lost_or_malformed_ack_remains_unknown() {
         use tokio::io::{AsyncReadExt, AsyncWriteExt};
-        for response in [None, Some(b"HTTP/1.1 200 OK\r\nContent-Length: 3\r\nConnection: close\r\n\r\nbad".as_slice())] {
+        for response in [
+            None,
+            Some(
+                b"HTTP/1.1 200 OK\r\nContent-Length: 3\r\nConnection: close\r\n\r\nbad".as_slice(),
+            ),
+        ] {
             let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
             let port = listener.local_addr().unwrap().port();
             let server = tauri::async_runtime::spawn(async move {
@@ -867,34 +1011,94 @@ mod tests {
                 loop {
                     let mut buffer = [0; 4096];
                     let read = stream.read(&mut buffer).await.unwrap();
-                    if read == 0 { break; }
+                    if read == 0 {
+                        break;
+                    }
                     bytes.extend_from_slice(&buffer[..read]);
                     if let Some(header_end) = bytes.windows(4).position(|w| w == b"\r\n\r\n") {
                         let headers = String::from_utf8_lossy(&bytes[..header_end]).to_lowercase();
-                        let length: usize = headers.lines().find_map(|line| line.strip_prefix("content-length: ")).unwrap().parse().unwrap();
-                        if bytes.len() >= header_end + 4 + length { break; }
+                        let length: usize = headers
+                            .lines()
+                            .find_map(|line| line.strip_prefix("content-length: "))
+                            .unwrap()
+                            .parse()
+                            .unwrap();
+                        if bytes.len() >= header_end + 4 + length {
+                            break;
+                        }
                     }
                 }
                 assert!(String::from_utf8_lossy(&bytes).contains("channelHandoff"));
-                if let Some(response) = response { stream.write_all(response).await.unwrap(); }
+                if let Some(response) = response {
+                    stream.write_all(response).await.unwrap();
+                }
             });
-            let mut message = PendingInboxMessage::new_request("source".into(), "Source".into(), "target".into(), "payload".into(), false);
-            message.session_event = Some(serde_json::json!({"type":"send.request","channelHandoff":{"context":"context"}}));
+            let mut message = PendingInboxMessage::new_request(
+                "source".into(),
+                "Source".into(),
+                "target".into(),
+                "payload".into(),
+                false,
+            );
+            message.session_event = Some(
+                serde_json::json!({"type":"send.request","channelHandoff":{"context":"context"}}),
+            );
             let outcome = http_post_drain(port, &message, false).await;
             assert!(matches!(outcome, DeliverOutcome::Unconfirmed { .. }));
             assert!(should_start_headless_completion(&outcome));
-            assert!(matches!(drain_ack_outcome(&message, 409, Ok(DrainResponse {accepted:false,reason:None})), DeliverOutcome::Rejected {..}));
+            assert!(matches!(
+                drain_ack_outcome(
+                    &message,
+                    409,
+                    Ok(DrainResponse {
+                        accepted: false,
+                        reason: None
+                    })
+                ),
+                DeliverOutcome::Rejected { .. }
+            ));
             server.await.unwrap();
         }
     }
 
     #[test]
     fn network_handoff_ack_loss_is_unknown_for_internal_reply_and_no_reply() {
-        for reply_back in [false,true] {
-            let message=PendingInboxMessage::new_request("source".into(),"Source".into(),"target".into(),"work".into(),reply_back);
-            assert!(matches!(drain_ack_outcome_for_handoff(&message,200,Err("ACK lost".into()),true),DeliverOutcome::Unconfirmed {..}));
-            assert!(matches!(drain_ack_outcome_for_handoff(&message,200,Ok(DrainResponse {accepted:false,reason:Some("busy".into())}),true),DeliverOutcome::Rejected {..}));
-            assert!(matches!(drain_ack_outcome_for_handoff(&message,200,Ok(DrainResponse {accepted:true,reason:None}),true),DeliverOutcome::Delivered {..}));
+        for reply_back in [false, true] {
+            let message = PendingInboxMessage::new_request(
+                "source".into(),
+                "Source".into(),
+                "target".into(),
+                "work".into(),
+                reply_back,
+            );
+            assert!(matches!(
+                drain_ack_outcome_for_handoff(&message, 200, Err("ACK lost".into()), true),
+                DeliverOutcome::Unconfirmed { .. }
+            ));
+            assert!(matches!(
+                drain_ack_outcome_for_handoff(
+                    &message,
+                    200,
+                    Ok(DrainResponse {
+                        accepted: false,
+                        reason: Some("busy".into())
+                    }),
+                    true
+                ),
+                DeliverOutcome::Rejected { .. }
+            ));
+            assert!(matches!(
+                drain_ack_outcome_for_handoff(
+                    &message,
+                    200,
+                    Ok(DrainResponse {
+                        accepted: true,
+                        reason: None
+                    }),
+                    true
+                ),
+                DeliverOutcome::Delivered { .. }
+            ));
         }
     }
 

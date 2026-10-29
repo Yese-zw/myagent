@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { amountRange, normalizeCheckoutInfo, orderOutcome, quoteRecharge, sortedMethodTypes } from './rechargeQuote';
+import { amountRange, normalizeCheckoutInfo, orderOutcome, quoteRecharge, sortedMethodTypes, payAmountForCredit, creditForPayAmount, round } from './rechargeQuote';
 
 const limit = (overrides = {}) => ({ single_min: 1, single_max: 1000, fee_rate: 0, available: true, daily_limit: 0, daily_used: 0, daily_remaining: 0, ...overrides });
 
@@ -28,5 +28,21 @@ describe('recharge checkout parity with sub2api', () => {
     expect(orderOutcome('RECHARGING')).toBe('success');
     expect(orderOutcome('FAILED')).toBe('expired');
     expect(orderOutcome('PENDING')).toBeNull();
+  });
+});
+
+describe('USD-first recharge', () => {
+  it('finds the smallest payment that credits the chosen USD', () => {
+    const info = { balance_recharge_multiplier: 0.14 };
+    const pay = payAmountForCredit(info, 100);
+    expect(round(pay * 0.14)).toBeGreaterThanOrEqual(100);
+    expect(round((pay - 0.01) * 0.14)).toBeLessThan(100);
+    expect(payAmountForCredit({ balance_recharge_multiplier: 1 }, 50)).toBe(50);
+    expect(payAmountForCredit(info, 0)).toBe(0);
+  });
+
+  it('converts payment limits back to USD for range hints', () => {
+    expect(creditForPayAmount({ balance_recharge_multiplier: 0.14 }, 1000)).toBe(140);
+    expect(creditForPayAmount({ balance_recharge_multiplier: 0.14 }, 0)).toBe(0);
   });
 });

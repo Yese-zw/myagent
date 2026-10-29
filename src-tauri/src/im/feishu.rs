@@ -2246,23 +2246,43 @@ impl FeishuAdapter {
     /// Get chat/group name by chat_id.
     /// open_id and p2p chat_id are different identifiers. Resolve using a read,
     /// and fail closed if the platform cannot expose the mapping to this bot.
-    pub(crate) async fn resolve_channel_chat(&self, target: &super::channel_messaging::ChannelTarget) -> Result<(String, super::types::ImSourceType, Option<String>), String> {
+    pub(crate) async fn resolve_channel_chat(
+        &self,
+        target: &super::channel_messaging::ChannelTarget,
+    ) -> Result<(String, super::types::ImSourceType, Option<String>), String> {
         let chat_id = if target.target_type == "user" {
-            let mut url = reqwest::Url::parse("https://open.feishu.cn/open-apis/chat/v3/p2p/id").map_err(|e| e.to_string())?;
+            let mut url = reqwest::Url::parse("https://open.feishu.cn/open-apis/chat/v3/p2p/id")
+                .map_err(|e| e.to_string())?;
             url.query_pairs_mut().append_pair("open_id", &target.id);
             let result = self.api_call("GET", url.as_str(), None).await?;
-            result["open_chat_id"].as_str().or(result["data"]["open_chat_id"].as_str())
-                .filter(|id| !id.is_empty()).ok_or("Cannot resolve Feishu open_id to the inbound p2p chat_id; no message was sent")?.to_string()
-        } else { target.id.clone() };
-        let mut url = reqwest::Url::parse("https://open.feishu.cn/open-apis/im/v1/chats/").map_err(|e| e.to_string())?;
-        url.path_segments_mut().map_err(|_| "Invalid Feishu URL")?.pop_if_empty().push(&chat_id);
+            result["open_chat_id"]
+                .as_str()
+                .or(result["data"]["open_chat_id"].as_str())
+                .filter(|id| !id.is_empty())
+                .ok_or(
+                    "Cannot resolve Feishu open_id to the inbound p2p chat_id; no message was sent",
+                )?
+                .to_string()
+        } else {
+            target.id.clone()
+        };
+        let mut url = reqwest::Url::parse("https://open.feishu.cn/open-apis/im/v1/chats/")
+            .map_err(|e| e.to_string())?;
+        url.path_segments_mut()
+            .map_err(|_| "Invalid Feishu URL")?
+            .pop_if_empty()
+            .push(&chat_id);
         let result = self.api_call("GET", url.as_str(), None).await?;
         let kind = match result["data"]["chat_mode"].as_str() {
             Some("p2p") => super::types::ImSourceType::Private,
             Some("group") => super::types::ImSourceType::Group,
             _ => return Err("Cannot resolve Feishu conversation kind; no message was sent".into()),
         };
-        Ok((chat_id, kind, result["data"]["name"].as_str().map(str::to_string)))
+        Ok((
+            chat_id,
+            kind,
+            result["data"]["name"].as_str().map(str::to_string),
+        ))
     }
 
     async fn get_chat_info(&self, chat_id: &str) -> Result<String, String> {

@@ -11,6 +11,7 @@ import {
   LoaderIcon,
   AttachIcon,
   PlusIcon,
+  RefreshIcon,
   SendIcon,
   SlidersIcon,
   StopIcon,
@@ -57,6 +58,9 @@ import { detectExcessiveRepetition } from '@/utils/excessiveRepetition';
 import { isProviderAvailable } from '@/config/configService';
 import { modelSupportsModality } from '@/config/services/providerService';
 import { Popover } from '@/components/ui/Popover';
+import { MYAGENTS_PROVIDER_ID } from '../../../shared/packaged-gateway';
+import { refreshPackagedGatewayModels } from '@/features/account/syncPackagedGateway';
+import { refreshModelPrices, useModelPrices } from '@/features/account/useModelPrices';
 import type {
   ImageAttachment,
   SimpleChatInputHandle,
@@ -347,6 +351,20 @@ const SimpleChatInput = memo(forwardRef<SimpleChatInputHandle, SimpleChatInputPr
   const fileService = useWorkspaceFileService(workspacePath);
 
   const toast = useToast();
+  // Gateway models and their plaza discount, refreshable from the model menu.
+  const modelPrices = useModelPrices();
+  const [refreshingModels, setRefreshingModels] = useState(false);
+  const refreshModels = useCallback(async () => {
+    if (refreshingModels) return;
+    setRefreshingModels(true);
+    try {
+      await Promise.all([refreshPackagedGatewayModels(), refreshModelPrices()]);
+    } catch {
+      toast?.error(t('input.refreshModelsFailed'));
+    } finally {
+      setRefreshingModels(false);
+    }
+  }, [refreshingModels, t, toast]);
   // Stabilize toast reference to avoid unnecessary effect re-runs
   const toastRef = useRef(toast);
   toastRef.current = toast;
@@ -2086,6 +2104,22 @@ const SimpleChatInput = memo(forwardRef<SimpleChatInputHandle, SimpleChatInputPr
                             <AlertIcon className="h-3 w-3 shrink-0 text-[var(--warning)]" />
                           </Tip>
                         )}
+                        {p.id === MYAGENTS_PROVIDER_ID && (
+                          <button
+                            type="button"
+                            disabled={refreshingModels}
+                            aria-label={t('input.refreshModels')}
+                            title={t('input.refreshModels')}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              void refreshModels();
+                            }}
+                            className="ml-auto rounded-md p-1 text-[var(--ink-muted)] transition-colors hover:bg-[var(--hover-bg)] hover:text-[var(--ink)] disabled:cursor-wait"
+                            data-refresh-models
+                          >
+                            <RefreshIcon className={`h-3.5 w-3.5 ${refreshingModels ? 'animate-spin' : ''}`} />
+                          </button>
+                        )}
                       </div>
                       {p.models.map(model => {
                         const isSelected = provider?.id === p.id && currentModelId === model.model;
@@ -2113,6 +2147,14 @@ const SimpleChatInput = memo(forwardRef<SimpleChatInputHandle, SimpleChatInputPr
                             }`}
                           >
                             <span className="truncate">{model.modelName}</span>
+                            {p.id === MYAGENTS_PROVIDER_ID && (() => {
+                              const ratio = modelPrices.get(model.model)?.ratio;
+                              return ratio != null && (
+                                <span className="ml-1.5 shrink-0 rounded px-1 py-px text-xs font-semibold leading-4 text-[var(--accent-warm)] bg-[var(--accent-warm-subtle)]" data-model-discount>
+                                  {t('app:sub2api.modelPrice.discount', { value: Number((ratio * 10).toFixed(1)), percent: Math.round((1 - ratio) * 100) })}
+                                </span>
+                              );
+                            })()}
                             <ModalityBadges modalities={model.inputModalities} className="ml-2" />
                           </button>
                         );

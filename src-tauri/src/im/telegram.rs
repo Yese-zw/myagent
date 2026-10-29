@@ -321,8 +321,14 @@ impl TelegramAdapter {
     }
 
     /// Read-only target resolution; never send a probe to discover identity.
-    pub(crate) async fn resolve_channel_chat(&self, id: &str) -> Result<(String, super::types::ImSourceType, Option<String>), String> {
-        let chat = self.api_call("getChat", &serde_json::json!({"chat_id":id})).await.map_err(|e| e.to_string())?;
+    pub(crate) async fn resolve_channel_chat(
+        &self,
+        id: &str,
+    ) -> Result<(String, super::types::ImSourceType, Option<String>), String> {
+        let chat = self
+            .api_call("getChat", &serde_json::json!({"chat_id":id}))
+            .await
+            .map_err(|e| e.to_string())?;
         resolve_handoff_chat(&chat)
     }
 
@@ -1843,27 +1849,46 @@ impl super::adapter::ImStreamAdapter for TelegramAdapter {
     }
 }
 
-fn resolve_handoff_chat(chat: &Value) -> Result<(String, super::types::ImSourceType, Option<String>), String> {
-        let kind = match chat["type"].as_str() {
+fn resolve_handoff_chat(
+    chat: &Value,
+) -> Result<(String, super::types::ImSourceType, Option<String>), String> {
+    let kind = match chat["type"].as_str() {
             Some("private") => super::types::ImSourceType::Private,
             Some("group" | "supergroup") => super::types::ImSourceType::Group,
             Some("channel") => return Err("Native Telegram channel_post is not supported by this inbound router; no handoff or message was sent".into()),
             _ => return Err("Cannot resolve Telegram conversation kind".into()),
         };
-        let id = chat["id"].as_i64().ok_or("Telegram returned no chat ID")?.to_string();
-        let name = chat["title"].as_str().or(chat["first_name"].as_str()).map(str::to_string);
-        Ok((id, kind, name))
+    let id = chat["id"]
+        .as_i64()
+        .ok_or("Telegram returned no chat ID")?
+        .to_string();
+    let name = chat["title"]
+        .as_str()
+        .or(chat["first_name"].as_str())
+        .map(str::to_string);
+    Ok((id, kind, name))
 }
 
 #[cfg(test)]
 mod tests {
     #[test]
     fn handoff_resolves_supported_inbound_kinds_and_rejects_channel_posts() {
-        for (kind, expected) in [("private", super::super::types::ImSourceType::Private), ("group", super::super::types::ImSourceType::Group), ("supergroup", super::super::types::ImSourceType::Group)] {
-            let result = super::resolve_handoff_chat(&serde_json::json!({"id":123,"type":kind,"title":"name"})).unwrap();
+        for (kind, expected) in [
+            ("private", super::super::types::ImSourceType::Private),
+            ("group", super::super::types::ImSourceType::Group),
+            ("supergroup", super::super::types::ImSourceType::Group),
+        ] {
+            let result = super::resolve_handoff_chat(
+                &serde_json::json!({"id":123,"type":kind,"title":"name"}),
+            )
+            .unwrap();
             assert_eq!(result, ("123".into(), expected, Some("name".into())));
         }
-        assert!(super::resolve_handoff_chat(&serde_json::json!({"id":123,"type":"channel"})).unwrap_err().contains("channel_post"));
+        assert!(
+            super::resolve_handoff_chat(&serde_json::json!({"id":123,"type":"channel"}))
+                .unwrap_err()
+                .contains("channel_post")
+        );
     }
 
     use super::*;

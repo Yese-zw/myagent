@@ -6546,10 +6546,14 @@ mod tests {
     async fn text_record_delete_preflight_does_not_project_audio_processing() {
         let root = tempfile::tempdir().unwrap();
         let manager = manager(&root);
-        let record = manager.record_store.create_text(crate::record::TextRecordCreateInput {
-            content: "Text Record delete regression".to_string(),
-            images: Vec::new(),
-        }).await.unwrap();
+        let record = manager
+            .record_store
+            .create_text(crate::record::TextRecordCreateInput {
+                content: "Text Record delete regression".to_string(),
+                images: Vec::new(),
+            })
+            .await
+            .unwrap();
         manager.cancel_record_processing(&record.id).await.unwrap();
         let retained = manager.record_store.get(&record.id).await.unwrap();
         assert_eq!(retained.kind, RecordKind::Text);

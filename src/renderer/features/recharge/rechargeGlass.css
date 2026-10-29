@@ -1,0 +1,1594 @@
+/* Ported from sub2api `frontend/src/styles/recharge-glass.css` and the scoped
+   styles of PaymentView / RechargeHero / AmountInput / PaymentMethodSelector so
+   the desktop recharge page matches the web checkout. Tokens follow sub2api's
+   default "editorial" theme, mapped onto the app's own theme variables so light
+   and dark both work. Components only consume --rx-* tokens. */
+
+.rx-stage,
+.rx-theme {
+  --rx-ink: var(--ink);
+  --rx-ink-2: var(--ink-secondary);
+  --rx-muted: var(--ink-muted);
+  --rx-faint: var(--ink-faint);
+
+  --rx-surface: color-mix(in srgb, var(--paper-elevated) 82%, transparent);
+  --rx-surface-2: color-mix(in srgb, var(--paper) 72%, transparent);
+  --rx-surface-hover: var(--paper-elevated);
+  --rx-line: var(--line);
+  --rx-line-soft: var(--line-subtle);
+  --rx-line-strong: var(--line-strong);
+  --rx-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+
+  /* Selected / primary: ink-black capsule, like the sidebar's active item. */
+  --rx-accent: var(--ink);
+  --rx-on-accent: var(--paper);
+  --rx-accent-soft: color-mix(in srgb, var(--ink) 8%, transparent);
+  --rx-tint: var(--accent-warm-subtle);
+  --rx-tint-ink: var(--accent-warm);
+  --rx-hot: #c2410c;
+  --rx-warn: #a16207;
+
+  --rx-radius-lg: 22px;
+  --rx-radius-md: 14px;
+  --rx-radius-sm: 10px;
+  --rx-shadow: 0 1px 2px rgba(17, 17, 15, 0.04), 0 12px 32px -18px rgba(17, 17, 15, 0.2);
+  --rx-shadow-lg: 0 24px 56px -24px rgba(17, 17, 15, 0.32);
+  --rx-blur: blur(18px) saturate(120%);
+
+  --rx-display: inherit;
+  --rx-display-style: normal;
+  --rx-display-weight: 650;
+
+  --rx-card-bg:
+    radial-gradient(110% 80% at 0% 0%, rgba(255, 255, 255, 0.1), transparent 55%),
+    radial-gradient(90% 90% at 100% 100%, rgba(220, 233, 255, 0.12), transparent 60%),
+    linear-gradient(155deg, #1d1d1a 0%, #11110f 60%, #1a1916 100%);
+  --rx-card-ink: #f4f2ec;
+  --rx-card-line: rgba(244, 242, 236, 0.1);
+  --rx-foil: rgba(244, 236, 214, 0.22);
+
+  --rx-liquid: linear-gradient(180deg, #e4eeff, #c7d9f6);
+  --rx-liquid-top: #e4eeff;
+
+  --rx-blob-1: rgba(255, 226, 196, 0.55);
+  --rx-blob-2: rgba(220, 233, 255, 0.75);
+  --rx-blob-3: rgba(233, 228, 212, 0.6);
+  --rx-grid-line: rgba(17, 17, 15, 0.045);
+  --rx-grain-opacity: 0.05;
+
+  --rx-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --rx-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.rx-stage {
+  position: relative;
+  isolation: isolate;
+  color: var(--rx-ink);
+  font-feature-settings: 'tnum' 1;
+}
+
+.dark .rx-stage,
+.dark .rx-theme {
+  --rx-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --rx-hot: #fb923c;
+  --rx-warn: #facc15;
+  --rx-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 16px 40px -20px rgba(0, 0, 0, 0.6);
+  --rx-shadow-lg: 0 28px 64px -24px rgba(0, 0, 0, 0.7);
+  --rx-card-bg:
+    radial-gradient(110% 80% at 0% 0%, rgba(255, 255, 255, 0.08), transparent 55%),
+    radial-gradient(90% 90% at 100% 100%, rgba(207, 224, 247, 0.08), transparent 60%),
+    linear-gradient(155deg, #2a2a26 0%, #1c1c19 60%, #24231f 100%);
+  --rx-card-line: rgba(244, 242, 236, 0.12);
+  --rx-liquid: linear-gradient(180deg, #2b3a50, #1e2a3a);
+  --rx-liquid-top: #2b3a50;
+  --rx-blob-1: rgba(120, 96, 64, 0.16);
+  --rx-blob-2: rgba(60, 84, 120, 0.18);
+  --rx-blob-3: rgba(90, 86, 74, 0.12);
+  --rx-grid-line: rgba(244, 242, 236, 0.03);
+  --rx-grain-opacity: 0.06;
+}
+
+
+/* ---------- from sub2api recharge-glass.css (base layers) ---------- */
+@property --rx-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+
+.rx-aurora {
+  pointer-events: none;
+  position: absolute;
+  inset: -1rem 0 0;
+  z-index: -1;
+  overflow: hidden;
+  /* 四周羽化，背景无可见边界 */
+  -webkit-mask-image: radial-gradient(ellipse 75% 65% at 50% 22%, #000 35%, transparent 100%);
+  mask-image: radial-gradient(ellipse 75% 65% at 50% 22%, #000 35%, transparent 100%);
+}
+
+.rx-aurora__blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(70px);
+  will-change: transform;
+}
+
+.rx-aurora__blob--1 {
+  top: -12%;
+  left: -6%;
+  width: 46%;
+  aspect-ratio: 1;
+  background: radial-gradient(circle at 30% 30%, var(--rx-blob-1), transparent 65%);
+  animation: rx-drift-1 24s var(--rx-ease) infinite alternate;
+}
+
+.rx-aurora__blob--2 {
+  top: -18%;
+  right: -8%;
+  width: 52%;
+  aspect-ratio: 1;
+  background: radial-gradient(circle at 60% 40%, var(--rx-blob-2), transparent 65%);
+  animation: rx-drift-2 28s var(--rx-ease) infinite alternate;
+}
+
+.rx-aurora__blob--3 {
+  top: 22%;
+  left: 30%;
+  width: 40%;
+  aspect-ratio: 1;
+  background: radial-gradient(circle at 50% 50%, var(--rx-blob-3), transparent 65%);
+  animation: rx-drift-3 32s var(--rx-ease) infinite alternate;
+}
+
+.rx-aurora__grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--rx-grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--rx-grid-line) 1px, transparent 1px);
+  background-size: 44px 44px;
+  -webkit-mask-image: radial-gradient(ellipse 70% 55% at 50% 0%, #000 0%, transparent 75%);
+  mask-image: radial-gradient(ellipse 70% 55% at 50% 0%, #000 0%, transparent 75%);
+}
+
+.rx-aurora__grain {
+  position: absolute;
+  inset: 0;
+  opacity: var(--rx-grain-opacity);
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@keyframes rx-drift-1 {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  100% { transform: translate3d(18%, 14%, 0) scale(1.15); }
+}
+
+@keyframes rx-drift-2 {
+  0% { transform: translate3d(0, 0, 0) scale(1.05); }
+  100% { transform: translate3d(-16%, 18%, 0) scale(0.92); }
+}
+
+@keyframes rx-drift-3 {
+  0% { transform: translate3d(0, 0, 0) scale(0.9); }
+  100% { transform: translate3d(-12%, -10%, 0) scale(1.2); }
+}
+
+/* ---------- 玻璃面板 ---------- */
+.rx-glass {
+  position: relative;
+  border-radius: var(--rx-radius-lg);
+  background: var(--rx-surface);
+  -webkit-backdrop-filter: var(--rx-blur);
+  backdrop-filter: var(--rx-blur);
+  border: 1px solid var(--rx-line);
+  box-shadow: var(--rx-highlight), var(--rx-shadow);
+}
+
+/* 区块标题：序号 + 标题 + 辅助说明 */
+.rx-section-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.rx-section-head__index {
+  font-family: var(--rx-display);
+  font-style: var(--rx-display-style);
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--rx-faint);
+}
+
+.rx-section-head__title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--rx-ink);
+}
+
+.rx-section-head__hint {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: var(--rx-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 入场：错峰浮起 */
+.rx-rise {
+  animation: rx-rise 0.8s var(--rx-ease) both;
+  animation-delay: calc(var(--rx-i, 0) * 80ms);
+}
+
+@keyframes rx-rise {
+  from { opacity: 0; transform: translate3d(0, 12px, 0); filter: blur(4px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rx-stage *,
+  .rx-stage *::before,
+  .rx-stage *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* ==========================================================================
+   通用皮肤：让 .rx-stage 内沿用全站语义类（.card / .stat-card / .table-container）的
+   旧页面自动获得同一套玻璃面板观感。
+   - 选择器叠加 .card.card 提升权重，压过 editorial / pixel 主题的 !important
+   - 不加 backdrop-filter：避免卡片成为内部 position: fixed 弹层的包含块
+   ========================================================================== */
+html .rx-stage .card.card,
+html .rx-stage .stat-card.stat-card,
+html .rx-stage .table-container.table-container {
+  background: var(--rx-surface) !important;
+  border: 1px solid var(--rx-line) !important;
+  border-radius: var(--rx-radius-lg) !important;
+  box-shadow: var(--rx-highlight), var(--rx-shadow) !important;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.35s var(--rx-ease) !important;
+}
+
+html .rx-stage .card.card:hover,
+html .rx-stage .stat-card.stat-card:hover {
+  border-color: var(--rx-line-strong) !important;
+}
+
+/* 统计卡：数字更大更紧，悬浮轻抬 */
+html .rx-stage .stat-card.stat-card:hover {
+  transform: translateY(-2px);
+}
+
+/* 入场：页面主区块错峰浮起（仅首屏常见的前几个块） */
+.rx-stage .rx-skin-rise > * {
+  animation: rx-rise 0.7s var(--rx-ease) both;
+}
+
+.rx-stage .rx-skin-rise > *:nth-child(1) { animation-delay: 120ms; }
+.rx-stage .rx-skin-rise > *:nth-child(2) { animation-delay: 190ms; }
+.rx-stage .rx-skin-rise > *:nth-child(3) { animation-delay: 260ms; }
+.rx-stage .rx-skin-rise > *:nth-child(4) { animation-delay: 330ms; }
+.rx-stage .rx-skin-rise > *:nth-child(n + 5) { animation-delay: 400ms; }
+
+/* 表头：小号大写、细线分隔 */
+html .rx-stage .table.table th,
+html .rx-stage table thead th {
+  font-size: 0.7rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase;
+  color: var(--rx-faint) !important;
+}
+
+html .rx-stage .table.table tbody tr,
+html .rx-stage table tbody tr {
+  transition: background 0.2s ease;
+}
+
+html .rx-stage .table.table tbody tr:hover,
+html .rx-stage table tbody tr:hover {
+  background: var(--rx-surface-2) !important;
+}
+
+/* 主按钮：与侧边栏激活项同色 */
+html .rx-stage .btn.btn-primary {
+  background: var(--rx-accent) !important;
+  color: var(--rx-on-accent) !important;
+  border-color: var(--rx-accent) !important;
+  border-radius: var(--rx-radius-sm) !important;
+  box-shadow: 0 1px 2px rgba(17, 17, 15, 0.14), 0 8px 20px -12px rgba(17, 17, 15, 0.45) !important;
+  transition: transform 0.35s var(--rx-spring), box-shadow 0.3s ease, opacity 0.2s ease !important;
+}
+
+html .rx-stage .btn.btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+html .rx-stage .btn.btn-secondary {
+  border-radius: var(--rx-radius-sm) !important;
+}
+
+/* 用于小块「数值 + 标签」的玻璃统计片 */
+
+
+/* ---------- from sub2api components/payment/RechargeHero.vue ---------- */
+.rx-hero {
+  padding: 0.25rem 0 0;
+}
+
+.rx-card-stage {
+  position: relative;
+  width: 100%;
+  perspective: 1100px;
+}
+
+.rx-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--rx-radius-lg);
+  color: var(--rx-card-ink);
+  background: var(--rx-card-bg);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 0 0 1px var(--rx-card-line),
+    var(--rx-shadow-lg);
+  transform: rotateX(var(--rx-rx)) rotateY(var(--rx-ry));
+  transform-style: preserve-3d;
+  transition: transform 0.6s var(--rx-ease), box-shadow 0.6s var(--rx-ease);
+}
+
+.rx-card-stage:hover .rx-card {
+  transition: transform 0.12s linear, box-shadow 0.6s var(--rx-ease);
+}
+
+.rx-card__holo {
+  position: absolute;
+  inset: -40%;
+  background: conic-gradient(from var(--rx-angle), transparent 0deg, var(--rx-foil) 60deg, transparent 120deg, transparent 200deg, var(--rx-foil) 260deg, transparent 320deg);
+  mix-blend-mode: soft-light;
+  animation: rx-spin 18s linear infinite;
+}
+
+@keyframes rx-spin {
+  to { --rx-angle: 360deg; }
+}
+
+.rx-card__holo::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 4px);
+}
+
+.rx-card__sheen {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--rx-px) var(--rx-py), rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0.04) 30%, transparent 55%);
+  mix-blend-mode: soft-light;
+  opacity: var(--rx-sheen);
+  transition: opacity 0.4s var(--rx-ease);
+}
+
+.rx-card__body {
+  position: relative;
+  display: grid;
+  gap: 0.85rem 1.5rem;
+  padding: 1.15rem 1.35rem 1.1rem;
+}
+
+@media (min-width: 768px) {
+  .rx-card__body {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: end;
+    padding: 1.25rem 1.6rem 1.2rem;
+  }
+
+  .rx-card__projected {
+    grid-column: 2;
+  }
+
+  .rx-card__foot {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    align-self: center;
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+    flex-direction: column;
+    align-items: flex-end;
+    text-align: right;
+  }
+}
+
+.rx-card__brand-row {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.rx-card__chip {
+  position: relative;
+  display: grid;
+  grid-template-rows: repeat(3, 1fr);
+  gap: 2px;
+  width: 2.3rem;
+  height: 1.7rem;
+  padding: 4px 5px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #efe6cf, #b9a578 55%, #e6dcc0);
+  box-shadow: inset 0 0 0 1px rgba(60, 48, 20, 0.3);
+}
+
+.rx-card__chip i {
+  border-top: 1px solid rgba(60, 48, 20, 0.35);
+}
+
+.rx-card__brand {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.8;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rx-card__balance {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.rx-card__label {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+
+.rx-card__amount {
+  margin-top: 0.2rem;
+  font-size: clamp(1.8rem, 1.2rem + 1.6vw, 2.4rem);
+  font-weight: 750;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+}
+
+.rx-card__currency {
+  margin-right: 0.15rem;
+  font-size: 0.6em;
+  font-weight: 600;
+  vertical-align: 0.42em;
+  opacity: 0.6;
+}
+
+.rx-card__projected {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.rx-card__delta {
+  padding: 0.1rem 0.5rem;
+  border-radius: 9999px;
+  font-weight: 700;
+  color: #11110f;
+  background: var(--rx-card-ink);
+}
+
+.rx-card__after {
+  opacity: 0.7;
+}
+
+.rx-card__after b {
+  font-weight: 700;
+}
+
+.rx-card__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  margin-top: 0.15rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--rx-card-line);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  opacity: 0.7;
+}
+
+.rx-card__holder {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+
+.rx-card__serial {
+  flex-shrink: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.rx-projected-enter-active,
+.rx-projected-leave-active {
+  transition: opacity 0.45s var(--rx-ease), transform 0.45s var(--rx-ease), filter 0.45s var(--rx-ease);
+}
+
+.rx-projected-enter-from,
+.rx-projected-leave-to {
+  opacity: 0;
+  transform: translateY(6px);
+  filter: blur(4px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rx-card__holo {
+    animation: none;
+  }
+}
+
+
+/* ---------- from sub2api components/payment/AmountInput.vue ---------- */
+.rx-amount {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.rx-amount__label {
+  display: block;
+  margin-bottom: 0.75rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--rx-faint, #94a3b8);
+}
+
+.rx-amount__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  padding-top: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .rx-amount__grid {
+    gap: 0.85rem;
+  }
+}
+
+/* ---------- 金额磁贴 ---------- */
+.rx-tile {
+  --mx: 50%;
+  --my: 50%;
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  min-height: 4.6rem;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 0.85rem 1rem;
+  border-radius: var(--rx-radius-md, 16px);
+  text-align: left;
+  color: var(--rx-ink, #0f172a);
+  background: var(--rx-surface-2, rgba(248, 250, 252, 0.7));
+  border: 1px solid var(--rx-line, rgba(15, 23, 42, 0.09));
+  box-shadow: var(--rx-highlight, none);
+  transition:
+    transform 0.45s var(--rx-spring, ease),
+    background 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.4s ease;
+  animation: rx-tile-in 0.6s var(--rx-ease, ease) both;
+  animation-delay: calc(var(--rx-i, 0) * 40ms + 120ms);
+}
+
+@keyframes rx-tile-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+
+.rx-tile:hover:not(.is-selected) {
+  transform: translateY(-2px);
+  background: var(--rx-surface-hover, #fff);
+  border-color: var(--rx-line-strong, rgba(15, 23, 42, 0.16));
+  box-shadow: var(--rx-highlight, none), var(--rx-shadow, none);
+}
+
+.rx-tile:active {
+  transform: translateY(0) scale(0.97);
+  transition-duration: 0.12s;
+}
+
+.rx-tile:focus-visible {
+  outline: 2px solid var(--rx-accent, #0d9488);
+  outline-offset: 3px;
+}
+
+/* 指针光斑：用墨色极淡晕染，和纸面同调 */
+.rx-tile__spot {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: radial-gradient(130px circle at var(--mx) var(--my), var(--rx-accent-soft, rgba(13, 148, 136, 0.14)), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.rx-tile:hover .rx-tile__spot {
+  opacity: 1;
+}
+
+.rx-tile__value {
+  font-size: 1.35rem;
+  font-weight: 750;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.rx-tile__symbol {
+  margin-right: 0.12rem;
+  font-size: 0.62em;
+  font-weight: 600;
+  vertical-align: 0.38em;
+  color: var(--rx-faint, #94a3b8);
+  transition: color 0.3s ease;
+}
+
+.rx-tile__meta {
+  margin-top: 0.4rem;
+  font-size: 0.7rem;
+  line-height: 1.2;
+  color: var(--rx-faint, #94a3b8);
+  font-variant-numeric: tabular-nums;
+  transition: color 0.3s ease;
+}
+
+.rx-tile.is-promo .rx-tile__meta {
+  color: var(--rx-hot, #e11d48);
+  font-weight: 650;
+}
+
+/* 选中：整块翻为墨色，与侧边栏激活项一致；边缘一道缓慢流动的高光 */
+.rx-tile__ring {
+  pointer-events: none;
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(from var(--rx-angle), transparent 0deg, rgba(255, 255, 255, 0.7) 50deg, transparent 110deg, transparent 360deg);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  animation: rx-ring-spin 3.6s linear infinite;
+}
+
+@keyframes rx-ring-spin {
+  to { --rx-angle: 360deg; }
+}
+
+.rx-tile.is-selected {
+  color: var(--rx-on-accent, #fff);
+  background: var(--rx-accent, #0d9488);
+  border-color: var(--rx-accent, #0d9488);
+  box-shadow: var(--rx-shadow-lg, none);
+  transform: translateY(-2px);
+}
+
+.rx-tile.is-selected .rx-tile__ring {
+  opacity: 0.6;
+}
+
+.rx-tile.is-selected .rx-tile__symbol,
+.rx-tile.is-selected .rx-tile__meta {
+  color: inherit;
+  opacity: 0.65;
+}
+
+.rx-tile.is-selected.is-promo .rx-tile__meta {
+  opacity: 0.85;
+}
+
+.rx-tile__check {
+  position: absolute;
+  right: 0.7rem;
+  bottom: 0.7rem;
+  display: grid;
+  place-items: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  border-radius: 9999px;
+  color: var(--rx-accent, #0d9488);
+  background: var(--rx-on-accent, #fff);
+  transform: scale(0);
+  transition: transform 0.4s var(--rx-spring, ease);
+}
+
+.rx-tile__check svg {
+  width: 0.7rem;
+  height: 0.7rem;
+}
+
+.rx-tile.is-selected .rx-tile__check {
+  transform: scale(1);
+}
+
+/* 窄屏：磁贴变窄，收紧留白；选中由整块墨色表达，隐藏勾选以免压住到账金额 */
+@media (max-width: 639px) {
+  .rx-tile {
+    padding: 0.75rem 0.8rem;
+  }
+
+  .rx-tile__value {
+    font-size: 1.2rem;
+  }
+
+  .rx-tile__check {
+    display: none;
+  }
+}
+
+/* 促销价签：实色小票，轻微倾斜 */
+.rx-tile__badge {
+  pointer-events: none;
+  position: absolute;
+  top: -0.6rem;
+  right: -0.35rem;
+  z-index: 2;
+  padding: 0.16rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  color: #fff;
+  background: var(--rx-hot, #e11d48);
+  box-shadow: 0 0 0 2px var(--rx-surface-hover, #fff), 0 6px 14px -6px var(--rx-hot, #e11d48);
+  transform: rotate(5deg);
+  transition: transform 0.4s var(--rx-spring, ease);
+}
+
+.rx-tile:hover .rx-tile__badge,
+.rx-tile.is-selected .rx-tile__badge {
+  transform: rotate(0deg) scale(1.06);
+}
+
+/* ---------- 自定义金额 ---------- */
+.rx-custom {
+  display: block;
+}
+
+.rx-custom__field {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.9rem 1.1rem 0.8rem;
+  border-radius: var(--rx-radius-md, 16px);
+  background: var(--rx-surface-2, rgba(248, 250, 252, 0.7));
+  border: 1px solid var(--rx-line, rgba(15, 23, 42, 0.09));
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+
+.rx-custom__field:focus-within {
+  background: var(--rx-surface-hover, #fff);
+  border-color: var(--rx-line-strong, rgba(15, 23, 42, 0.16));
+  box-shadow: 0 0 0 4px var(--rx-accent-soft, rgba(13, 148, 136, 0.14));
+}
+
+.rx-custom__symbol {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--rx-faint, #94a3b8);
+  transition: color 0.3s ease;
+}
+
+.rx-custom__field:focus-within .rx-custom__symbol,
+.rx-custom.is-filled .rx-custom__symbol {
+  color: var(--rx-ink, #0f172a);
+}
+
+.rx-custom__input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  font-size: 1.6rem;
+  font-weight: 750;
+  letter-spacing: -0.025em;
+  color: var(--rx-ink, #0f172a);
+  font-variant-numeric: tabular-nums;
+  outline: none;
+  box-shadow: none;
+}
+
+.rx-custom__input:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.rx-custom__input::placeholder {
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--rx-faint, #94a3b8);
+  opacity: 0.8;
+}
+
+/* 聚焦时底部墨线描出 */
+.rx-custom__line {
+  pointer-events: none;
+  position: absolute;
+  left: 1.1rem;
+  right: 1.1rem;
+  bottom: 0.45rem;
+  height: 1.5px;
+  border-radius: 9999px;
+  background: var(--rx-accent, #0d9488);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.6s var(--rx-ease, ease);
+}
+
+.rx-custom__field:focus-within .rx-custom__line {
+  transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rx-tile,
+  .rx-tile__ring {
+    animation: none;
+  }
+}
+
+
+/* ---------- from sub2api components/payment/PaymentMethodSelector.vue ---------- */
+.rx-method {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  height: 4rem;
+  align-items: center;
+  gap: 0.6rem;
+  overflow: hidden;
+  padding: 0 1.1rem 0 0.6rem;
+  border-radius: var(--rx-radius-md, 16px);
+  border: 1px solid var(--rx-line, rgba(15, 23, 42, 0.09));
+  color: var(--rx-ink, #0f172a);
+  background: var(--rx-surface-2, rgba(248, 250, 252, 0.7));
+  box-shadow: var(--rx-highlight, none);
+  text-align: left;
+  transition: transform 0.4s var(--rx-spring, ease), border-color 0.3s ease, box-shadow 0.4s ease, background 0.3s ease;
+  animation: rx-method-in 0.55s var(--rx-ease, ease) both;
+  animation-delay: calc(var(--rx-i, 0) * 50ms + 200ms);
+}
+
+@keyframes rx-method-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+.rx-method:not(.is-disabled):not(.is-selected):hover {
+  transform: translateY(-2px);
+  background: var(--rx-surface-hover, #fff);
+  border-color: var(--rx-line-strong, rgba(15, 23, 42, 0.16));
+}
+
+.rx-method:not(.is-disabled):active {
+  transform: scale(0.97);
+}
+
+.rx-method:focus-visible {
+  outline: 2px solid var(--rx-accent, #0d9488);
+  outline-offset: 3px;
+}
+
+/* 品牌色只作极淡的左侧晕染，不抢主色 */
+.rx-method__glow {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(90% 140% at 0% 50%, color-mix(in srgb, var(--rx-brand) 12%, transparent), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.rx-method__icon {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--rx-radius-sm, 11px);
+  background: #fff;
+  box-shadow: inset 0 0 0 1px var(--rx-line, rgba(15, 23, 42, 0.08));
+  transition: transform 0.45s var(--rx-spring, ease);
+}
+
+.rx-method__label {
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.rx-method__fee {
+  margin-top: 0.15rem;
+  font-size: 0.66rem;
+  letter-spacing: 0.04em;
+  color: var(--rx-faint, #94a3b8);
+}
+
+/* 右上角选中指示点：绝对定位，不挤占标签宽度；点本身是品牌色 */
+.rx-method__radio {
+  position: absolute;
+  top: 0.55rem;
+  right: 0.55rem;
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 9999px;
+  border: 1.5px solid var(--rx-line-strong, rgba(15, 23, 42, 0.2));
+  transition: border-color 0.3s ease;
+}
+
+.rx-method__radio::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: inherit;
+  background: var(--rx-brand);
+  transform: scale(0);
+  transition: transform 0.4s var(--rx-spring, ease);
+}
+
+.rx-method.is-selected {
+  border-color: var(--rx-accent, #0d9488);
+  background: var(--rx-surface-hover, #fff);
+  box-shadow: 0 0 0 1px var(--rx-accent, #0d9488), var(--rx-shadow, none);
+}
+
+.rx-method.is-selected .rx-method__glow {
+  opacity: 1;
+}
+
+.rx-method.is-selected .rx-method__icon {
+  transform: rotate(-5deg) scale(1.05);
+}
+
+.rx-method.is-selected .rx-method__radio {
+  border-color: var(--rx-brand);
+}
+
+.rx-method.is-selected .rx-method__radio::after {
+  transform: scale(1);
+}
+
+.rx-method.is-disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+  filter: grayscale(0.6);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rx-method {
+    animation: none;
+  }
+}
+
+
+/* ---------- from sub2api views/user/PaymentView.vue ---------- */
+/* ---------- 加载骨架 ---------- */
+.rx-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-top: 1.5rem;
+}
+
+.rx-skeleton__hero {
+  display: block;
+}
+
+.rx-skeleton__bar,
+.rx-skeleton__card,
+.rx-skeleton__panel {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border-radius: var(--rx-radius-sm);
+  background: var(--rx-surface-2);
+  border: 1px solid var(--rx-line-soft);
+}
+
+.rx-skeleton__bar {
+  height: 0.9rem;
+}
+
+.rx-skeleton__card {
+  height: 6.5rem;
+  border-radius: var(--rx-radius-lg);
+}
+
+.rx-skeleton__panel {
+  border-radius: var(--rx-radius-lg);
+}
+
+.rx-skeleton__bar::after,
+.rx-skeleton__card::after,
+.rx-skeleton__panel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 20%, var(--rx-surface-hover) 50%, transparent 80%);
+  opacity: 0.7;
+  transform: translateX(-100%);
+  animation: rx-shimmer 1.6s ease-in-out infinite;
+}
+
+@keyframes rx-shimmer {
+  to { transform: translateX(100%); }
+}
+
+/* ---------- Tab 切换：滑动墨色胶囊（同侧边栏激活项） ---------- */
+.rx-tabs {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--rx-tab-count), minmax(0, 1fr));
+  width: 100%;
+  max-width: 20rem;
+  padding: 0.3rem;
+  border-radius: 9999px;
+  background: var(--rx-surface);
+  border: 1px solid var(--rx-line);
+  -webkit-backdrop-filter: var(--rx-blur);
+  backdrop-filter: var(--rx-blur);
+  box-shadow: var(--rx-highlight), var(--rx-shadow);
+}
+
+
+.rx-tabs__pill {
+  position: absolute;
+  top: 0.3rem;
+  bottom: 0.3rem;
+  left: 0.3rem;
+  width: calc((100% - 0.6rem) / var(--rx-tab-count));
+  border-radius: 9999px;
+  background: var(--rx-accent);
+  box-shadow: 0 1px 2px rgba(17, 17, 15, 0.14), 0 6px 18px rgba(17, 17, 15, 0.1);
+  transform: translateX(calc(var(--rx-tab-index) * 100%));
+  transition: transform 0.55s var(--rx-spring);
+}
+
+.rx-tabs__tab {
+  position: relative;
+  z-index: 1;
+  padding: 0.55rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 650;
+  color: var(--rx-muted);
+  transition: color 0.35s ease;
+}
+
+.rx-tabs__tab:hover {
+  color: var(--rx-ink);
+}
+
+.rx-tabs__tab.is-active {
+  font-weight: 700;
+  color: var(--rx-on-accent);
+}
+
+.rx-tabs__tab:focus-visible {
+  outline: 2px solid var(--rx-accent);
+  outline-offset: 2px;
+}
+
+/* ---------- 面板 ---------- */
+.rx-panel {
+  padding: 1.4rem;
+}
+
+@media (min-width: 640px) {
+  .rx-panel {
+    padding: 1.75rem;
+  }
+}
+
+.rx-methods-rail {
+  padding: 1.25rem 1.3rem 1.35rem;
+}
+
+.rx-methods-rail .rx-section-head {
+  margin-bottom: 0.9rem;
+}
+
+.rx-methods-rail [data-testid="payment-method-grid"] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.rx-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 4rem 1.5rem;
+  text-align: center;
+  color: var(--rx-muted);
+}
+
+.rx-empty__orb {
+  width: 3rem;
+  height: 3rem;
+  margin-bottom: 0.75rem;
+  border-radius: 9999px;
+  border: 1px solid var(--rx-line-strong);
+  background: radial-gradient(circle at 32% 30%, var(--rx-surface-hover), var(--rx-surface-2) 60%);
+  box-shadow: var(--rx-shadow);
+  animation: rx-orb 6s ease-in-out infinite;
+}
+
+@keyframes rx-orb {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.rx-empty__meta {
+  font-size: 0.78rem;
+  color: var(--rx-faint);
+}
+
+/* 活动文案：与主题强调色同调的浅色便签 */
+.rx-notice {
+  position: relative;
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--rx-radius-md);
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--rx-tint-ink);
+  background: var(--rx-tint);
+  border: 1px solid var(--rx-line-soft);
+}
+
+.rx-notice__icon {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: var(--rx-radius-sm);
+  color: var(--rx-on-accent);
+  background: var(--rx-accent);
+}
+
+.rx-notice__icon svg {
+  width: 1rem;
+  height: 1rem;
+  animation: rx-twinkle 2.6s ease-in-out infinite;
+}
+
+@keyframes rx-twinkle {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(0.86) rotate(12deg); }
+}
+
+.rx-notice__body {
+  min-width: 0;
+  flex: 1;
+}
+
+.rx-error {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 1rem;
+  font-size: 0.8rem;
+  color: var(--rx-warn);
+}
+
+.rx-error svg {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+/* ---------- 订单小票 ---------- */
+.rx-receipt {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.4rem;
+}
+
+.rx-receipt__head {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.rx-receipt__eyebrow {
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--rx-faint);
+}
+
+.rx-receipt__account {
+  overflow: hidden;
+  margin-top: 0.1rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--rx-ink);
+}
+
+.rx-receipt__rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  font-size: 0.85rem;
+}
+
+.rx-receipt__note {
+  padding-top: 0.6rem;
+  font-size: 0.72rem;
+  color: var(--rx-faint);
+  border-top: 1px dashed var(--rx-line-strong);
+}
+
+.rx-receipt__perf {
+  height: 1px;
+  margin: 0 -0.25rem;
+  background-image: linear-gradient(90deg, var(--rx-line-strong) 50%, transparent 50%);
+  background-size: 8px 1px;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+}
+
+.rx-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  color: var(--rx-muted);
+  font-variant-numeric: tabular-nums;
+  animation: rx-row-in 0.45s var(--rx-ease) both;
+}
+
+@keyframes rx-row-in {
+  from { opacity: 0; transform: translateX(-6px); }
+  to { opacity: 1; transform: none; }
+}
+
+.rx-row__strong {
+  font-weight: 650;
+  color: var(--rx-ink);
+}
+
+.rx-row__strike {
+  color: var(--rx-faint);
+  text-decoration: line-through;
+}
+
+.rx-row__hot {
+  font-weight: 700;
+  color: var(--rx-hot);
+}
+
+.rx-row--total {
+  margin-top: 0.2rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--rx-line);
+  color: var(--rx-ink-2);
+  font-weight: 650;
+}
+
+.rx-row__total {
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--rx-ink);
+}
+
+/* ---------- 能量舱 ---------- */
+.rx-meter {
+  --rx-fill: 0.06;
+  position: relative;
+  height: 8.5rem;
+  overflow: hidden;
+  border-radius: var(--rx-radius-md);
+  background:
+    repeating-linear-gradient(0deg, transparent 0 calc(25% - 1px), var(--rx-line-soft) calc(25% - 1px) 25%),
+    var(--rx-surface-2);
+  border: 1px solid var(--rx-line);
+  box-shadow: inset 0 2px 10px rgba(17, 17, 15, 0.04);
+}
+
+.rx-meter__liquid {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(var(--rx-fill) * 100%);
+  background: var(--rx-liquid);
+  transition: height 1.1s cubic-bezier(0.34, 1.3, 0.64, 1);
+}
+
+.rx-meter.is-empty .rx-meter__liquid {
+  background: var(--rx-line-soft);
+}
+
+.rx-meter__wave {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% - 1px);
+  width: 200%;
+  height: 10px;
+}
+
+/* The renderer draws no inline SVG outside the icon sets, so the wave shape is
+   a CSS mask over a solid fill instead of an <svg><path>. */
+.rx-meter__wave {
+  background: var(--rx-liquid-top);
+  -webkit-mask: var(--rx-wave-shape) repeat-x 0 0 / 50% 100%;
+  mask: var(--rx-wave-shape) repeat-x 0 0 / 50% 100%;
+}
+
+.rx-meter__wave--back {
+  --rx-wave-shape: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 12' preserveAspectRatio='none'%3E%3Cpath d='M0 6 Q15 0 30 6 T60 6 T90 6 T120 6 V12 H0z'/%3E%3C/svg%3E");
+}
+
+.rx-meter__wave--front {
+  --rx-wave-shape: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 12' preserveAspectRatio='none'%3E%3Cpath d='M0 6 Q15 12 30 6 T60 6 T90 6 T120 6 V12 H0z'/%3E%3C/svg%3E");
+}
+
+.rx-meter.is-empty .rx-meter__wave {
+  background: var(--rx-line-soft);
+}
+
+.rx-meter__wave--back {
+  opacity: 0.5;
+  animation: rx-wave 6s linear infinite reverse;
+}
+
+.rx-meter__wave--front {
+  animation: rx-wave 3.6s linear infinite;
+}
+
+@keyframes rx-wave {
+  to { transform: translateX(-50%); }
+}
+
+.rx-meter__bubble {
+  position: absolute;
+  bottom: 0;
+  left: calc(20% + var(--b) * 28%);
+  width: calc(4px + var(--b) * 2px);
+  aspect-ratio: 1;
+  border-radius: 9999px;
+  border: 1px solid var(--rx-surface-hover);
+  opacity: 0;
+  animation: rx-bubble calc(3.2s + var(--b) * 0.9s) ease-in infinite;
+  animation-delay: calc(var(--b) * 0.8s);
+}
+
+.rx-meter.is-empty .rx-meter__bubble {
+  display: none;
+}
+
+@keyframes rx-bubble {
+  0% { transform: translateY(0); opacity: 0; }
+  15% { opacity: 0.9; }
+  100% { transform: translateY(-6rem); opacity: 0; }
+}
+
+.rx-meter__readout {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  text-align: center;
+}
+
+.rx-meter__label {
+  padding: 0.12rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--rx-muted);
+  background: var(--rx-surface-hover);
+  border: 1px solid var(--rx-line-soft);
+}
+
+.rx-meter__value {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+  color: var(--rx-ink);
+}
+
+.rx-meter__hint {
+  max-width: 13rem;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--rx-faint);
+}
+
+/* ---------- 主按钮：墨色实底（同侧边栏激活项），左侧圆点提示所选渠道 ---------- */
+.rx-cta {
+  --rx-brand: #14b8a6;
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 3.3rem;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: var(--rx-radius-md);
+  font-size: 0.96rem;
+  font-weight: 700;
+  color: var(--rx-on-accent);
+  background: var(--rx-accent);
+  box-shadow: 0 1px 2px rgba(17, 17, 15, 0.14), 0 10px 24px -10px rgba(17, 17, 15, 0.35);
+  transition: transform 0.4s var(--rx-spring), box-shadow 0.4s ease, opacity 0.3s ease;
+}
+
+.rx-cta:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(17, 17, 15, 0.14), 0 16px 32px -12px rgba(17, 17, 15, 0.45);
+}
+
+.rx-cta:not(:disabled):active {
+  transform: scale(0.98);
+}
+
+.rx-cta:focus-visible {
+  outline: 2px solid var(--rx-accent);
+  outline-offset: 3px;
+}
+
+.rx-cta:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+  box-shadow: none;
+}
+
+.rx-cta__content {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.rx-cta__content::before {
+  content: '';
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 9999px;
+  background: var(--rx-brand);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--rx-brand) 25%, transparent);
+}
+
+.rx-cta__arrow {
+  width: 1.05rem;
+  height: 1.05rem;
+  transition: transform 0.4s var(--rx-spring);
+}
+
+.rx-cta:not(:disabled):hover .rx-cta__arrow {
+  transform: translateX(4px);
+}
+
+.rx-cta__shine {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.22) 50%, transparent 65%);
+  transform: translateX(-120%);
+}
+
+.dark .rx-cta__shine {
+  background: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.5) 50%, transparent 65%);
+}
+
+.rx-cta:not(:disabled) .rx-cta__shine {
+  animation: rx-sweep 4.5s ease-in-out infinite 1.2s;
+}
+
+@keyframes rx-sweep {
+  0%, 65% { transform: translateX(-120%); }
+  100% { transform: translateX(120%); }
+}
+
+.rx-cta__spinner {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 9999px;
+  border: 2px solid color-mix(in srgb, var(--rx-on-accent) 35%, transparent);
+  border-top-color: var(--rx-on-accent);
+  animation: rx-spin-cta 0.8s linear infinite;
+}
+
+@keyframes rx-spin-cta {
+  to { transform: rotate(360deg); }
+}
+
+.rx-ghost {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: var(--rx-radius-md);
+  font-size: 0.875rem;
+  font-weight: 650;
+  color: var(--rx-muted);
+  border: 1px solid var(--rx-line-strong);
+  transition: color 0.3s ease, background 0.3s ease;
+}
+
+.rx-ghost:hover {
+  color: var(--rx-ink);
+  background: var(--rx-surface-2);
+}
+
+/* ---------- 订阅确认指标 ---------- */
+.rx-chip {
+  padding: 0.6rem 0.85rem;
+  border-radius: var(--rx-radius-sm);
+  background: var(--rx-surface-2);
+  border: 1px solid var(--rx-line-soft);
+}
+
+.rx-help {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.4rem;
+  min-height: 0;
+}
+
+.rx-help .markdown-body {
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.rx-fade-enter-active,
+.rx-fade-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.rx-fade-enter-from,
+.rx-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+}

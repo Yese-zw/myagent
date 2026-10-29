@@ -50,6 +50,7 @@ pub mod tokendance;
 pub use myagents_media_worker_protocol as media_worker_protocol;
 #[cfg(any(windows, test))]
 mod credential_permissions;
+mod main_renderer;
 pub mod memory_auto_update;
 pub mod memory_evolution;
 mod network_diagnostics;
@@ -95,7 +96,6 @@ mod updater;
 pub mod utils;
 pub mod wake_lock;
 mod webview_policy;
-mod main_renderer;
 pub mod workspace_files;
 mod workspace_path;
 
@@ -1107,7 +1107,7 @@ pub fn run() {
                 WebviewUrl::default(),
             )
             .scroll_bar_style(crate::webview_policy::scroll_bar_style())
-            .title("LSAGENT")
+            .title("灵思AGENT")
             .inner_size(1200.0, 800.0)
             .min_inner_size(800.0, 600.0)
             .resizable(true)

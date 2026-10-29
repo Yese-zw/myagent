@@ -8,9 +8,9 @@ mod credentialed;
 mod manager;
 mod manifest;
 mod models;
-mod operations;
 #[cfg(test)]
 mod oauth_tests;
+mod operations;
 mod process;
 mod store;
 pub mod types;
@@ -34,7 +34,11 @@ pub(crate) fn initialize(app: tauri::AppHandle, had_prior_instance: bool) {
     let manager = match manager() {
         Ok(manager) => Arc::clone(manager),
         Err(error) => {
-            crate::ulog_warn!("[cliproxy] initialize failed code={} reason={}", error.code, error.message);
+            crate::ulog_warn!(
+                "[cliproxy] initialize failed code={} reason={}",
+                error.code,
+                error.message
+            );
             return;
         }
     };
@@ -60,9 +64,10 @@ fn manager() -> Result<&'static Arc<CliProxyManager>> {
     initialized_manager(&MANAGER)
 }
 
-fn initialized_manager(slot: &OnceLock<Result<Arc<CliProxyManager>>>) -> Result<&Arc<CliProxyManager>> {
-    slot
-        .get()
+fn initialized_manager(
+    slot: &OnceLock<Result<Arc<CliProxyManager>>>,
+) -> Result<&Arc<CliProxyManager>> {
+    slot.get()
         .ok_or_else(|| Error::new("initializing", "模型组件尚未初始化"))
         .and_then(|result| result.as_ref().map_err(Clone::clone))
 }
@@ -140,7 +145,9 @@ mod tests {
     #[test]
     fn construction_failure_is_not_reported_as_pending_initialization() {
         let slot = OnceLock::new();
-        assert!(slot.set(Err(Error::new("state_format", "Invalid component state"))).is_ok());
+        assert!(slot
+            .set(Err(Error::new("state_format", "Invalid component state")))
+            .is_ok());
         let error = initialized_manager(&slot).err().unwrap();
         assert_eq!(error.code, "state_format");
         assert_eq!(error.message, "Invalid component state");

@@ -95,6 +95,8 @@ import { useChatSearch, isHighlightApiSupported } from '@/hooks/useChatSearch';
 import { useBrowserResourceReady } from '@/hooks/useBrowserResourceReady';
 import SelectionCommentMenu from '@/components/SelectionCommentMenu';
 import TerminalReasonBanner from '@/components/TerminalReasonBanner';
+import InsufficientBalanceCard from '@/features/account/InsufficientBalanceCard';
+import { isInsufficientBalanceError } from '@/features/account/insufficientBalanceError';
 import RuntimeDiagnosticsBanner from '@/components/RuntimeDiagnosticsBanner';
 import { UnifiedLogsPanel } from '@/components/UnifiedLogsPanel';
 import WorkspaceConfigPanel, {
@@ -617,6 +619,7 @@ interface ChatProps {
   sessionNotificationBadgeCounts?: ReadonlyMap<string, number>;
   /** Open App Shell history with a clean, single-Tag aggregation intent. */
   onOpenHistoryTag?: (tag: string) => void;
+  onOpenRecharge?: () => void;
 }
 
 function isCurrentSessionGoal(
@@ -646,6 +649,7 @@ export default function Chat({
   onFilePreviewIntentConsumed,
   sessionNotificationBadgeCounts,
   onOpenHistoryTag,
+  onOpenRecharge,
 }: ChatProps) {
   // Get state from TabContext (required - Chat must be inside TabProvider)
   const {
@@ -6473,7 +6477,14 @@ export default function Chat({
               chatInputRef.current?.setValue(input.text, { primaryContext: input.primaryContext, requiredSystemSkill: input.requiredSystemSkill });
             }} />}
 
-            {agentError &&
+            {agentError && isInsufficientBalanceError(agentError) && (
+              <InsufficientBalanceCard
+                onRecharge={onOpenRecharge}
+                onDismiss={() => setAgentError(null)}
+              />
+            )}
+
+            {agentError && !isInsufficientBalanceError(agentError) &&
               (() => {
                 // Find the last real user message — drives both the oversized-image
                 // rewind hint and the banner-level "重新发送" button (issue #183).

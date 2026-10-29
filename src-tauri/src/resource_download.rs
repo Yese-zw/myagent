@@ -29,11 +29,12 @@ pub(crate) async fn fetch_limited_bytes(
     max_bytes: u64,
     label: &str,
 ) -> Result<Vec<u8>, DownloadError> {
-    let mut response = client
-        .get(url)
-        .send()
-        .await
-        .map_err(|e| DownloadError::Transport(format!("[resource-download] Failed to fetch {}: {}", label, e)))?;
+    let mut response = client.get(url).send().await.map_err(|e| {
+        DownloadError::Transport(format!(
+            "[resource-download] Failed to fetch {}: {}",
+            label, e
+        ))
+    })?;
     if !response.status().is_success() {
         return Err(DownloadError::Http(response.status().as_u16()));
     }
@@ -43,10 +44,12 @@ pub(crate) async fn fetch_limited_bytes(
     let mut out = Vec::new();
     let mut total = 0u64;
     loop {
-        let Some(chunk) = response
-            .chunk()
-            .await
-            .map_err(|e| DownloadError::Transport(format!("[resource-download] Failed to read {}: {}", label, e)))?
+        let Some(chunk) = response.chunk().await.map_err(|e| {
+            DownloadError::Transport(format!(
+                "[resource-download] Failed to read {}: {}",
+                label, e
+            ))
+        })?
         else {
             break;
         };
@@ -145,10 +148,20 @@ mod tests {
             let (mut stream, _) = listener.accept().await.unwrap();
             let mut request = [0; 4096];
             assert!(stream.read(&mut request).await.unwrap() > 0);
-            stream.write_all(b"HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\nConnection: close\r\n\r\n").await.unwrap();
+            stream
+                .write_all(
+                    b"HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\nConnection: close\r\n\r\n",
+                )
+                .await
+                .unwrap();
         });
-        let result = fetch_limited_bytes(&crate::local_http::json_client(Duration::from_secs(2)),
-            &format!("http://{address}/manifest"), 1024, "test manifest").await;
+        let result = fetch_limited_bytes(
+            &crate::local_http::json_client(Duration::from_secs(2)),
+            &format!("http://{address}/manifest"),
+            1024,
+            "test manifest",
+        )
+        .await;
         assert!(matches!(result, Err(DownloadError::Http(404))));
         server.await.unwrap();
     }

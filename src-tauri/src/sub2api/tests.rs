@@ -34,17 +34,43 @@ async fn public_settings_allow_embedded_branding_but_auth_responses_stay_bounded
 }
 
 #[test]
-fn packaged_defaults_pin_origin_and_key_group() {
+fn packaged_defaults_pin_only_the_origin() {
     let defaults = packaged_defaults().unwrap();
-    assert_eq!(defaults.server_url, "https://lingsiai.vip");
-    assert_eq!(defaults.default_group_id, 110);
+    assert_eq!(defaults.server_url, "https://api.lingsiai.cn");
+}
+
+#[test]
+fn app_group_prefers_the_user_choice_then_the_server_default() {
+    assert_eq!(effective_app_group_id(7, 110).unwrap(), 7);
+    assert_eq!(effective_app_group_id(0, 110).unwrap(), 110);
+    assert_eq!(
+        effective_app_group_id(0, 0).unwrap_err().code,
+        "APP_NOT_CONFIGURED"
+    );
+}
+
+#[test]
+fn public_settings_carry_the_app_config() {
+    let settings: PublicSettings = serde_json::from_value(json!({
+        "site_name": "Gateway",
+        "app_name": "Example Agent",
+        "app_default_group_id": 110
+    }))
+    .unwrap();
+    assert_eq!(settings.app_name, "Example Agent");
+    assert_eq!(settings.app_default_group_id, 110);
+
+    let legacy: PublicSettings = serde_json::from_value(json!({"site_name": "Gateway"})).unwrap();
+    assert_eq!(legacy.app_name, "");
+    assert_eq!(legacy.app_default_group_id, 0);
+    assert_eq!(legacy.community_group_image, "");
 }
 
 #[test]
 fn gateway_base_url_follows_the_packaged_origin() {
     assert_eq!(
-        gateway_base_url("https://lingsiai.vip"),
-        "https://lingsiai.vip/v1"
+        gateway_base_url("https://api.lingsiai.cn"),
+        "https://api.lingsiai.cn/v1"
     );
     assert_eq!(
         extract_gateway_key(&json!({"key":"sk-live-example","name":"LSAGENT"})).as_deref(),
@@ -61,8 +87,8 @@ fn gateway_base_url_follows_the_packaged_origin() {
 }
 
 #[test]
-fn registration_group_key_requires_the_packaged_group() {
-    let group_id = packaged_defaults().unwrap().default_group_id;
+fn registration_group_key_requires_the_app_group() {
+    let group_id = 110;
     let other_groups = json!({
         "items": [
             {"id": 1, "name": "manual", "group_id": 1, "key": "sk-other-secret"},
@@ -94,7 +120,7 @@ fn registration_group_key_requires_the_packaged_group() {
 }
 
 #[test]
-fn create_key_always_uses_the_packaged_group() {
+fn create_key_drops_a_renderer_chosen_group() {
     let (path, method, payload) = account_api_request(
         "create-key",
         Some(json!({"name":"LSAGENT","group_id":1,"extra":true})),
@@ -102,7 +128,8 @@ fn create_key_always_uses_the_packaged_group() {
     .unwrap();
     assert_eq!(path, "keys");
     assert_eq!(method, reqwest::Method::POST);
-    assert_eq!(payload, Some(json!({"name":"LSAGENT","group_id":110})));
+    // `authenticated_api` inserts the server-resolved App group afterwards.
+    assert_eq!(payload, Some(json!({"name":"LSAGENT"})));
     assert!(account_api_request("create-key", Some(json!({"name":""}))).is_err());
 }
 
@@ -142,10 +169,12 @@ fn public_account_projection_excludes_all_credentials() {
         refresh_token: "private-refresh".into(),
         user: user.clone(),
         api_key: String::new(),
+        app_group_id: 0,
     };
     let value = serde_json::to_string(&AccountSnapshot {
         server_url: grant.server_url.clone(),
         user: Some(user),
+        app_group_id: None,
     })
     .unwrap();
     assert!(!value.contains("private-access"));
@@ -379,7 +408,8 @@ fn captcha_is_a_single_command_capability_without_login_credentials() {
 #[test]
 fn codex_launch_config_replaces_only_gateway_owned_top_level_keys() {
     let existing = "model = \"gpt-5\"\nopenai_base_url = \"https://old.example/v1\"\nmodel_provider = \"custom\"\nforced_login_method = \"chatgpt\"\ncli_auth_credentials_store = \"keyring\"\n\n[model_providers.custom]\nbase_url = \"https://keep.example\"\n";
-    let merged = super::codex_launch::merge_config(existing, "https://gw.example/v1");
+    let merged =
+        super::codex_launch::merge_config(existing, "https://gw.example/v1", "Example Site");
     assert!(merged.starts_with("openai_base_url = \"https://gw.example/v1\"\n"));
     assert!(merged.contains("cli_auth_credentials_store = \"file\""));
     assert!(merged.contains("forced_login_method = \"api\""));
@@ -389,11 +419,36 @@ fn codex_launch_config_replaces_only_gateway_owned_top_level_keys() {
     assert!(!merged.contains("keyring"));
     assert!(!merged.contains("model_provider = "));
     assert!(merged.contains("[model_providers.custom]\nbase_url = \"https://keep.example\""));
+    assert!(merged.contains("[model_providers.openai]"));
+    assert!(merged.contains("name = \"Example Site\""));
 
     let unlocked =
-        super::codex_launch::merge_config("model = \"gpt-5\"\n", "https://gw.example/v1");
+        super::codex_launch::merge_config("model = \"gpt-5\"\n", "https://gw.example/v1", "Site");
     assert!(!unlocked.contains("forced_login_method"));
     assert!(unlocked.contains("cli_auth_credentials_store = \"file\""));
+}
+
+#[test]
+fn codex_launch_provider_name_matches_site_and_keeps_openai_history() {
+    assert_eq!(
+        super::codex_launch::provider_display_name("  灵矽 AI  ", "https://api.lingsiai.cn/v1"),
+        "灵矽 AI"
+    );
+    assert_eq!(
+        super::codex_launch::provider_display_name("", "https://www.api.lingsiai.cn/v1"),
+        "api.lingsiai.cn"
+    );
+
+    let existing = "[desktop]\ntheme = \"dark\"\n\n[model_providers.openai]\nname = \"Old\"\nbase_url = \"https://lingsiai.vip/v1\"\nwire_api = \"responses\"\n\n[model_providers.custom]\nname = \"Keep Me\"\n";
+    let merged =
+        super::codex_launch::merge_config(existing, "https://api.lingsiai.cn/v1", "灵矽 AI");
+    assert_eq!(merged.matches("[model_providers.openai]").count(), 1);
+    assert!(merged.contains("name = \"灵矽 AI\""));
+    assert!(merged.contains("base_url = \"https://api.lingsiai.cn/v1\""));
+    assert!(!merged.contains("lingsiai.vip"));
+    assert!(merged.contains("[desktop]\ntheme = \"dark\""));
+    assert!(merged.contains("[model_providers.custom]\nname = \"Keep Me\""));
+    assert!(!merged.contains("model_provider = "));
 }
 
 #[test]
@@ -420,4 +475,29 @@ fn codex_launch_opens_a_separate_app_instance_on_the_gateway_profile() {
     );
     // The key travels only through the owner-only auth.json, never argv.
     assert!(args.iter().all(|arg| !arg.contains("OPENAI_API_KEY")));
+}
+
+#[test]
+fn account_api_maps_model_plaza_to_an_authenticated_get() {
+    let (path, method, _) = account_api_request("model-plaza", None).unwrap();
+    assert_eq!(path, "model-plaza");
+    assert_eq!(method, reqwest::Method::GET);
+}
+
+#[cfg(unix)]
+#[test]
+fn share_history_links_sessions_and_migrates_local_rollouts() {
+    let root = std::env::temp_dir().join(format!("codex-share-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&root);
+    let (home, user) = (root.join("gateway"), root.join("user"));
+    std::fs::create_dir_all(home.join("sessions/2026")).unwrap();
+    std::fs::write(home.join("sessions/2026/local.jsonl"), "x").unwrap();
+    std::fs::create_dir_all(user.join("sessions/2026")).unwrap();
+    std::fs::write(user.join("sessions/2026/user.jsonl"), "y").unwrap();
+    super::codex_launch::share_history(&home, &user);
+    super::codex_launch::share_history(&home, &user);
+    assert!(std::fs::symlink_metadata(home.join("sessions")).unwrap().file_type().is_symlink());
+    assert!(home.join("sessions/2026/user.jsonl").is_file());
+    assert!(user.join("sessions/2026/local.jsonl").is_file());
+    let _ = std::fs::remove_dir_all(&root);
 }

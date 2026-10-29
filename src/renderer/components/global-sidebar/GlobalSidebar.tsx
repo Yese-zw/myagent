@@ -37,12 +37,12 @@ import { useTranslation } from 'react-i18next';
 import { track } from '@/analytics';
 import myAgentsLogo from '@/assets/runtime-icons/myagents.png';
 import { updateSession, type SessionMetadata } from '@/api/sessionClient';
-import { MyAgentsLogotype } from '@/components/brand/MyAgentsLogotype';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import FeedbackPopover from '@/components/FeedbackPopover';
 import Sub2apiAccountEntry from '@/features/account/Sub2apiAccountEntry';
 import Sub2apiBalanceCard from '@/features/account/Sub2apiBalanceCard';
 import { useProductLogo } from '@/features/account/useProductLogo';
+import { useProductName } from '@/features/account/useProductName';
 import { SidebarResizeHandle } from './SidebarResizeHandle';
 import { APP_SHELL_POPOVER_CHROME } from '@/components/global-sidebar/appShellPopoverChrome';
 import OverlayBackdrop from '@/components/OverlayBackdrop';
@@ -128,7 +128,7 @@ const AUTO_RAIL_QUERY = '(max-width: 1080px)';
 const EMPTY_TAGS: SessionTag[] = [];
 const SIDEBAR_TRANSITION_MS = 200;
 const WORKSPACE_BRANCH_TRANSITION_MS = 200;
-const MYAGENTS_WEBSITE_URL = 'https://lingsiai.vip';
+const MYAGENTS_WEBSITE_URL = 'https://api.lingsiai.cn/home';
 const FLYOUT_FOCUS_ENTRY_SELECTOR = [
   'button:not([disabled])',
   'a[href]',
@@ -483,6 +483,8 @@ export default memo(function GlobalSidebar({
   const { t } = useTranslation('app');
   const { t: tLauncher } = useTranslation('launcher');
   const brandIcon = useProductLogo(myAgentsLogo);
+  // The icon above already shows the site logo; the wordmark slot shows the name.
+  const productName = useProductName('灵思AGENT');
   const toast = useToast();
   const deleteSession = useSessionDeletion();
   const toastRef = useRef(toast);
@@ -1184,7 +1186,7 @@ export default memo(function GlobalSidebar({
               aria-hidden={!expanded}
               data-global-sidebar-brand-name
             >
-              <MyAgentsLogotype variant="compact" className="global-sidebar-brand-logotype" title="LSAGENT" />
+              {productName}
             </span>
           </button>
           {searchAvailable && (

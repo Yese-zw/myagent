@@ -53,10 +53,7 @@ impl RuntimeDistributionPolicy {
         {
             return Err("Default Integrated Runtime must be allowed".to_string());
         }
-        if !matches!(
-            self.selector_availability.as_str(),
-            "always" | "hidden"
-        ) {
+        if !matches!(self.selector_availability.as_str(), "always" | "hidden") {
             return Err("Runtime distribution policy has invalid selectorAvailability".to_string());
         }
         Ok(())

@@ -11,7 +11,7 @@ import type { AccountSection } from '@/features/account/tabContract';
 
 type RecordValue = Record<string, unknown>;
 type PageData = { items: RecordValue[]; total: number; page: number; page_size: number };
-const sectionKeys: AccountSection[] = ['dashboard', 'profile', 'models', 'keys', 'usage', 'orders', 'redeem'];
+const sectionKeys: AccountSection[] = ['dashboard', 'profile', 'models', 'usage', 'orders', 'redeem'];
 const field = 'w-full rounded-lg border border-[var(--line)] bg-[var(--paper-elevated)] px-3 py-2.5 text-sm text-[var(--ink)] outline-none transition-colors focus:border-[var(--focus-border)] focus:outline-none';
 const primary = 'rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-medium text-[var(--on-accent)] disabled:cursor-not-allowed disabled:opacity-50';
 const secondary = 'rounded-lg border border-[var(--line)] px-3 py-2 text-sm font-medium text-[var(--ink-muted)] hover:bg-[var(--hover-bg)] disabled:opacity-50';
@@ -99,8 +99,6 @@ export default function Account({ isActive }: { isActive: boolean }) {
             ? <ProfileWorkspace profile={record(pages[cacheKey])} account={account} settings={service.settings} onAccount={accept} />
             : section === 'models'
               ? <AvailableModelsWorkspace isActive={isActive} reloadToken={refreshKey} onBusy={setRefreshing} />
-            : section === 'keys'
-              ? <KeysPanel data={dataPage} onRefresh={() => setRefreshKey(value => value + 1)} />
               : section === 'usage'
                 ? <UsagePanel data={dataPage} />
                 : section === 'orders'
@@ -124,15 +122,6 @@ function EmptyRecords({ icon: Icon, title, hint }: { icon: AppIconComponent; tit
       <p className="mt-1 max-w-sm text-sm leading-6 text-[var(--ink-muted)]">{hint}</p>
     </div>
   );
-}
-
-function KeysPanel({ data, onRefresh }: { data: PageData; onRefresh: () => void }) {
-  const { t } = useTranslation('app');
-  const [name, setName] = useState(''); const [busy, setBusy] = useState(false); const [message, setMessage] = useState(''); const [pendingDelete, setPendingDelete] = useState<unknown>(undefined);
-  const mutate = async (operation: string, payload: RecordValue) => { setBusy(true); setMessage(''); try { await sub2api.accountApi(operation, payload); onRefresh(); } catch (reason) { setMessage(t(`sub2api.errors.${sub2apiErrorCode(reason)}`, { defaultValue: t('sub2api.errors.UNKNOWN') })); } finally { setBusy(false); } };
-  const create = async () => { if (!name.trim()) return; await mutate('create-key', { name: name.trim() }); setName(''); };
-  return <div><p className="text-sm text-[var(--ink-muted)]">{t('sub2api.keysHint')}</p><form className="mt-5 flex max-w-xl gap-2" onSubmit={event => { event.preventDefault(); void create(); }}><input aria-label={t('sub2api.keyName')} value={name} onChange={event => setName(event.target.value)} maxLength={100} placeholder={t('sub2api.keyName')} className={`${field} min-w-0 flex-1`} /><button disabled={busy || !name.trim()} className={primary}>{t('sub2api.createKey')}</button></form>
-    {message && <p role="status" className="mt-3 text-sm text-[var(--ink-muted)]">{message}</p>}{data.items.length === 0 ? <p className="mt-6 text-sm text-[var(--ink-muted)]">{t('sub2api.empty')}</p> : <div className="mt-5 space-y-3">{data.items.map(item => <article key={String(item.id)} className="rounded-lg border border-[var(--line-subtle)] p-4"><div className="flex flex-wrap items-start justify-between gap-3"><div className="min-w-0"><h3 className="font-medium">{display(item.name)}</h3><p className="mt-1 break-all font-mono text-xs text-[var(--ink-muted)]">{display(item.key)}</p><p className="mt-2 text-xs text-[var(--ink-muted)]">{t('sub2api.keyStatus')}: {display(item.status)} · {t('sub2api.createdAt')}: {date(item.created_at)}</p></div><div className="flex gap-2"><button type="button" disabled={busy} className={secondary} onClick={() => void mutate('update-key', { id: item.id, status: item.status === 'active' ? 'inactive' : 'active' })}>{item.status === 'active' ? t('sub2api.disable') : t('sub2api.enable')}</button><button type="button" disabled={busy} className={secondary} onClick={() => setPendingDelete(item.id)}>{t('sub2api.delete')}</button></div></div></article>)}</div>}{pendingDelete !== undefined && <ConfirmDialog title={t('sub2api.delete')} message={t('sub2api.deleteKeyConfirm')} confirmVariant="danger" confirmText={t('sub2api.delete')} cancelText={t('sub2api.back')} onConfirm={() => { const id = pendingDelete; setPendingDelete(undefined); void mutate('delete-key', { id }); }} onCancel={() => setPendingDelete(undefined)} />}</div>;
 }
 
 function TokenCell({ item }: { item: RecordValue }) {

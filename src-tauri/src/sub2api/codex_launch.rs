@@ -3,7 +3,9 @@
 //! Mirrors cockpit-tools' API-key Codex instances: a dedicated `CODEX_HOME`
 //! holds `auth.json` (`auth_mode = "apikey"`) and a `config.toml` whose
 //! top-level `openai_base_url` routes Codex's built-in `openai` provider to
-//! the gateway. A separate Electron user-data dir lets this instance run next
+//! the gateway. The built-in provider id is kept so existing sessions stay
+//! visible; `[model_providers.openai].name` is set to the gateway website
+//! name. A separate Electron user-data dir lets this instance run next
 //! to the user's own Codex app; their `~/.codex` and app data are never
 //! touched, and the API key lives only in the owner-only `auth.json`.
 
@@ -42,7 +44,7 @@ pub(super) fn installed_app_name() -> Option<String> {
     platform::installed_app_name()
 }
 
-pub(super) fn launch(base_url: &str, api_key: &str) -> Result<LaunchOutcome> {
+pub(super) fn launch(base_url: &str, api_key: &str, provider_name: &str) -> Result<LaunchOutcome> {
     let root = dirs::home_dir()
         .ok_or_else(|| AuthError::new("STORE_ERROR"))?
         .join(".myagents");
@@ -50,11 +52,15 @@ pub(super) fn launch(base_url: &str, api_key: &str) -> Result<LaunchOutcome> {
     let app_data = root.join(CODEX_APP_DATA_DIR);
     // Refresh credentials even when the instance is running: Codex re-reads
     // auth.json, so a rotated key takes effect without restarting it.
-    write_profile(&home, base_url, api_key)?;
+    write_profile(&home, base_url, api_key, provider_name)?;
+    // History is best-effort: a failure must not block launching Codex.
+    if let Some(user_home) = dirs::home_dir().map(|dir| dir.join(".codex")) {
+        share_history(&home, &user_home);
+    }
     platform::launch(&home, &app_data)
 }
 
-fn write_profile(home: &Path, base_url: &str, api_key: &str) -> Result<()> {
+fn write_profile(home: &Path, base_url: &str, api_key: &str, provider_name: &str) -> Result<()> {
     let store = |_| AuthError::new("STORE_ERROR");
     fs::create_dir_all(home).map_err(store)?;
     let auth = json!({ "auth_mode": "apikey", "OPENAI_API_KEY": api_key });
@@ -62,7 +68,85 @@ fn write_profile(home: &Path, base_url: &str, api_key: &str) -> Result<()> {
     write_private(&home.join("auth.json"), &bytes)?;
     let config_path = home.join("config.toml");
     let existing = fs::read_to_string(&config_path).unwrap_or_default();
-    fs::write(&config_path, merge_config(&existing, base_url)).map_err(store)
+    fs::write(
+        &config_path,
+        merge_config(&existing, base_url, provider_name),
+    )
+    .map_err(store)
+}
+
+/// History lives in the Codex home, so the dedicated profile starts empty.
+/// Link its rollout stores to the user's `~/.codex` so the gateway instance
+/// lists the same conversations. Only history is shared; auth and config stay
+/// profile-local. Sessions already recorded in the profile are moved over.
+#[cfg(unix)]
+pub(super) fn share_history(home: &Path, user_home: &Path) {
+    use std::os::unix::fs::symlink;
+    if !user_home.is_dir() {
+        return;
+    }
+    for (name, is_dir) in [
+        ("sessions", true),
+        ("archived_sessions", true),
+        ("session_index.jsonl", false),
+        ("history.jsonl", false),
+    ] {
+        let shared = user_home.join(name);
+        let local = home.join(name);
+        if fs::symlink_metadata(&local).is_ok_and(|meta| meta.file_type().is_symlink()) {
+            continue;
+        }
+        if is_dir {
+            if fs::create_dir_all(&shared).is_err() {
+                continue;
+            }
+            if local.is_dir() {
+                merge_dir(&local, &shared);
+                let _ = fs::remove_dir_all(&local);
+            }
+        } else if local.is_file() {
+            if !shared.exists() {
+                let _ = fs::rename(&local, &shared);
+            } else if let Ok(extra) = fs::read(&local) {
+                // Append-only logs: fold profile-local lines into the shared one.
+                use std::io::Write;
+                let appended = fs::OpenOptions::new()
+                    .append(true)
+                    .open(&shared)
+                    .and_then(|mut file| file.write_all(&extra));
+                if appended.is_err() {
+                    continue;
+                }
+                let _ = fs::remove_file(&local);
+            }
+        }
+        if !shared.exists() {
+            continue;
+        }
+        let _ = symlink(&shared, &local);
+    }
+}
+
+#[cfg(not(unix))]
+pub(super) fn share_history(_home: &Path, _user_home: &Path) {}
+
+/// Move entries from `from` into `to` without overwriting existing ones.
+#[cfg(unix)]
+fn merge_dir(from: &Path, to: &Path) {
+    let Ok(entries) = fs::read_dir(from) else {
+        return;
+    };
+    for entry in entries.flatten() {
+        let target = to.join(entry.file_name());
+        let source = entry.path();
+        if source.is_dir() && !fs::symlink_metadata(&source).is_ok_and(|m| m.file_type().is_symlink()) {
+            if fs::create_dir_all(&target).is_ok() {
+                merge_dir(&source, &target);
+            }
+        } else if !target.exists() {
+            let _ = fs::rename(&source, &target);
+        }
+    }
 }
 
 fn write_private(path: &Path, bytes: &[u8]) -> Result<()> {
@@ -88,11 +172,92 @@ fn write_private(path: &Path, bytes: &[u8]) -> Result<()> {
     }
 }
 
+/// Prefer the gateway website name; fall back to the base URL host.
+pub(super) fn provider_display_name(site_name: &str, base_url: &str) -> String {
+    let from_site = sanitize_provider_name(site_name);
+    if !from_site.is_empty() {
+        return from_site;
+    }
+    let host = url::Url::parse(base_url)
+        .ok()
+        .and_then(|parsed| parsed.host_str().map(str::to_owned))
+        .unwrap_or_default();
+    let host = host.strip_prefix("www.").unwrap_or(&host);
+    let from_host = sanitize_provider_name(host);
+    if !from_host.is_empty() {
+        from_host
+    } else {
+        "LSAGENT".into()
+    }
+}
+
+fn sanitize_provider_name(name: &str) -> String {
+    let collapsed = name.split_whitespace().collect::<Vec<_>>().join(" ");
+    collapsed.chars().take(80).collect()
+}
+
+fn quote_toml_string(value: &str) -> String {
+    serde_json::to_string(value).unwrap_or_else(|_| "\"\"".into())
+}
+
+/// Keep the built-in `openai` provider id (session history is keyed to it)
+/// and upsert its display name / base URL without dropping other tables.
+fn upsert_openai_provider(tail: &mut Vec<String>, name: &str, base_url: &str) {
+    let header = "[model_providers.openai]";
+    let name_line = format!("name = {}", quote_toml_string(name));
+    let url_line = format!("base_url = {}", quote_toml_string(base_url));
+    let mut i = 0;
+    while i < tail.len() {
+        if tail[i].trim() == header {
+            i += 1;
+            let table_start = i;
+            while i < tail.len() && !tail[i].trim_start().starts_with('[') {
+                i += 1;
+            }
+            let table_end = i;
+            let mut saw_name = false;
+            let mut saw_url = false;
+            for line in tail.iter_mut().take(table_end).skip(table_start) {
+                let key = line.trim_start().split('=').next().unwrap_or("").trim();
+                if key == "name" {
+                    *line = name_line.clone();
+                    saw_name = true;
+                } else if key == "base_url" {
+                    *line = url_line.clone();
+                    saw_url = true;
+                }
+            }
+            let mut insert_at = table_end;
+            if !saw_url {
+                tail.insert(insert_at, url_line);
+                insert_at += 1;
+            }
+            if !saw_name {
+                tail.insert(insert_at, name_line);
+            }
+            return;
+        }
+        i += 1;
+    }
+    if tail
+        .last()
+        .map(|line| !line.trim().is_empty())
+        .unwrap_or(false)
+    {
+        tail.push(String::new());
+    }
+    tail.push(header.into());
+    tail.push(name_line);
+    tail.push(url_line);
+    tail.push("wire_api = \"responses\"".into());
+    tail.push("requires_openai_auth = true".into());
+}
+
 /// Replace our top-level keys (before the first `[table]`) and keep the rest.
 /// A locked `forced_login_method` that is not `api` would make Codex treat the
 /// API-key profile as signed out, so that one conflict is rewritten to `api`.
 /// An unset login method is left unset; Codex then follows `auth.json`.
-pub(super) fn merge_config(existing: &str, base_url: &str) -> String {
+pub(super) fn merge_config(existing: &str, base_url: &str, provider_name: &str) -> String {
     let mut head = Vec::new();
     let mut tail = Vec::new();
     let mut in_tables = false;
@@ -103,7 +268,7 @@ pub(super) fn merge_config(existing: &str, base_url: &str) -> String {
             in_tables = true;
         }
         if in_tables {
-            tail.push(line);
+            tail.push(line.to_string());
             continue;
         }
         let key = trimmed.split('=').next().unwrap_or("").trim();
@@ -113,23 +278,24 @@ pub(super) fn merge_config(existing: &str, base_url: &str) -> String {
                 .map(|(_, value)| value.trim().trim_matches('"').to_ascii_lowercase())
                 .unwrap_or_default();
             if value == "api" {
-                head.push(line);
+                head.push(line.to_string());
             } else {
                 locked_login_method = true;
             }
             continue;
         }
         if !MANAGED_TOP_LEVEL_KEYS.contains(&key) {
-            head.push(line);
+            head.push(line.to_string());
         }
     }
-    let quoted = serde_json::to_string(base_url).unwrap_or_else(|_| "\"\"".into());
+    let quoted = quote_toml_string(base_url);
     let mut out = format!("openai_base_url = {quoted}\ncli_auth_credentials_store = \"file\"\n");
     if locked_login_method {
         out.push_str("forced_login_method = \"api\"\n");
     }
+    upsert_openai_provider(&mut tail, provider_name, base_url);
     for line in head.into_iter().chain(tail) {
-        out.push_str(line);
+        out.push_str(&line);
         out.push('\n');
     }
     out

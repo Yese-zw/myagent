@@ -3,14 +3,14 @@ import { buildPackagedGatewayProvider, MYAGENTS_PROVIDER_ID, packagedGatewayBase
 
 describe('packaged gateway provider', () => {
   it('pins the origin, /v1 base URL, and discovered models', () => {
-    expect(packagedGatewayOrigin()).toBe('https://lingsiai.vip');
-    expect(packagedGatewayBaseUrl()).toBe('https://lingsiai.vip/v1');
+    expect(packagedGatewayOrigin()).toBe('https://api.lingsiai.cn');
+    expect(packagedGatewayBaseUrl()).toBe('https://api.lingsiai.cn/v1');
     const provider = buildPackagedGatewayProvider([
       { model: 'claude-sonnet', modelName: 'Claude Sonnet', modelSeries: 'claude', source: 'discovered' },
     ]);
     expect(provider.id).toBe(MYAGENTS_PROVIDER_ID);
-    expect(provider.config.baseUrl).toBe('https://lingsiai.vip/v1');
-    expect(provider.modelListUrl).toBe('https://lingsiai.vip/v1/models');
+    expect(provider.config.baseUrl).toBe('https://api.lingsiai.cn/v1');
+    expect(provider.modelListUrl).toBe('https://api.lingsiai.cn/v1/models');
     expect(provider.apiProtocol).toBe('openai');
     expect(provider.primaryModel).toBe('claude-sonnet');
     expect(provider.models).toHaveLength(1);

@@ -1,17 +1,21 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import QRCode from 'qrcode';
 import Markdown from '@/components/Markdown';
 import ConfirmDialog from '@/components/ConfirmDialog';
-import { AlertIcon, CheckIcon, ClockIcon, CoinsIcon, ExternalIcon, InfoIcon, LoaderIcon, ShieldCheckIcon, XCircleIcon, ZapIcon } from '@/components/icons';
+import { AlertIcon, ArrowRightIcon, CheckIcon, ClockIcon, CoinsIcon, ExternalIcon, InfoIcon, LoaderIcon, StarIcon, XCircleIcon } from '@/components/icons';
 import { sub2api, sub2apiErrorCode } from '@/api/sub2api';
 import { useSub2apiAccount } from '@/features/account/useSub2apiAccount';
 import { useSub2apiBalance } from '@/features/account/useSub2apiBalance';
+import { useProductName } from '@/features/account/useProductName';
 import {
-  PRESET_AMOUNTS, amountFits, amountRange, formatPayment, formatPercent, formatUsd, matchTier, normalizeCheckoutInfo,
-  orderOutcome, quoteRecharge, round, sortedMethodTypes, type CheckoutInfo, type OrderOutcome,
+  PRESET_AMOUNTS, amountFits, amountRange, creditForPayAmount, formatPayment, formatPercent, formatUsd, orderOutcome,
+  normalizeCheckoutInfo, payAmountForCredit, quoteRecharge, round, sortedMethodTypes, type CheckoutInfo, type OrderOutcome,
 } from '@/features/recharge/rechargeQuote';
+import alipayIcon from '@/assets/brand/alipay.svg';
+import wxpayIcon from '@/assets/brand/wxpay.svg';
 import { openExternal } from '@/utils/openExternal';
+import '@/features/recharge/rechargeGlass.css';
 
 type Order = {
   orderId: number; outTradeNo: string; paymentType: string; qrCode: string; payUrl: string;
@@ -21,15 +25,13 @@ type Order = {
 const POLL_MS = 3000;
 const VERIFY_INTERVAL_MS = 15_000;
 const VERIFY_MAX_ATTEMPTS = 6;
-const cardShell = 'rounded-2xl border border-[var(--line)] bg-[var(--paper-elevated)] shadow-[var(--shadow-xs)]';
-const card = `${cardShell} p-5`;
-const secondary = 'inline-flex items-center justify-center gap-2 rounded-lg border border-[var(--line)] px-4 py-2 text-sm font-medium text-[var(--ink-secondary)] transition-colors hover:bg-[var(--hover-bg)] hover:text-[var(--ink)] disabled:cursor-not-allowed disabled:opacity-50';
-const primary = 'inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--accent)] px-4 text-sm font-semibold text-[var(--on-accent)] shadow-[var(--shadow-sm)] transition-[opacity,transform] hover:opacity-90 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-45 disabled:active:scale-100';
+const card = 'rx-glass rx-panel';
+const secondary = 'rx-ghost inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--rx-line)] px-4 py-2 text-sm font-medium text-[var(--rx-ink-2)] transition-colors hover:bg-[var(--rx-surface-hover)] disabled:cursor-not-allowed disabled:opacity-50';
 
-/** Brand tones for the built-in gateways; other methods use the app accent. */
-const METHOD_BRAND: Record<string, { color: string; glyph: string }> = {
-  alipay: { color: '#1677FF', glyph: '支' },
-  wxpay: { color: '#07C160', glyph: '微' },
+/** Brand colors and marks for the built-in gateways (same as sub2api). */
+const METHOD_BRAND: Record<string, { color: string; icon: string; glyph: string }> = {
+  alipay: { color: '#02A9F1', icon: alipayIcon, glyph: '支' },
+  wxpay: { color: '#09BB07', icon: wxpayIcon, glyph: '微' },
 };
 
 function errorText(t: (key: string, options?: Record<string, unknown>) => string, reason: unknown) {
@@ -37,15 +39,18 @@ function errorText(t: (key: string, options?: Record<string, unknown>) => string
 }
 
 function record(value: unknown): Record<string, unknown> { return value && typeof value === 'object' ? value as Record<string, unknown> : {}; }
+const usdText = (value: number) => value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 export default function Recharge({ isActive }: { isActive: boolean }) {
   const { t, i18n } = useTranslation('app');
   const locale = i18n.language;
   const { account } = useSub2apiAccount();
   const balance = useSub2apiBalance();
+  const brandName = useProductName('灵思AGENT');
   const [info, setInfo] = useState<CheckoutInfo | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  /** USD the user wants credited (before any bonus). */
   const [preset, setPreset] = useState<number | null>(null);
   const [custom, setCustom] = useState('');
   const [method, setMethod] = useState('');
@@ -71,11 +76,17 @@ export default function Recharge({ isActive }: { isActive: boolean }) {
   useEffect(() => { if (isActive && !info) void load(); }, [info, isActive, load]);
 
   const methodTypes = useMemo(() => info ? sortedMethodTypes(info.methods) : [], [info]);
+  // Gateway limits are in payment currency; the page works in USD credit.
   const range = useMemo(() => info ? amountRange(info.methods) : { min: 0, max: 0 }, [info]);
-  const presets = useMemo(() => PRESET_AMOUNTS.filter(value => (range.min <= 0 || value >= range.min) && (range.max <= 0 || value <= range.max)), [range]);
-  const amount = custom.trim() ? round(Number(custom)) : preset ?? 0;
-  const validAmount = Number.isFinite(amount) && amount > 0 ? amount : 0;
-  const quote = useMemo(() => info ? quoteRecharge(info, validAmount) : null, [info, validAmount]);
+  const usdRange = useMemo(() => info ? { min: creditForPayAmount(info, range.min), max: creditForPayAmount(info, range.max) } : { min: 0, max: 0 }, [info, range]);
+  const presets = useMemo(() => info ? PRESET_AMOUNTS.filter(usd => {
+    const pay = payAmountForCredit(info, usd);
+    return (range.min <= 0 || pay >= range.min) && (range.max <= 0 || pay <= range.max);
+  }) : [], [info, range]);
+  const target = custom.trim() ? round(Number(custom)) : preset ?? 0;
+  const validTarget = Number.isFinite(target) && target > 0 ? target : 0;
+  const payAmount = info ? payAmountForCredit(info, validTarget) : 0;
+  const quote = useMemo(() => info ? quoteRecharge(info, payAmount) : null, [info, payAmount]);
   const currency = info?.methods[method]?.currency;
   const fmt = useCallback((value: number) => formatPayment(value, currency, locale), [currency, locale]);
 
@@ -89,20 +100,20 @@ export default function Recharge({ isActive }: { isActive: boolean }) {
   }, [info, method, methodTypes, quote]);
 
   const amountError = useMemo(() => {
-    if (!info || !quote || validAmount <= 0) return '';
+    if (!info || !quote || validTarget <= 0) return '';
     if (!methodTypes.some(type => amountFits(info.methods[type], quote.payBase))) return t('sub2api.recharge.amountNoMethod');
     const limit = info.methods[method];
-    if (limit?.single_min && quote.payBase < limit.single_min) return t('sub2api.recharge.amountTooLow', { min: fmt(limit.single_min) });
-    if (limit?.single_max && quote.payBase > limit.single_max) return t('sub2api.recharge.amountTooHigh', { max: fmt(limit.single_max) });
+    if (limit?.single_min && quote.payBase < limit.single_min) return t('sub2api.recharge.amountTooLow', { min: `${formatUsd(creditForPayAmount(info, limit.single_min))} (${fmt(limit.single_min)})` });
+    if (limit?.single_max && quote.payBase > limit.single_max) return t('sub2api.recharge.amountTooHigh', { max: `${formatUsd(creditForPayAmount(info, limit.single_max))} (${fmt(limit.single_max)})` });
     return '';
-  }, [fmt, info, method, methodTypes, quote, t, validAmount]);
-  const canSubmit = !!info && !!quote && validAmount > 0 && !amountError && !!info.methods[method]?.available && !submitting;
+  }, [fmt, info, method, methodTypes, quote, t, validTarget]);
+  const canSubmit = !!info && !!quote && validTarget > 0 && payAmount > 0 && !amountError && !!info.methods[method]?.available && !submitting;
 
   const submit = async () => {
     if (!canSubmit || !quote) return;
     setSubmitting(true); setSubmitError(null);
     try {
-      const result = record(await sub2api.accountApi('create-order', { amount: validAmount, payment_type: method }));
+      const result = record(await sub2api.accountApi('create-order', { amount: payAmount, payment_type: method }));
       const next: Order = {
         orderId: Number(result.order_id) || 0,
         outTradeNo: String(result.out_trade_no ?? ''),
@@ -133,129 +144,229 @@ export default function Recharge({ isActive }: { isActive: boolean }) {
   }, [refreshBalance]);
 
   if (!account.user) {
-    return <Shell><div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
-      <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--paper-inset)] text-[var(--ink-muted)]"><CoinsIcon className="h-6 w-6" /></span>
-      <h2 className="mt-4 text-lg font-semibold">{t('sub2api.accountRequired')}</h2>
-      <p className="mt-2 text-sm text-[var(--ink-muted)]">{t('sub2api.recharge.signInHint')}</p>
-      <button type="button" className={`${primary} mt-5 h-10`} onClick={() => window.dispatchEvent(new Event('sub2api-account:open-login'))}>{t('sub2api.signIn')}</button>
+    return <Shell><div className="rx-glass rx-empty mt-6">
+      <span className="rx-empty__orb" aria-hidden="true" />
+      <CoinsIcon className="relative h-6 w-6 text-[var(--rx-muted)]" />
+      <h2 className="relative mt-3 text-lg font-semibold">{t('sub2api.accountRequired')}</h2>
+      <p className="relative mt-1 text-sm text-[var(--rx-muted)]">{t('sub2api.recharge.signInHint')}</p>
+      <button type="button" className="rx-cta relative mt-5 !w-auto px-8" onClick={() => window.dispatchEvent(new Event('sub2api-account:open-login'))}>
+        <span className="rx-cta__content">{t('sub2api.signIn')}</span>
+      </button>
     </div></Shell>;
   }
 
-  return <Shell>
-    <header>
-      <h1 className="text-2xl font-semibold tracking-tight text-[var(--ink)]">{t('sub2api.recharge.title')}</h1>
-    </header>
+  const credited = validTarget > 0 && quote ? quote.credited : 0;
+  const meterFill = Math.min(0.94, Math.max(0.16, Math.log1p(validTarget) / Math.log1p(usdRange.max > 0 ? usdRange.max : 5000))).toFixed(3);
+  const rangeHint = usdRange.min > 0 && usdRange.max > 0 ? `${formatUsd(usdRange.min)} – ${formatUsd(usdRange.max)}`
+    : usdRange.min > 0 ? `≥ ${formatUsd(usdRange.min)}` : usdRange.max > 0 ? `≤ ${formatUsd(usdRange.max)}` : '';
+  const brandColor = METHOD_BRAND[method]?.color ?? 'var(--rx-accent)';
 
+  return <Shell>
     {order ? <PaymentPanel order={order} outcome={outcome} onSettled={onSettled} onDone={finish} fmt={(value) => formatPayment(value, order.currency || currency, locale)} />
-      : loadError ? <div className={`${card} mt-6 flex flex-col items-center gap-3 py-12 text-center`}>
+      : loadError ? <div className={`${card} mt-2 flex flex-col items-center gap-3 py-12 text-center`}>
         <AlertIcon className="h-6 w-6 text-[var(--error)]" /><p role="alert" className="text-sm text-[var(--error)]">{loadError}</p>
         <button type="button" className={secondary} disabled={loading} onClick={() => void load()}>{t('sub2api.retry')}</button>
       </div>
-      : !info ? <div className="flex min-h-[40vh] items-center justify-center" role="status" aria-label={t('sub2api.recharge.loading')}><LoaderIcon className="h-8 w-8 animate-spin text-[var(--ink-muted)]" /></div>
-      : info.balance_disabled || methodTypes.length === 0 ? <div className={`${card} mt-6 py-14 text-center text-sm text-[var(--ink-muted)]`}>{t('sub2api.recharge.unavailable')}</div>
-      : <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="min-w-0 space-y-6">
-          <section className={card} aria-labelledby="recharge-amount-title">
-            <SectionTitle id="recharge-amount-title" step="1" title={t('sub2api.recharge.chooseAmount')} />
-            {info.recharge_bonus_notice && <div className="mb-4 rounded-xl border border-[var(--warning-border)] bg-[var(--warning-bg)] px-4 py-3 text-sm leading-relaxed text-[var(--ink)]"><Markdown>{info.recharge_bonus_notice}</Markdown></div>}
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {presets.map(value => {
-                const selected = !custom.trim() && preset === value;
-                const tier = matchTier(info.recharge_bonus_tiers, value);
-                const presetQuote = quoteRecharge(info, value);
-                return <button key={value} type="button" aria-pressed={selected} onClick={() => { setPreset(value); setCustom(''); setSubmitError(null); }}
-                  className={`group relative overflow-hidden rounded-xl border px-4 py-3.5 text-left transition-all ${selected ? 'border-[var(--accent)] bg-[var(--accent-warm-subtle)] ring-1 ring-[var(--accent)]' : 'border-[var(--line)] bg-[var(--paper)] hover:border-[var(--line-strong)] hover:bg-[var(--hover-bg)]'}`}>
-                  {tier && tier.bonus_percent > 0 && <span className="absolute right-0 top-0 rounded-bl-lg bg-[var(--accent-warm)] px-2 py-0.5 text-xs font-semibold text-[var(--on-accent)]">
-                    {info.recharge_bonus_mode === 'discount' ? t('sub2api.recharge.discountBadge', { percent: formatPercent(tier.bonus_percent) }) : t('sub2api.recharge.bonusBadge', { percent: formatPercent(tier.bonus_percent) })}
-                  </span>}
-                  <span className="block text-lg font-semibold tabular-nums text-[var(--ink)]">{fmt(value)}</span>
-                  <span className="mt-0.5 block text-xs tabular-nums text-[var(--ink-muted)]">{t('sub2api.recharge.creditsTo', { amount: formatUsd(presetQuote.credited) })}</span>
-                  {selected && <CheckIcon className="absolute bottom-2.5 right-2.5 h-4 w-4 text-[var(--accent)]" />}
-                </button>;
-              })}
-            </div>
-            <label className="mt-4 block">
-              <span className="text-xs font-medium text-[var(--ink-muted)]">{t('sub2api.recharge.customAmount')}</span>
-              <div className={`mt-1.5 flex items-center rounded-xl border bg-[var(--paper)] px-3 transition-colors focus-within:border-[var(--focus-border)] ${custom.trim() ? 'border-[var(--accent)]' : 'border-[var(--line)]'}`}>
-                <span className="text-sm text-[var(--ink-muted)]">{fmt(0).replace(/[\d.,\s]/g, '') || '¥'}</span>
-                <input inputMode="decimal" value={custom} onChange={event => { setCustom(event.target.value.replace(/[^\d.]/g, '')); setSubmitError(null); }}
-                  placeholder={range.min > 0 || range.max > 0 ? t('sub2api.recharge.rangeHint', { min: fmt(range.min || 0.01), max: range.max ? fmt(range.max) : '∞' }) : t('sub2api.recharge.customPlaceholder')}
-                  className="h-11 min-w-0 flex-1 bg-transparent px-2 text-base tabular-nums text-[var(--ink)] outline-none placeholder:text-sm placeholder:text-[var(--ink-faint)]" />
-              </div>
-            </label>
-            {amountError && <p className="mt-2 inline-flex items-center gap-1.5 text-xs text-[var(--warning)]"><AlertIcon className="h-3.5 w-3.5" />{amountError}</p>}
-          </section>
-
-          <section className={card} aria-labelledby="recharge-method-title">
-            <SectionTitle id="recharge-method-title" step="2" title={t('sub2api.recharge.chooseMethod')} />
-            <div className="grid gap-3 sm:grid-cols-2">
-              {methodTypes.map(type => {
-                const limit = info.methods[type]!;
-                const usable = limit.available && amountFits(limit, quote?.payBase ?? 0);
-                const selected = method === type;
-                const brand = METHOD_BRAND[type];
-                return <button key={type} type="button" disabled={!usable} aria-pressed={selected} onClick={() => setMethod(type)}
-                  className={`relative flex items-center gap-3 rounded-xl border px-4 py-3.5 text-left transition-all disabled:cursor-not-allowed disabled:opacity-45 ${selected ? 'border-[var(--accent)] ring-1 ring-[var(--accent)]' : 'border-[var(--line)] hover:border-[var(--line-strong)] hover:bg-[var(--hover-bg)]'}`}
-                  style={selected && brand ? { borderColor: brand.color, boxShadow: `0 0 0 1px ${brand.color}` } : undefined}>
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-sm font-bold text-white" style={{ background: brand?.color ?? 'var(--accent)' }}>{brand?.glyph ?? type.slice(0, 1).toUpperCase()}</span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-semibold text-[var(--ink)]">{limit.display_name || t(`sub2api.recharge.methods.${type}`, { defaultValue: type })}</span>
-                    <span className="mt-0.5 block truncate text-xs text-[var(--ink-muted)]">{!limit.available ? t('sub2api.recharge.methodUnavailable') : limit.fee_rate > 0 ? t('sub2api.recharge.methodFee', { rate: formatPercent(limit.fee_rate) }) : t('sub2api.recharge.rangeHint', { min: fmt(limit.single_min || 0.01), max: limit.single_max ? fmt(limit.single_max) : '∞' })}</span>
+      : !info ? <div className="rx-skeleton" role="status" aria-label={t('sub2api.recharge.loading')}>
+        <div className="rx-skeleton__hero"><span className="rx-skeleton__card" /></div>
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]"><span className="rx-skeleton__panel h-80" /><span className="rx-skeleton__panel h-80" /></div>
+      </div>
+      : info.balance_disabled || methodTypes.length === 0 ? <div className="rx-glass rx-empty"><span className="rx-empty__orb" aria-hidden="true" /><p className="relative text-sm text-[var(--rx-muted)]">{t('sub2api.recharge.unavailable')}</p></div>
+      : <div className="space-y-6">
+        <BalanceCard brand={brandName} balance={balance.balance ?? 0} credit={credited} username={account.user.username || account.user.email} userId={account.user.id} />
+        <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+          <div className="min-w-0 space-y-6">
+            <section className={`${card} rx-rise`} style={{ '--rx-i': 2 } as CSSProperties} aria-labelledby="recharge-amount-title">
+              <header className="rx-section-head">
+                <span className="rx-section-head__index">01</span>
+                <h2 id="recharge-amount-title" className="rx-section-head__title">{t('sub2api.recharge.chooseAmount')}</h2>
+                {rangeHint && <span className="rx-section-head__hint">{rangeHint}</span>}
+              </header>
+              {info.recharge_bonus_notice && <div className="rx-notice">
+                <span className="rx-notice__icon" aria-hidden="true"><StarIcon /></span>
+                <div className="rx-notice__body"><Markdown>{info.recharge_bonus_notice}</Markdown></div>
+              </div>}
+              <div className="rx-amount">
+                <div>
+                  <p className="rx-amount__label">{t('sub2api.recharge.quickAmounts')}</p>
+                  <div className="rx-amount__grid">
+                    {presets.map((usd, index) => {
+                      const selected = !custom.trim() && preset === usd;
+                      const tileQuote = quoteRecharge(info, payAmountForCredit(info, usd));
+                      const promo = tileQuote.percent > 0;
+                      return <button key={usd} type="button" aria-pressed={selected} data-testid={`quick-amount-${usd}`}
+                        className={`rx-tile ${selected ? 'is-selected' : ''} ${promo ? 'is-promo' : ''}`} style={{ '--rx-i': index } as CSSProperties}
+                        onPointerMove={trackPointer} onClick={() => { setPreset(usd); setCustom(''); setSubmitError(null); }}>
+                        <span className="rx-tile__ring" aria-hidden="true" />
+                        <span className="rx-tile__spot" aria-hidden="true" />
+                        {promo && <span className="rx-tile__badge">{info.recharge_bonus_mode === 'discount' ? `${formatPercent(tileQuote.percent)}% OFF` : `+${formatPercent(tileQuote.percent)}%`}</span>}
+                        <span className="rx-tile__value"><span className="rx-tile__symbol">$</span>{usd}</span>
+                        <span className="rx-tile__meta">{t('sub2api.recharge.needPay', { amount: fmt(tileQuote.total) })}</span>
+                        <span className="rx-tile__check" aria-hidden="true"><CheckIcon strokeWidth={2.5} /></span>
+                      </button>;
+                    })}
+                  </div>
+                </div>
+                <label className={`rx-custom ${custom.trim() ? 'is-filled' : ''}`}>
+                  <span className="rx-amount__label">{t('sub2api.recharge.customAmount')}</span>
+                  <span className="rx-custom__field">
+                    <span className="rx-custom__symbol">$</span>
+                    <input type="text" inputMode="decimal" value={custom} className="rx-custom__input"
+                      placeholder={rangeHint || t('sub2api.recharge.customPlaceholder')}
+                      onChange={event => { const next = event.target.value; if (/^\d*(\.\d{0,2})?$/.test(next)) { setCustom(next); setSubmitError(null); } }} />
+                    <span className="rx-custom__line" aria-hidden="true" />
                   </span>
-                  <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${selected ? 'border-transparent text-white' : 'border-[var(--line-strong)]'}`} style={selected ? { background: brand?.color ?? 'var(--accent)' } : undefined}>{selected && <CheckIcon className="h-3 w-3" />}</span>
-                </button>;
-              })}
-            </div>
-          </section>
+                </label>
+              </div>
+              {amountError && <p className="rx-error"><AlertIcon className="h-4 w-4" />{amountError}</p>}
+            </section>
+          </div>
 
-          {(info.help_text || info.help_image_url) && <section className={`${card} flex flex-col gap-4 sm:flex-row sm:items-start`}>
-            {info.help_image_url && <img src={info.help_image_url} alt="" className="h-36 w-auto max-w-full shrink-0 self-center rounded-xl object-contain" />}
-            {info.help_text && <div className="min-w-0 flex-1 text-sm text-[var(--ink-secondary)]"><Markdown>{info.help_text}</Markdown></div>}
-          </section>}
+          <aside className="space-y-6 lg:sticky lg:top-6">
+            {(info.help_text || info.help_image_url) && <section className="rx-glass rx-help rx-rise" style={{ '--rx-i': 3 } as CSSProperties}>
+              <div className="flex flex-col items-center gap-3">
+                {info.help_image_url && <img src={info.help_image_url} alt="" className="h-40 w-full max-w-full rounded-lg object-contain" />}
+                {info.help_text && <div className="w-full overflow-x-auto break-words text-sm text-[var(--rx-ink-2)]"><Markdown>{info.help_text}</Markdown></div>}
+              </div>
+            </section>}
+            <section className={`${card} rx-rise rx-methods-rail`} style={{ '--rx-i': 4 } as CSSProperties} aria-labelledby="recharge-method-title">
+              <header className="rx-section-head">
+                <span className="rx-section-head__index">02</span>
+                <h2 id="recharge-method-title" className="rx-section-head__title">{t('sub2api.recharge.chooseMethod')}</h2>
+              </header>
+              <div data-testid="payment-method-grid" className="grid grid-cols-2 gap-3">
+                {methodTypes.map((type, index) => {
+                  const limit = info.methods[type]!;
+                  const usable = limit.available && amountFits(limit, quote?.payBase ?? 0);
+                  const selected = method === type;
+                  const brand = METHOD_BRAND[type];
+                  const label = limit.display_name || t(`sub2api.recharge.methods.${type}`, { defaultValue: type });
+                  return <button key={type} type="button" title={label} disabled={!usable} aria-pressed={selected} onClick={() => setMethod(type)}
+                    className={`rx-method min-w-0 ${!usable ? 'is-disabled' : selected ? 'is-selected' : ''}`}
+                    style={{ '--rx-brand': brand?.color ?? '#14b8a6', '--rx-i': index } as CSSProperties}>
+                    <span className="rx-method__glow" aria-hidden="true" />
+                    <span className="rx-method__icon">{brand ? <img src={brand.icon} alt="" className="h-6 w-6 object-contain" /> : <span className="text-sm font-bold">{type.slice(0, 1).toUpperCase()}</span>}</span>
+                    <span className="flex min-w-0 flex-1 flex-col items-start leading-tight">
+                      <span className="rx-method__label block w-full truncate">{label}</span>
+                      {limit.fee_rate > 0 && <span className="rx-method__fee">{t('sub2api.recharge.methodFee', { rate: formatPercent(limit.fee_rate) })}</span>}
+                    </span>
+                    <span className="rx-method__radio" aria-hidden="true" />
+                  </button>;
+                })}
+              </div>
+            </section>
+
+            <div className="rx-glass rx-receipt rx-rise" style={{ '--rx-i': 5 } as CSSProperties}>
+              <header className="rx-receipt__head">
+                <span className="rx-section-head__index">03</span>
+                <div className="min-w-0 flex-1">
+                  <p className="rx-receipt__eyebrow">{t('sub2api.recharge.rechargeAccount')}</p>
+                  <p className="rx-receipt__account">{account.user.username || account.user.email}</p>
+                </div>
+              </header>
+              <div className={`rx-meter ${validTarget <= 0 ? 'is-empty' : ''}`} style={{ '--rx-fill': meterFill } as CSSProperties}>
+                <div className="rx-meter__liquid" aria-hidden="true">
+                  <span className="rx-meter__wave rx-meter__wave--back" />
+                  <span className="rx-meter__wave rx-meter__wave--front" />
+                  {[0, 1, 2].map(b => <span key={b} className="rx-meter__bubble" style={{ '--b': b } as CSSProperties} />)}
+                </div>
+                <div className="rx-meter__readout">
+                  {validTarget > 0 && quote ? <>
+                    <span className="rx-meter__label">{t('sub2api.recharge.credited')}</span>
+                    <span className="rx-meter__value">+${usdText(quote.credited)}</span>
+                  </> : <span className="rx-meter__hint">{t('sub2api.recharge.emptyHint')}</span>}
+                </div>
+              </div>
+              {validTarget > 0 && quote && <div className="rx-receipt__rows">
+                <div className="rx-row"><span>{t('sub2api.recharge.amount')}</span><span className="rx-row__strong">{formatUsd(round(payAmount * info.balance_recharge_multiplier))}</span></div>
+                {quote.mode === 'bonus' && quote.bonus > 0 && <div className="rx-row"><span>{t('sub2api.recharge.bonus', { percent: formatPercent(quote.percent) })}</span><span className="rx-row__hot">+{formatUsd(quote.bonus)}</span></div>}
+                <div className="rx-row"><span>{t('sub2api.recharge.credited')}</span><span className="rx-row__strong">{formatUsd(quote.credited)}</span></div>
+                <div className="rx-row"><span>{t('sub2api.recharge.payAmount')}</span><span className={quote.discount > 0 ? 'rx-row__strike' : 'rx-row__strong'}>{fmt(payAmount)}</span></div>
+                {quote.discount > 0 && <div className="rx-row"><span>{t('sub2api.recharge.discount', { percent: formatPercent(quote.percent) })}</span><span className="rx-row__hot">-{fmt(quote.discount)}</span></div>}
+                {quote.fee > 0 && <div className="rx-row"><span>{t('sub2api.recharge.fee', { rate: formatPercent(info.recharge_fee_rate) })}</span><span className="rx-row__strong">{fmt(quote.fee)}</span></div>}
+                <div className="rx-row rx-row--total"><span>{t('sub2api.recharge.actualPay')}</span><span className="rx-row__total">{fmt(quote.total)}</span></div>
+                {info.balance_recharge_multiplier !== 1 && <p className="rx-receipt__note">{t('sub2api.recharge.ratePreview', { amount: fmt(round(1 / info.balance_recharge_multiplier, 4)) })}</p>}
+              </div>}
+              <div className="rx-receipt__perf" aria-hidden="true" />
+              {submitError && <p role="alert" className="rx-error !mt-0 mb-3">{submitError}</p>}
+              <button type="button" className="rx-cta" style={{ '--rx-brand': brandColor } as CSSProperties} disabled={!canSubmit} onClick={() => void submit()}>
+                <span className="rx-cta__shine" aria-hidden="true" />
+                {submitting ? <span className="rx-cta__content"><span className="rx-cta__spinner" aria-hidden="true" />{t('sub2api.processing')}</span>
+                  : <span className="rx-cta__content">
+                    {validTarget > 0 && quote ? t('sub2api.recharge.payNow', { amount: fmt(quote.total) }) : t('sub2api.recharge.pickAmount')}
+                    <ArrowRightIcon className="rx-cta__arrow" aria-hidden="true" />
+                  </span>}
+              </button>
+            </div>
+          </aside>
         </div>
-
-        <aside className="lg:sticky lg:top-6 lg:self-start">
-          <section className={card} aria-labelledby="recharge-summary-title">
-            <h2 id="recharge-summary-title" className="text-sm font-semibold text-[var(--ink)]">{t('sub2api.recharge.summary')}</h2>
-            <dl className="mt-4 space-y-2.5 text-sm">
-              <Row label={t('sub2api.recharge.amount')} value={validAmount > 0 ? fmt(validAmount) : '—'} strike={!!quote?.discount} />
-              {!!quote?.discount && <Row label={t('sub2api.recharge.discount', { percent: formatPercent(quote.percent) })} value={`-${fmt(quote.discount)}`} tone="accent" />}
-              {!!quote?.fee && <Row label={t('sub2api.recharge.fee', { rate: formatPercent(info.recharge_fee_rate) })} value={fmt(quote.fee)} />}
-              {quote?.mode === 'bonus' && quote.bonus > 0 && <Row label={t('sub2api.recharge.bonus', { percent: formatPercent(quote.percent) })} value={`+${formatUsd(quote.bonus)}`} tone="accent" />}
-              <Row label={t('sub2api.recharge.credited')} value={validAmount > 0 && quote ? formatUsd(quote.credited) : '—'} tone="success" />
-            </dl>
-            <div className="mt-4 flex items-baseline justify-between border-t border-[var(--line-subtle)] pt-4">
-              <span className="text-sm font-medium text-[var(--ink-secondary)]">{t('sub2api.recharge.actualPay')}</span>
-              <span className="text-2xl font-bold tabular-nums text-[var(--ink)]">{validAmount > 0 && quote ? fmt(quote.total) : '—'}</span>
-            </div>
-            {submitError && <p role="alert" className="mt-3 flex items-start gap-1.5 rounded-lg bg-[var(--error-bg)] px-3 py-2 text-xs text-[var(--error)]"><AlertIcon className="mt-px h-3.5 w-3.5 shrink-0" />{submitError}</p>}
-            <button type="button" disabled={!canSubmit} onClick={() => void submit()} className={`${primary} mt-4 h-11 w-full text-base`}>
-              {submitting ? <><LoaderIcon className="h-4 w-4 animate-spin" />{t('sub2api.processing')}</> : <><ZapIcon className="h-4 w-4" />{validAmount > 0 && quote ? t('sub2api.recharge.payNow', { amount: fmt(quote.total) }) : t('sub2api.recharge.pickAmount')}</>}
-            </button>
-            <p className="mt-3 flex items-center justify-center gap-1.5 text-xs text-[var(--ink-faint)]"><ShieldCheckIcon className="h-3.5 w-3.5" />{t('sub2api.recharge.secureHint')}</p>
-          </section>
-        </aside>
       </div>}
   </Shell>;
 }
 
+/** Spotlight follows the pointer via CSS variables on the tile itself. */
+function trackPointer(event: ReactPointerEvent<HTMLElement>) {
+  const el = event.currentTarget;
+  const rect = el.getBoundingClientRect();
+  el.style.setProperty('--mx', `${event.clientX - rect.left}px`);
+  el.style.setProperty('--my', `${event.clientY - rect.top}px`);
+}
+
+/** Holographic balance card from sub2api's RechargeHero, with tilt and projected balance. */
+function BalanceCard({ brand, balance, credit, username, userId }: { brand: string; balance: number; credit: number; username: string; userId: number }) {
+  const { t } = useTranslation('app');
+  const [tilt, setTilt] = useState({ rx: 0, ry: 0, px: 50, py: 30, active: false });
+  const onMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (event.pointerType === 'touch') return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = (event.clientX - rect.left) / rect.width; const y = (event.clientY - rect.top) / rect.height;
+    setTilt({ ry: (x - 0.5) * 10, rx: (0.5 - y) * 6, px: x * 100, py: y * 100, active: true });
+  };
+  const style = { '--rx-rx': `${tilt.rx}deg`, '--rx-ry': `${tilt.ry}deg`, '--rx-px': `${tilt.px}%`, '--rx-py': `${tilt.py}%`, '--rx-sheen': tilt.active ? '1' : '0.55' } as CSSProperties;
+  return <section className="rx-hero">
+    <div className="rx-card-stage" onPointerMove={onMove} onPointerLeave={() => setTilt({ rx: 0, ry: 0, px: 50, py: 30, active: false })}>
+      <div className={`rx-card ${credit > 0 ? 'is-charged' : ''}`} style={style}>
+        <div className="rx-card__holo" aria-hidden="true" />
+        <div className="rx-card__sheen" aria-hidden="true" />
+        <div className="rx-card__body">
+          <div className="rx-card__brand-row">
+            <span className="rx-card__chip" aria-hidden="true"><i /><i /><i /></span>
+            <span className="rx-card__brand">{brand}</span>
+          </div>
+          <div className="rx-card__balance">
+            <span className="rx-card__label">{t('sub2api.recharge.currentBalance')}</span>
+            <span className="rx-card__amount"><span className="rx-card__currency">$</span>{usdText(balance)}</span>
+          </div>
+          {credit > 0 && <div className="rx-card__projected" data-testid="recharge-projected-balance">
+            <span className="rx-card__delta">+${usdText(credit)}</span>
+            <span className="rx-card__after">{t('sub2api.recharge.afterTopUp')} <b>${usdText(balance + credit)}</b></span>
+          </div>}
+          <div className="rx-card__foot">
+            <span className="rx-card__holder">{username || '—'}</span>
+            <span className="rx-card__serial">•••• {String(userId || 0).padStart(4, '0').slice(-4)}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>;
+}
+
 function Shell({ children }: { children: ReactNode }) {
-  return <main className="h-full min-h-0 overflow-y-auto overscroll-contain bg-[var(--paper)] text-[var(--ink)]">
-    <div className="mx-auto max-w-5xl px-8 pb-10 pt-7">{children}</div>
+  return <main className="h-full min-h-0 overflow-y-auto overscroll-contain bg-[var(--paper)] text-[var(--ink)] [scrollbar-gutter:stable]">
+    <div className="rx-stage mx-auto max-w-[1180px] px-8 pb-10 pt-7">
+      <div className="rx-aurora" aria-hidden="true">
+        <span className="rx-aurora__blob rx-aurora__blob--1" /><span className="rx-aurora__blob rx-aurora__blob--2" /><span className="rx-aurora__blob rx-aurora__blob--3" />
+        <span className="rx-aurora__grid" /><span className="rx-aurora__grain" />
+      </div>
+      <div className="relative">{children}</div>
+    </div>
   </main>;
 }
 
-function SectionTitle({ id, step, title }: { id: string; step: string; title: string }) {
-  return <h2 id={id} className="mb-4 flex items-center gap-2.5 text-sm font-semibold text-[var(--ink)]">
-    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[var(--ink)] text-xs font-bold text-[var(--paper)]">{step}</span>{title}
-  </h2>;
-}
-
-function Row({ label, value, tone, strike }: { label: string; value: string; tone?: 'accent' | 'success'; strike?: boolean }) {
-  const color = tone === 'accent' ? 'text-[var(--accent-warm)]' : tone === 'success' ? 'text-[var(--success)] font-semibold' : 'text-[var(--ink)]';
-  return <div className="flex items-center justify-between gap-3">
-    <dt className="text-[var(--ink-muted)]">{label}</dt>
-    <dd className={`tabular-nums ${strike ? 'text-[var(--ink-faint)] line-through' : color}`}>{value}</dd>
+function Row({ label, value, tone }: { label: string; value: string; tone?: 'success' }) {
+  return <div className="rx-row">
+    <span>{label}</span>
+    <span className={tone === 'success' ? 'rx-row__total' : 'rx-row__strong'}>{value}</span>
   </div>;
 }
 
@@ -314,19 +425,19 @@ function PaymentPanel({ order, outcome, onSettled, onDone, fmt }: { order: Order
 
   if (outcome) {
     const success = outcome === 'success';
-    return <section className={`${card} mx-auto mt-6 flex max-w-md flex-col items-center px-8 py-10 text-center`}>
+    return <section className="rx-glass mx-auto mt-2 flex max-w-md flex-col items-center px-8 py-10 text-center">
       <span className={`flex h-16 w-16 items-center justify-center rounded-full ${success ? 'bg-[var(--success-bg)] text-[var(--success)]' : 'bg-[var(--paper-inset)] text-[var(--ink-muted)]'}`}>
         {success ? <CheckIcon className="h-8 w-8" strokeWidth={2.5} /> : outcome === 'expired' ? <ClockIcon className="h-8 w-8" /> : <XCircleIcon className="h-8 w-8" />}
       </span>
       <h2 className="mt-5 text-xl font-semibold text-[var(--ink)]">{t(`sub2api.recharge.outcome.${outcome}`)}</h2>
       <p className="mt-2 text-sm text-[var(--ink-muted)]">{success ? t('sub2api.recharge.outcome.successHint', { amount: formatUsd(order.credited) }) : t('sub2api.recharge.outcome.retryHint')}</p>
-      <button type="button" onClick={onDone} className={`${primary} mt-7 h-10 w-full`}>{success ? t('sub2api.recharge.again') : t('sub2api.recharge.backToRecharge')}</button>
+      <button type="button" onClick={onDone} className="rx-cta mt-7"><span className="rx-cta__content">{success ? t('sub2api.recharge.again') : t('sub2api.recharge.backToRecharge')}</span></button>
     </section>;
   }
 
   const minutes = String(Math.floor(remaining / 60)).padStart(2, '0');
   const seconds = String(remaining % 60).padStart(2, '0');
-  return <section className={`${cardShell} mx-auto mt-6 max-w-md overflow-hidden`}>
+  return <section className="rx-glass mx-auto mt-2 max-w-md overflow-hidden">
     <div className="px-8 pb-6 pt-7 text-center" style={brand ? { background: `linear-gradient(180deg, ${brand.color}14, transparent)` } : undefined}>
       <p className="text-sm font-medium text-[var(--ink-muted)]">{order.qrCode ? t(`sub2api.recharge.scan.${order.paymentType}`, { defaultValue: t('sub2api.recharge.scan.default') }) : t('sub2api.recharge.payInBrowser')}</p>
       <p className="mt-1 text-3xl font-bold tabular-nums text-[var(--ink)]">{fmt(order.payAmount)}</p>
@@ -336,11 +447,11 @@ function PaymentPanel({ order, outcome, onSettled, onDone, fmt }: { order: Order
       </div> : <div className="mx-auto mt-6 flex h-20 w-20 items-center justify-center rounded-full bg-[var(--paper-inset)]"><LoaderIcon className="h-8 w-8 animate-spin text-[var(--accent)]" /></div>}
       <p className="mt-4 inline-flex items-center gap-1.5 text-xs text-[var(--ink-muted)]"><LoaderIcon className="h-3 w-3 animate-spin" />{t('sub2api.recharge.waiting')}</p>
     </div>
-    <dl className="space-y-2 border-t border-[var(--line-subtle)] px-8 py-4 text-sm">
+    <div className="space-y-2 border-t border-[var(--rx-line-soft)] px-8 py-4 text-sm">
       <Row label={t('sub2api.recharge.credited')} value={formatUsd(order.credited)} tone="success" />
       <Row label={t('sub2api.recharge.orderNo')} value={order.outTradeNo ? order.outTradeNo.replace(/^sub2_/i, '') : `#${order.orderId}`} />
       <Row label={t('sub2api.recharge.expiresIn')} value={`${minutes}:${seconds}`} />
-    </dl>
+    </div>
     {error && <p role="alert" className="mx-8 mb-3 rounded-lg bg-[var(--error-bg)] px-3 py-2 text-xs text-[var(--error)]">{error}</p>}
     <div className="flex gap-2 border-t border-[var(--line-subtle)] px-8 py-4">
       {order.payUrl && <button type="button" className={`${secondary} flex-1`} onClick={() => void openExternal(order.payUrl)}><ExternalIcon className="h-4 w-4" />{t('sub2api.recharge.openPayPage')}</button>}

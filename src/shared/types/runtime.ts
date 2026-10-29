@@ -92,7 +92,7 @@ export const _exhaustiveRuntimeCheck: _AssertRuntimeExhaustive = true;
 /** Human-readable display names keyed by runtime type. */
 export const RUNTIME_DISPLAY_NAMES: Record<RuntimeType, string> = {
   builtin: 'Built-in (Claude Agent SDK)',
-  dsh: 'LSAGENT (DeepSeek Harness)',
+  dsh: '灵思AGENT (DeepSeek Harness)',
   'claude-code': 'Claude Code CLI',
   codex: 'OpenAI Codex CLI',
 };

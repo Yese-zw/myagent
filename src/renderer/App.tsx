@@ -4624,6 +4624,7 @@ export default function App({ rendererAttachment = COLD_RENDERER_ATTACHMENT }: {
       onSidecarConfigAdopted: markSidecarConfigAdopted,
       onFilePreviewIntentConsumed: handleFilePreviewIntentConsumed,
       sessionNotificationBadgeCounts,
+      onOpenRecharge: handleOpenRecharge,
     }),
     [
       registerFileEditSubmitter,
@@ -4637,6 +4638,7 @@ export default function App({ rendererAttachment = COLD_RENDERER_ATTACHMENT }: {
       handleNewSession,
       handleOpenChatHistorySession,
       handleOpenHistoryTag,
+      handleOpenRecharge,
       handleRenameSession,
       markSidecarConfigAdopted,
       sessionNotificationBadgeCounts,

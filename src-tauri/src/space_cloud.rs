@@ -1218,10 +1218,7 @@ fn with_space_client_context_headers(
         .header(SPACE_CLIENT_VERSION_HEADER, client_version)
         .header(SPACE_PLATFORM_HEADER, platform)
         .header(ACCEPT_LANGUAGE, crate::i18n::current_locale().as_str())
-        .header(
-            USER_AGENT,
-            format!("LSAGENT/{client_version} ({platform})"),
-        );
+        .header(USER_AGENT, format!("LSAGENT/{client_version} ({platform})"));
     if let Some(device_id) = SPACE_CLIENT_DEVICE_CONTEXT.device_id.as_deref() {
         request = request.header(SPACE_DEVICE_ID_HEADER, device_id);
     }

@@ -435,7 +435,7 @@ describe('GlobalSidebar rail flyout', () => {
     fireEvent.click(brandLink);
 
     await vi.waitFor(() => {
-      expect(mocks.openExternal).toHaveBeenCalledWith('https://lingsiai.vip');
+      expect(mocks.openExternal).toHaveBeenCalledWith('https://api.lingsiai.cn/home');
     });
   });
 
@@ -1304,7 +1304,9 @@ describe('GlobalSidebar rail flyout', () => {
     expect(navigation.querySelector('[data-global-sidebar-workspace-rail]')).not.toBeInTheDocument();
     expect(navigation.querySelector('[data-global-sidebar-workspace-region]')).not.toHaveClass('border-t', 'border-[var(--line-subtle)]');
     expect(navigation.querySelector('[data-global-sidebar-footer-actions]')).not.toHaveClass('global-sidebar-rail-stack');
-    expect(brandName?.querySelector('[data-myagents-logotype]')).toHaveAccessibleName('LSAGENT');
+    // The icon beside it already shows the logo, so the name slot is text only.
+    expect(brandName).toHaveTextContent('灵思AGENT');
+    expect(brandName?.querySelector('img')).toBeNull();
     expect(brandName).toHaveClass('theme-product-wordmark', 'text-sm', 'font-medium');
     expect(brandName).not.toHaveClass('font-semibold', 'tracking-wide', 'theme-launcher-hero-title');
     expect(brandName).toHaveAttribute('aria-hidden', 'false');

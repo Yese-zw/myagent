@@ -17,7 +17,7 @@ vi.mock('@/api/sub2api', () => ({
 
 vi.mock('./useSub2apiAccount', () => ({
   useSub2apiAccount: () => ({
-    account: { serverUrl: 'https://lingsiai.vip', user: { id: 1, email: 'a@b.c', username: 'a' } },
+    account: { serverUrl: 'https://api.lingsiai.cn', user: { id: 1, email: 'a@b.c', username: 'a' } },
   }),
 }));
 

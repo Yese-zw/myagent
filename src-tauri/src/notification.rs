@@ -663,7 +663,7 @@ fn show_linux_toast<R: Runtime>(
 
     let mut notification = Notification::new();
     notification
-        .appname("LSAGENT")
+        .appname("灵思AGENT")
         .summary(title)
         .body(body)
         .timeout(Timeout::Milliseconds(10_000))

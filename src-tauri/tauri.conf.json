@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "LSAGENT",
-  "version": "0.5.4",
+  "productName": "灵思AGENT",
+  "version": "1.0.0",
   "identifier": "com.myagents.app",
   "build": {
     "frontendDist": "../dist",

@@ -54,11 +54,27 @@ pub fn verify_bundle(app_version: &str) {
             .expect("source pin JSON");
     assert_eq!(manifest["schemaVersion"], 1, "CLIProxy manifest schema");
     let releases = manifest["releases"].as_array().expect("CLIProxy releases");
-    let minimums: Vec<_> = releases.iter().map(|r| r["compatibility"]["minAppVersion"].as_str().expect("minimum App version")).collect();
-    crate::cliproxy_policy::select_release_index(app_version, &minimums).expect("unique version thresholds");
-    let pinned: Vec<_> = releases.iter().filter(|r| r["version"] == source["version"] && r["commit"] == source["commit"]).collect();
-    let minimums: Vec<_> = pinned.iter().map(|r| r["compatibility"]["minAppVersion"].as_str().unwrap()).collect();
-    let selected = crate::cliproxy_policy::select_release_index(app_version, &minimums).expect("valid App policy").expect("compatible bundled baseline");
+    let minimums: Vec<_> = releases
+        .iter()
+        .map(|r| {
+            r["compatibility"]["minAppVersion"]
+                .as_str()
+                .expect("minimum App version")
+        })
+        .collect();
+    crate::cliproxy_policy::select_release_index(app_version, &minimums)
+        .expect("unique version thresholds");
+    let pinned: Vec<_> = releases
+        .iter()
+        .filter(|r| r["version"] == source["version"] && r["commit"] == source["commit"])
+        .collect();
+    let minimums: Vec<_> = pinned
+        .iter()
+        .map(|r| r["compatibility"]["minAppVersion"].as_str().unwrap())
+        .collect();
+    let selected = crate::cliproxy_policy::select_release_index(app_version, &minimums)
+        .expect("valid App policy")
+        .expect("compatible bundled baseline");
     let component = pinned[selected];
     for key in ["version", "tag", "commit"] {
         assert_eq!(component[key], source[key], "CLIProxy source pin {key}");

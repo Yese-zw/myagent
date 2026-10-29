@@ -317,11 +317,9 @@ fn resolve_agent_runtime_identity_by_id_with_policy(
     let preference = if selection_available {
         match agent.get("runtimePreference") {
             Some(preference) => runtime_identity_from_preference(preference).map(Some),
-            None if agent.get("runtime").is_none_or(serde_json::Value::is_null) => {
-                Ok(Some(configured_distribution_default_runtime_identity_for(
-                    cfg, policy,
-                )))
-            }
+            None if agent.get("runtime").is_none_or(serde_json::Value::is_null) => Ok(Some(
+                configured_distribution_default_runtime_identity_for(cfg, policy),
+            )),
             None => runtime_identity_from_legacy_agent(agent).map(Some),
         }
     } else {
@@ -336,12 +334,10 @@ fn resolve_agent_runtime_identity_by_id_with_policy(
 
     // An explicitly selected External Runtime wins over dormant integrated or
     // managed Provider template fields.
-    if let Some(preference) = preference.as_ref().filter(|identity| {
-        matches!(
-            identity.runtime.as_str(),
-            "claude-code" | "codex"
-        )
-    }) {
+    if let Some(preference) = preference
+        .as_ref()
+        .filter(|identity| matches!(identity.runtime.as_str(), "claude-code" | "codex"))
+    {
         return Some(admit_runtime_identity_for(preference.clone(), policy));
     }
 
@@ -358,9 +354,7 @@ fn resolve_agent_runtime_identity_by_id_with_policy(
     }
     if matches!(
         provider_id,
-        Some(
-            ANTHROPIC_SUBSCRIPTION_PROVIDER_ID | "anthropic-api"
-        )
+        Some(ANTHROPIC_SUBSCRIPTION_PROVIDER_ID | "anthropic-api")
     ) {
         return Some(admit_runtime_identity_for(
             RuntimeIdentity::new(Some("builtin"), None),
@@ -976,7 +970,9 @@ mod tests {
         });
         for id in ["sdk", "sdk-preference", "fixed-provider"] {
             assert_eq!(
-                resolve_agent_runtime_identity_by_id_from_value(&config, id).unwrap().runtime,
+                resolve_agent_runtime_identity_by_id_from_value(&config, id)
+                    .unwrap()
+                    .runtime,
                 "builtin"
             );
         }
@@ -985,7 +981,9 @@ mod tests {
             "agents": [{ "id": "dsh", "runtimePreference": { "family": "integrated", "id": "dsh" } }]
         });
         assert_eq!(
-            resolve_agent_runtime_identity_by_id_from_value(&config, "dsh").unwrap().runtime,
+            resolve_agent_runtime_identity_by_id_from_value(&config, "dsh")
+                .unwrap()
+                .runtime,
             "dsh"
         );
     }
@@ -1139,17 +1137,17 @@ mod tests {
         assert_eq!(ordinary.runtime, "dsh");
         assert_eq!(ordinary.runtime_source.as_deref(), Some("integrated"));
         assert_eq!(
-            resolve_agent_runtime_identity_by_id_with_policy(&config, "antigravity-subscription", &policy)
-                .expect("portable Provider identity")
-                .runtime,
+            resolve_agent_runtime_identity_by_id_with_policy(
+                &config,
+                "antigravity-subscription",
+                &policy
+            )
+            .expect("portable Provider identity")
+            .runtime,
             "dsh"
         );
 
-        for agent_id in [
-            "claude-subscription",
-            "claude-api",
-            "managed-codex",
-        ] {
+        for agent_id in ["claude-subscription", "claude-api", "managed-codex"] {
             let identity =
                 resolve_agent_runtime_identity_by_id_with_policy(&config, agent_id, &policy)
                     .expect("incompatible Provider identity");

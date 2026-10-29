@@ -1176,6 +1176,11 @@ const SYSTEM_SKILLS: readonly string[] = [
   // v29: prompt-writer promoted from utility → system skill so content
   // improvements reach existing installs (seed-once never updates).
   'prompt-writer',
+  // v63: writing / data-viz skills shipped with the app.
+  'lieflat-less-ai-tone',
+  'lieflat-charts',
+  'lieflat-gongwen',
+  'writing-dna-skill',
 ];
 
 function isSystemSkillName(name: string): boolean {

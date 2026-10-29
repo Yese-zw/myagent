@@ -12,8 +12,8 @@ interface RuntimePresentation {
 }
 
 export const RUNTIME_PRESENTATION: Record<RuntimeType, RuntimePresentation> = {
-  builtin: { name: 'LSAGENT (Claude Agent SDK)', icon: myagentsIcon, engineIcon: claudeCodeIcon },
-  dsh: { name: 'LSAGENT (DeepSeek Harness)', icon: myagentsIcon, engineIcon: dshIcon },
+  builtin: { name: '灵思AGENT (Claude Agent SDK)', icon: myagentsIcon, engineIcon: claudeCodeIcon },
+  dsh: { name: '灵思AGENT (DeepSeek Harness)', icon: myagentsIcon, engineIcon: dshIcon },
   'claude-code': { name: 'Claude Code CLI', icon: claudeCodeIcon },
   codex: { name: 'Codex CLI', icon: codexIcon },
 };

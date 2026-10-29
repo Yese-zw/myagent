@@ -5,8 +5,10 @@ import { MYAGENTS_PROVIDER_ID } from '../../../shared/packaged-gateway';
 import { sub2api, type Sub2apiAccount } from '@/api/sub2api';
 import { isTauriEnvironment } from '@/utils/browserMock';
 
-let syncedUserId: number | null = null;
+// User + key group last synced; a group switched on the website re-syncs the key.
+let syncedAccountKey: string | null = null;
 let inflight: Promise<void> | null = null;
+let inflightAccountKey: string | null = null;
 
 export async function syncPackagedGateway(
   account: Sub2apiAccount,
@@ -14,12 +16,19 @@ export async function syncPackagedGateway(
 ): Promise<void> {
   if (!isTauriEnvironment()) return;
   if (!account.user) {
-    syncedUserId = null;
+    syncedAccountKey = null;
     await deleteApiKey(MYAGENTS_PROVIDER_ID).catch(() => undefined);
     return;
   }
-  if (!options?.force && syncedUserId === account.user.id) return;
-  if (inflight) return inflight;
+  const accountKey = `${account.user.id}:${account.appGroupId ?? ''}`;
+  if (!options?.force && syncedAccountKey === accountKey) return;
+  if (inflight) {
+    if (inflightAccountKey === accountKey) return inflight;
+    // A newer key group arrived while an older sync runs: re-sync after it.
+    await inflight;
+    return syncPackagedGateway(account, options);
+  }
+  inflightAccountKey = accountKey;
   inflight = (async () => {
     const creds = await sub2api.gateway();
     await saveApiKey(MYAGENTS_PROVIDER_ID, creds.apiKey);
@@ -49,7 +58,7 @@ export async function syncPackagedGateway(
       },
     }));
     await rebuildAndPersistAvailableProviders();
-    syncedUserId = account.user!.id;
+    syncedAccountKey = accountKey;
   })().catch(error => {
     console.warn('[sub2api] gateway sync failed', error);
   }).finally(() => { inflight = null; });
@@ -57,7 +66,7 @@ export async function syncPackagedGateway(
 }
 
 export function resetPackagedGatewaySync() {
-  syncedUserId = null;
+  syncedAccountKey = null;
   inflight = null;
 }
 

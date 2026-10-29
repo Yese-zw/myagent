@@ -56,13 +56,20 @@ pub async fn cmd_workspace_search_files_fuzzy(
 }
 
 #[tauri::command]
-pub async fn cmd_workspace_search_files_page(workspace: String, query: String, cursor: Option<String>, limit: usize) -> Result<crate::picker_page::PickerPage<FileSearchResult>, String> {
+pub async fn cmd_workspace_search_files_page(
+    workspace: String,
+    query: String,
+    cursor: Option<String>,
+    limit: usize,
+) -> Result<crate::picker_page::PickerPage<FileSearchResult>, String> {
     let root = validate_workspace_root(&workspace)?;
     tokio::task::spawn_blocking(move || {
         let (items, partial) = snapshot(&root, &query)?;
         let scope = format!("{}\0{}", root.display(), query);
         crate::picker_page::page(items, &scope, cursor.as_deref(), limit, partial)
-    }).await.map_err(|_| "PICKER_SEARCH_FAILED".to_string())?
+    })
+    .await
+    .map_err(|_| "PICKER_SEARCH_FAILED".to_string())?
 }
 
 fn walk_and_match(workspace_root: &PathBuf, query: &str) -> Result<Vec<FileSearchResult>, String> {
@@ -70,7 +77,10 @@ fn walk_and_match(workspace_root: &PathBuf, query: &str) -> Result<Vec<FileSearc
     items.truncate(HARD_RESULT_LIMIT);
     Ok(items)
 }
-fn snapshot(workspace_root: &PathBuf, query: &str) -> Result<(Vec<FileSearchResult>, bool), String> {
+fn snapshot(
+    workspace_root: &PathBuf,
+    query: &str,
+) -> Result<(Vec<FileSearchResult>, bool), String> {
     let matcher = SkimMatcherV2::default().smart_case();
     let mut hits: Vec<(i64, FileSearchResult)> = Vec::new();
     let mut visited_nodes = 0usize;
@@ -88,10 +98,20 @@ fn snapshot(workspace_root: &PathBuf, query: &str) -> Result<(Vec<FileSearchResu
     );
 
     if query.trim().is_empty() {
-        hits.sort_by(|a, b| a.1.path.matches('/').count().cmp(&b.1.path.matches('/').count())
-            .then(a.1.name.to_lowercase().cmp(&b.1.name.to_lowercase())).then(a.1.path.cmp(&b.1.path)));
+        hits.sort_by(|a, b| {
+            a.1.path
+                .matches('/')
+                .count()
+                .cmp(&b.1.path.matches('/').count())
+                .then(a.1.name.to_lowercase().cmp(&b.1.name.to_lowercase()))
+                .then(a.1.path.cmp(&b.1.path))
+        });
     } else {
-        hits.sort_by(|a, b| b.0.cmp(&a.0).then(a.1.path.len().cmp(&b.1.path.len())).then(a.1.path.cmp(&b.1.path)));
+        hits.sort_by(|a, b| {
+            b.0.cmp(&a.0)
+                .then(a.1.path.len().cmp(&b.1.path.len()))
+                .then(a.1.path.cmp(&b.1.path))
+        });
     }
     Ok((hits.into_iter().map(|(_, item)| item).collect(), partial))
 }
@@ -112,7 +132,10 @@ fn walk(
     }
     let entries = match std::fs::read_dir(current) {
         Ok(e) => e,
-        Err(_) => { *partial = true; return; },
+        Err(_) => {
+            *partial = true;
+            return;
+        }
     };
     for entry_result in entries {
         if *visited >= HARD_NODE_LIMIT {
@@ -121,7 +144,10 @@ fn walk(
         }
         let entry = match entry_result {
             Ok(e) => e,
-            Err(_) => { *partial = true; continue; },
+            Err(_) => {
+                *partial = true;
+                continue;
+            }
         };
         *visited += 1;
         let name = entry.file_name().to_string_lossy().to_string();
@@ -131,13 +157,20 @@ fn walk(
         let path = entry.path();
         let metadata = match std::fs::symlink_metadata(&path) {
             Ok(m) => m,
-            Err(_) => { *partial = true; continue; },
+            Err(_) => {
+                *partial = true;
+                continue;
+            }
         };
         if metadata.is_symlink() {
             // Skip symlinks defensively to avoid infinite loops via cycles.
             continue;
         }
-        if let Some(score) = if query.trim().is_empty() { Some(0) } else { matcher.fuzzy_match(&name, query) } {
+        if let Some(score) = if query.trim().is_empty() {
+            Some(0)
+        } else {
+            matcher.fuzzy_match(&name, query)
+        } {
             let rel = path
                 .strip_prefix(root)
                 .ok()
@@ -157,7 +190,16 @@ fn walk(
             ));
         }
         if metadata.is_dir() {
-            walk(root, &path, depth + 1, matcher, query, hits, visited, partial);
+            walk(
+                root,
+                &path,
+                depth + 1,
+                matcher,
+                query,
+                hits,
+                visited,
+                partial,
+            );
         }
     }
 }
@@ -175,18 +217,49 @@ mod tests {
     #[tokio::test]
     async fn picker_pages_beyond_legacy_cap_and_detects_changed_snapshot() {
         let ws = make_tmp_workspace();
-        for index in 0..30 { fs::write(ws.join(format!("file{index:02}.txt")), "").unwrap(); }
-        let first = cmd_workspace_search_files_page(ws.to_string_lossy().into(), "file".into(), None, 5).await.unwrap();
-        assert!(first.has_more); assert!(!first.complete);
-        let rest = cmd_workspace_search_files_page(ws.to_string_lossy().into(), "file".into(), first.next_cursor.clone(), 200).await.unwrap();
-        assert_eq!(rest.items.len(), 25); assert!(rest.complete);
+        for index in 0..30 {
+            fs::write(ws.join(format!("file{index:02}.txt")), "").unwrap();
+        }
+        let first =
+            cmd_workspace_search_files_page(ws.to_string_lossy().into(), "file".into(), None, 5)
+                .await
+                .unwrap();
+        assert!(first.has_more);
+        assert!(!first.complete);
+        let rest = cmd_workspace_search_files_page(
+            ws.to_string_lossy().into(),
+            "file".into(),
+            first.next_cursor.clone(),
+            200,
+        )
+        .await
+        .unwrap();
+        assert_eq!(rest.items.len(), 25);
+        assert!(rest.complete);
         fs::write(ws.join("file-new.txt"), "").unwrap();
-        assert_eq!(cmd_workspace_search_files_page(ws.to_string_lossy().into(), "file".into(), first.next_cursor, 200).await.unwrap_err(), "PICKER_CURSOR_STALE");
+        assert_eq!(
+            cmd_workspace_search_files_page(
+                ws.to_string_lossy().into(),
+                "file".into(),
+                first.next_cursor,
+                200
+            )
+            .await
+            .unwrap_err(),
+            "PICKER_CURSOR_STALE"
+        );
         let mut nested = ws.clone();
-        for _ in 0..10 { nested = nested.join("nested"); fs::create_dir(&nested).unwrap(); }
+        for _ in 0..10 {
+            nested = nested.join("nested");
+            fs::create_dir(&nested).unwrap();
+        }
         fs::write(nested.join("too-deep.txt"), "").unwrap();
-        let limited = cmd_workspace_search_files_page(ws.to_string_lossy().into(), "".into(), None, 200).await.unwrap();
-        assert!(limited.scan_limit_reached); assert!(!limited.complete);
+        let limited =
+            cmd_workspace_search_files_page(ws.to_string_lossy().into(), "".into(), None, 200)
+                .await
+                .unwrap();
+        assert!(limited.scan_limit_reached);
+        assert!(!limited.complete);
         fs::remove_dir_all(ws).unwrap();
     }
 

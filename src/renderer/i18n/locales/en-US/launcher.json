@@ -9,7 +9,7 @@
     "thoughtSaved": "Record saved. You can find it in Task Center.",
     "runtimeNeedsAgent": "This workspace has no Agent configured, so Runtime cannot be changed.",
     "runtimeSwitchFailed": "Failed to switch Runtime. Please try again.",
-    "runtimeUnavailable": "This Runtime artifact is unavailable or failed integrity checks. Repair or reinstall LSAGENT first.",
+    "runtimeUnavailable": "This Runtime artifact is unavailable or failed integrity checks. Repair or reinstall 灵思AGENT first.",
     "selectCompatibleProviderModel": "Select a Provider and model supported by this Runtime first.",
     "setDefaultFailed": "Failed to set the default workspace. Please try again.",
     "selectWorkspaceFirst": "Select a workspace first.",

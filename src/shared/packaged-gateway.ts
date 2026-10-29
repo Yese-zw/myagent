@@ -30,7 +30,7 @@ export function buildPackagedGatewayProvider(models: ModelEntity[] = []): Provid
     upstreamFormat: 'chat_completions',
     authType: 'api_key',
     modelListUrl: `${baseUrl}/models`,
-    websiteUrl: packagedGatewayOrigin(),
+    websiteUrl: `${packagedGatewayOrigin()}/home`,
     config: { baseUrl },
     models,
     enabled: true,

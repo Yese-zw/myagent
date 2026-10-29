@@ -1463,9 +1463,17 @@ mod lifecycle_contract_tests {
         let mut manager = SidecarManager::new();
         insert_test_sidecar(&mut manager, "unpublished", SidecarState::Healthy);
         let prepared = SidecarOwner::Agent("inbox-deliver-prepared".into());
-        manager.get_session_sidecar_mut("unpublished").unwrap().owners.insert(prepared.clone());
+        manager
+            .get_session_sidecar_mut("unpublished")
+            .unwrap()
+            .owners
+            .insert(prepared.clone());
         assert!(manager.session_has_owners_other_than("unpublished", Some(&prepared)));
-        manager.get_session_sidecar_mut("unpublished").unwrap().owners.retain(|owner| owner == &prepared);
+        manager
+            .get_session_sidecar_mut("unpublished")
+            .unwrap()
+            .owners
+            .retain(|owner| owner == &prepared);
         assert!(!manager.session_has_owners_other_than("unpublished", Some(&prepared)));
         assert!(manager.session_has_owners("unpublished"));
     }

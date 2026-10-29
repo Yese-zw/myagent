@@ -266,15 +266,24 @@ pub(super) fn read_json<T: serde::de::DeserializeOwned>(path: &Path) -> Result<O
         _ => return Err(Error::storage()),
     }
     let bytes = fs::read(path).map_err(|_| Error::storage())?;
-    serde_json::from_slice(&bytes)
-        .map(Some)
-        .map_err(|error| {
-            let name = path.file_name().and_then(|name| name.to_str()).unwrap_or("state.json");
-            // Do not log parser text: it can include values from the document.
-            crate::ulog_warn!("[cliproxy] state decode failed file={} category={:?} line={} column={}",
-                name, error.classify(), error.line(), error.column());
-            Error::new("state_format", format!("组件状态文件 {name} 格式不兼容或已损坏"))
-        })
+    serde_json::from_slice(&bytes).map(Some).map_err(|error| {
+        let name = path
+            .file_name()
+            .and_then(|name| name.to_str())
+            .unwrap_or("state.json");
+        // Do not log parser text: it can include values from the document.
+        crate::ulog_warn!(
+            "[cliproxy] state decode failed file={} category={:?} line={} column={}",
+            name,
+            error.classify(),
+            error.line(),
+            error.column()
+        );
+        Error::new(
+            "state_format",
+            format!("组件状态文件 {name} 格式不兼容或已损坏"),
+        )
+    })
 }
 
 pub(super) fn write_json<T: Serialize>(path: &Path, value: &T) -> Result<()> {
@@ -323,7 +332,10 @@ mod tests {
         assert_eq!(error.code, "state_format");
         assert!(error.message.contains("account-state.json"));
         assert!(!error.message.contains("secret-value"));
-        assert_eq!(read_json::<Accounts>(temp.path()).err().unwrap().code, "storage");
+        assert_eq!(
+            read_json::<Accounts>(temp.path()).err().unwrap().code,
+            "storage"
+        );
     }
 
     #[test]

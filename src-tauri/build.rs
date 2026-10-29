@@ -3,11 +3,11 @@ use std::{
     env, fs,
     path::{Path, PathBuf},
 };
-#[path = "src/resource_signature_core.rs"]
-mod resource_signature;
 mod build_cliproxy;
 #[path = "src/cliproxy_policy.rs"]
 mod cliproxy_policy;
+#[path = "src/resource_signature_core.rs"]
+mod resource_signature;
 
 const SPACE_BUILD_ENV_KEYS: &[&str] = &[
     "MYAGENTS_SPACE_ENABLED",
@@ -31,8 +31,12 @@ fn main() {
         .expect("CARGO_MANIFEST_DIR is required");
     let package_path = manifest_dir.join("../package.json");
     println!("cargo:rerun-if-changed={}", package_path.display());
-    let package: serde_json::Value = serde_json::from_str(&fs::read_to_string(package_path).expect("package.json")).expect("package.json JSON");
-    let sdk = package["dependencies"]["@anthropic-ai/claude-agent-sdk"].as_str().expect("pinned Claude SDK version");
+    let package: serde_json::Value =
+        serde_json::from_str(&fs::read_to_string(package_path).expect("package.json"))
+            .expect("package.json JSON");
+    let sdk = package["dependencies"]["@anthropic-ai/claude-agent-sdk"]
+        .as_str()
+        .expect("pinned Claude SDK version");
     println!("cargo:rustc-env=MYAGENTS_CLAUDE_SDK_VERSION={sdk}");
     build_cliproxy::verify_bundle(package["version"].as_str().expect("App version"));
     expose_managed_codex_runtime_lock();
@@ -56,10 +60,13 @@ fn expose_dsh_build_lock() {
     println!("cargo:rerun-if-changed={}", release_path.display());
     println!("cargo:rerun-if-changed={}", selection_path.display());
     let lock: serde_json::Value = if selection_path.exists() {
-        let selection: serde_json::Value = serde_json::from_slice(
-            &fs::read(&selection_path).expect("DSH build selection"),
-        ).expect("DSH build selection JSON");
-        selection.get("lock").cloned().expect("DSH build selection lock")
+        let selection: serde_json::Value =
+            serde_json::from_slice(&fs::read(&selection_path).expect("DSH build selection"))
+                .expect("DSH build selection JSON");
+        selection
+            .get("lock")
+            .cloned()
+            .expect("DSH build selection lock")
     } else {
         serde_json::from_slice(&fs::read(release_path).expect("DSH release lock"))
             .expect("DSH release lock JSON")
@@ -472,9 +479,11 @@ fn expose_space_build_env() {
 
     // Public deployment identities, never credentials. Keep official builds
     // usable without requiring a new local .env entry on every developer/CI.
-    resolved_env.entry("MYAGENTS_AGENT_NETWORK_SERVICE_ID".to_string())
+    resolved_env
+        .entry("MYAGENTS_AGENT_NETWORK_SERVICE_ID".to_string())
         .or_insert_with(|| "98b5376a-4750-49e6-ae82-c5de39b7afef".to_string());
-    resolved_env.entry("MYAGENTS_AGENT_NETWORK_DEV_SERVICE_ID".to_string())
+    resolved_env
+        .entry("MYAGENTS_AGENT_NETWORK_DEV_SERVICE_ID".to_string())
         .or_insert_with(|| "c25f1f29-8ac8-4da8-9f7b-c16c9d6c5ac5".to_string());
 
     if env::var("PROFILE").as_deref() == Ok("release") {
@@ -482,7 +491,10 @@ fn expose_space_build_env() {
         // absent from our resolved map. Emit an explicit empty value so a
         // release rustc invocation cannot accidentally bake in the Dev origin.
         resolved_env.insert("MYAGENTS_SPACE_DEV_BASE_URL".to_string(), String::new());
-        resolved_env.insert("MYAGENTS_AGENT_NETWORK_DEV_SERVICE_ID".to_string(), String::new());
+        resolved_env.insert(
+            "MYAGENTS_AGENT_NETWORK_DEV_SERVICE_ID".to_string(),
+            String::new(),
+        );
     } else if resolved_env
         .get("MYAGENTS_SPACE_DEV_BASE_URL")
         .map(|value| value.trim().is_empty())

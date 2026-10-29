@@ -2,7 +2,7 @@
   "name": "myagents",
   "description": "LSAGENT - Desktop Claude Code for everyone. AI-powered productivity, not just for developers.",
   "type": "module",
-  "version": "0.5.4",
+  "version": "1.0.0",
   "license": "AGPL-3.0-only",
   "engines": {
     "node": ">=24.14.0",
@@ -21,7 +21,7 @@
     }
   },
   "author": "LSAGENT Team <myagents.io@gmail.com>",
-  "homepage": "https://lingsiai.vip",
+  "homepage": "https://api.lingsiai.cn/home",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/hAcKlyc/MyAgents.git"

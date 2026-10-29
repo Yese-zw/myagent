@@ -237,6 +237,7 @@ mod tests {
                 username: "Alice".into(),
             },
             api_key: String::new(),
+            app_group_id: 0,
         }
     }
 

@@ -1,23 +1,21 @@
 /**
- * FeedbackPopover - Quick access popover for AI assistant and community QR code
+ * FeedbackPopover - Quick access popover for AI assistant and community image
  *
  * Opens beside the helper entry in the App Shell sidebar.
- * Two modules: "AI 小助理" (opens BugReportOverlay) and "加入用户群" (shows QR code).
+ * Two modules: "AI 小助理" (opens BugReportOverlay) and "加入用户群"
+ * (shows the community-group image from Sub2API general settings).
  */
 
-import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   HelperIcon,
-  LoaderIcon,
   TeamIcon,
   CloseIcon,
 } from '@/components/icons';
 
-import { apiGetJson } from '@/api/apiFetch';
 import { APP_SHELL_POPOVER_CHROME } from '@/components/global-sidebar/appShellPopoverChrome';
 import { Popover } from '@/components/ui/Popover';
-import { isTauriEnvironment } from '@/utils/browserMock';
+import { useCommunityGroupImage } from '@/features/account/useCommunityGroupImage';
 
 interface FeedbackPopoverProps {
     open: boolean;
@@ -27,31 +25,9 @@ interface FeedbackPopoverProps {
     triggerRef: React.RefObject<HTMLElement | null>;
 }
 
-const QR_CDN_URL = 'https://download.myagents.io/assets/feedback_qr_code.png';
-
 export default function FeedbackPopover({ open, onClose, onOpenBugReport, triggerRef }: FeedbackPopoverProps) {
     const { t } = useTranslation('app');
-    const isTauri = isTauriEnvironment();
-    const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(isTauri ? null : QR_CDN_URL);
-    const [qrLoading, setQrLoading] = useState(isTauri);
-
-    // Load QR code from Sidecar in Tauri mode
-    useEffect(() => {
-        if (!isTauri) return;
-        let cancelled = false;
-
-        apiGetJson<{ success: boolean; dataUrl?: string }>('/api/assets/qr-code')
-            .then(result => {
-                if (cancelled) return;
-                if (result.success && result.dataUrl) {
-                    setQrCodeUrl(result.dataUrl);
-                }
-            })
-            .catch(() => { /* silent fail */ })
-            .finally(() => { if (!cancelled) setQrLoading(false); });
-
-        return () => { cancelled = true; };
-    }, [isTauri]);
+    const communityGroupImage = useCommunityGroupImage();
 
     return (
         <Popover
@@ -103,8 +79,7 @@ export default function FeedbackPopover({ open, onClose, onOpenBugReport, trigge
                 </button>
             </div>
 
-            {/* 加入用户群 */}
-            {(qrLoading || qrCodeUrl) && (
+            {communityGroupImage ? (
                 <div className="px-3 pb-3.5">
                     <div className="rounded-lg border border-[var(--line)] bg-[var(--paper-elevated)] p-3.5">
                         <div className="flex items-center gap-2.5">
@@ -119,21 +94,15 @@ export default function FeedbackPopover({ open, onClose, onOpenBugReport, trigge
                             </div>
                         </div>
                         <div className="mt-3 flex justify-center">
-                            {qrLoading ? (
-                                <div className="flex h-32 w-32 items-center justify-center">
-                                    <LoaderIcon className="h-6 w-6 animate-spin text-[var(--ink-muted)]" />
-                                </div>
-                            ) : (
-                                <img
-                                    src={qrCodeUrl!}
-                                    alt={t('titlebar.communityQrAlt')}
-                                    className="h-32 w-32 rounded-lg"
-                                />
-                            )}
+                            <img
+                                src={communityGroupImage}
+                                alt={t('titlebar.communityQrAlt')}
+                                className="h-32 w-32 rounded-lg object-contain"
+                            />
                         </div>
                     </div>
                 </div>
-            )}
+            ) : null}
         </Popover>
     );
 }

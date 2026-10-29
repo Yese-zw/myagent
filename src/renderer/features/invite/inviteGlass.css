@@ -1,0 +1,554 @@
+/* Ported from sub2api `views/user/AffiliateView.vue` (scoped styles) and the
+   `.rx-metric` block of `styles/recharge-glass.css`. Tokens and base layers
+   come from `features/recharge/rechargeGlass.css`. */
+
+.rx-metric {
+  position: relative;
+  overflow: hidden;
+  padding: 1.15rem 1.25rem;
+}
+
+.rx-metric__label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--rx-faint);
+}
+
+.rx-metric__value {
+  margin-top: 0.45rem;
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+  color: var(--rx-ink);
+}
+
+.rx-metric__hint {
+  margin-top: 0.35rem;
+  font-size: 0.74rem;
+  color: var(--rx-faint);
+}
+
+/* 右上角极淡的序号水印 */
+.rx-metric__index {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.9rem;
+  font-family: var(--rx-display);
+  font-style: var(--rx-display-style);
+  font-size: 0.9rem;
+  color: var(--rx-faint);
+  opacity: 0.7;
+}
+
+/* ==========================================================================
+   设置卡：资料 / 密码 / 分组等表单面板共用
+   ========================================================================== */
+
+.rx-aff-loading {
+  display: grid;
+  gap: 1rem;
+  padding-top: 1.5rem;
+}
+
+.rx-aff-loading span {
+  height: 7rem;
+  border-radius: var(--rx-radius-lg);
+  background: linear-gradient(100deg, var(--rx-surface-2) 30%, var(--rx-surface-hover) 50%, var(--rx-surface-2) 70%);
+  background-size: 200% 100%;
+  animation: rx-aff-shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes rx-aff-shimmer {
+  to { background-position: -200% 0; }
+}
+
+/* ---------- 邀请卡 ---------- */
+.rx-invite-card {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+  width: 100%;
+  padding: 1.2rem 1.4rem 1.15rem;
+  border-radius: var(--rx-radius-lg);
+  color: var(--rx-card-ink);
+  background: var(--rx-card-bg);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), inset 0 0 0 1px var(--rx-card-line), var(--rx-shadow-lg);
+}
+
+.rx-invite-card__sheen {
+  pointer-events: none;
+  position: absolute;
+  inset: -40%;
+  background: conic-gradient(from var(--rx-angle), transparent 0deg, var(--rx-foil) 60deg, transparent 120deg, transparent 220deg, var(--rx-foil) 280deg, transparent 340deg);
+  mix-blend-mode: soft-light;
+  animation: rx-aff-spin 18s linear infinite;
+}
+
+@keyframes rx-aff-spin {
+  to { --rx-angle: 360deg; }
+}
+
+.rx-invite-card__rate-block,
+.rx-invite-card__label,
+.rx-invite-card__rate,
+.rx-invite-card__hint,
+.rx-invite-card__foot {
+  position: relative;
+}
+
+.rx-invite-card__label {
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+.rx-invite-card__rate {
+  margin-top: 0.3rem;
+  font-family: var(--rx-display);
+  font-style: var(--rx-display-style);
+  font-size: clamp(2.2rem, 1.6rem + 2vw, 3.2rem);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.rx-invite-card__rate small {
+  margin-left: 0.15rem;
+  font-size: 0.45em;
+  opacity: 0.7;
+}
+
+.rx-invite-card__hint {
+  position: relative;
+  margin-top: 0.4rem;
+  font-size: 0.75rem;
+  opacity: 0.6;
+}
+
+.rx-invite-card__foot {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+  font-size: 0.78rem;
+  opacity: 0.85;
+}
+
+.rx-invite-card__foot b {
+  font-weight: 800;
+}
+
+.rx-invite-card__avatars {
+  display: flex;
+}
+
+.rx-invite-card__avatars span {
+  display: grid;
+  place-items: center;
+  width: 1.65rem;
+  height: 1.65rem;
+  margin-left: -0.45rem;
+  border-radius: 9999px;
+  font-size: 0.66rem;
+  font-weight: 800;
+  color: #11110f;
+  background: var(--rx-card-ink);
+  box-shadow: 0 0 0 2px #1a1a17;
+  transition: transform 0.35s var(--rx-spring);
+}
+
+.rx-invite-card__avatars span:first-child {
+  margin-left: 0;
+}
+
+.rx-invite-card__avatars span.is-empty {
+  color: var(--rx-card-ink);
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--rx-card-line);
+}
+
+.rx-invite-card:hover .rx-invite-card__avatars span:nth-child(2) { transform: translateX(3px); }
+.rx-invite-card:hover .rx-invite-card__avatars span:nth-child(3) { transform: translateX(6px); }
+.rx-invite-card:hover .rx-invite-card__avatars span:nth-child(4) { transform: translateX(9px); }
+.rx-invite-card:hover .rx-invite-card__avatars span:nth-child(5) { transform: translateX(12px); }
+
+/* ---------- 面板与字段 ---------- */
+.rx-aff-panel {
+  padding: 1.4rem;
+}
+
+@media (min-width: 640px) {
+  .rx-aff-panel {
+    padding: 1.75rem;
+  }
+}
+
+.rx-aff-good {
+  color: #15803d;
+}
+
+.dark .rx-aff-good {
+  color: #4ade80;
+}
+
+.rx-aff-warn {
+  color: var(--rx-warn);
+}
+
+.rx-aff-muted {
+  font-size: 0.85rem;
+  color: var(--rx-muted);
+}
+
+.rx-aff-field-label {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--rx-faint);
+}
+
+.rx-aff-ticket {
+  --notch: 10px;
+  position: relative;
+  display: flex;
+  min-height: 5.1rem;
+  overflow: hidden;
+  border-radius: var(--rx-radius-md);
+  background: var(--rx-surface-hover);
+  border: 1px solid var(--rx-line);
+  box-shadow: var(--rx-highlight), var(--rx-shadow);
+}
+
+.rx-aff-ticket__stub {
+  display: flex;
+  width: 4.6rem;
+  flex-shrink: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  color: var(--rx-on-accent);
+  background: var(--rx-accent);
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.rx-aff-ticket__body {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0 0.9rem;
+}
+
+.rx-aff-ticket__scan {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 30%, var(--rx-accent-soft) 50%, transparent 70%);
+  transform: translateX(-100%);
+}
+
+.rx-aff-ticket:hover .rx-aff-ticket__scan {
+  animation: rx-aff-scan 1.4s var(--rx-ease) 1;
+}
+
+@keyframes rx-aff-scan {
+  to { transform: translateX(100%); }
+}
+
+.rx-aff-stamp {
+  position: absolute;
+  right: 5.5rem;
+  top: 50%;
+  padding: 0.15rem 0.45rem;
+  border: 2px solid color-mix(in srgb, var(--rx-hot) 70%, white);
+  border-radius: 6px;
+  color: color-mix(in srgb, var(--rx-hot) 80%, white);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  transform: translateY(-50%) rotate(-12deg);
+}
+
+.rx-stamp-enter-active { animation: rx-aff-stamp-in 0.45s var(--rx-spring); }
+.rx-stamp-leave-active { transition: opacity 0.25s ease; }
+.rx-stamp-leave-to { opacity: 0; }
+
+@keyframes rx-aff-stamp-in {
+  from { transform: translateY(-50%) rotate(-12deg) scale(1.6); opacity: 0; }
+}
+
+.rx-aff-field {
+  padding: 0.55rem 0.55rem 0.55rem 1rem;
+  border-radius: var(--rx-radius-md);
+  background: var(--rx-surface-2);
+  border: 1px dashed var(--rx-line-strong);
+  transition: border-color 0.3s ease, background 0.3s ease;
+}
+
+.rx-aff-field:hover {
+  border-style: solid;
+  background: var(--rx-surface-hover);
+}
+
+.rx-aff-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--rx-ink);
+}
+
+.rx-aff-link {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.82rem;
+  color: var(--rx-ink-2);
+}
+
+.rx-aff-copy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.5rem 0.9rem;
+  border-radius: var(--rx-radius-sm);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--rx-on-accent);
+  background: var(--rx-accent);
+  transition: transform 0.35s var(--rx-spring);
+}
+
+.rx-aff-copy:hover {
+  transform: translateY(-1px);
+}
+
+.rx-aff-copy:active {
+  transform: scale(0.96);
+}
+
+/* 使用说明：竖向步骤条，序号为墨色圆点，连接线入场时自上而下描出 */
+.rx-aff-tips {
+  position: relative;
+  counter-reset: tip;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.rx-aff-tips::before {
+  content: '';
+  position: absolute;
+  left: 0.85rem;
+  top: 0.9rem;
+  bottom: 0.9rem;
+  width: 1.5px;
+  background: linear-gradient(var(--rx-line-strong), var(--rx-line-soft));
+  transform-origin: top;
+  animation: rx-aff-line 1.2s var(--rx-ease) both 0.4s;
+}
+
+@keyframes rx-aff-line {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+
+.rx-aff-tips li {
+  position: relative;
+  counter-increment: tip;
+  min-height: 1.75rem;
+  padding-left: 2.6rem;
+  font-size: 0.86rem;
+  line-height: 1.6;
+  color: var(--rx-ink-2);
+  animation: rx-aff-step 0.5s var(--rx-ease) both;
+}
+
+.rx-aff-tips li:nth-child(1) { animation-delay: 0.45s; }
+.rx-aff-tips li:nth-child(2) { animation-delay: 0.6s; }
+.rx-aff-tips li:nth-child(3) { animation-delay: 0.75s; }
+.rx-aff-tips li:nth-child(4) { animation-delay: 0.9s; }
+
+@keyframes rx-aff-step {
+  from { opacity: 0; transform: translateX(-6px); }
+  to { opacity: 1; transform: none; }
+}
+
+.rx-aff-tips li::before {
+  content: counter(tip);
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--rx-on-accent);
+  background: var(--rx-accent);
+  box-shadow: 0 0 0 4px var(--rx-surface-hover);
+}
+
+.rx-aff-tips li:last-child::before {
+  color: var(--rx-accent);
+  background: var(--rx-surface-hover);
+  border: 1.5px solid var(--rx-accent);
+}
+
+/* ---------- 转入 ---------- */
+.rx-aff-transfer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.4rem;
+}
+
+@media (min-width: 640px) {
+  .rx-aff-transfer {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 1.75rem;
+  }
+}
+
+.rx-aff-transfer__action {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 1rem;
+}
+
+.rx-aff-transfer__amount {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+  color: var(--rx-ink);
+}
+
+.rx-aff-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.75rem 1.2rem;
+  border-radius: var(--rx-radius-md);
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--rx-on-accent);
+  background: var(--rx-accent);
+  box-shadow: 0 1px 2px rgba(17, 17, 15, 0.14), 0 10px 24px -12px rgba(17, 17, 15, 0.45);
+  transition: transform 0.35s var(--rx-spring), opacity 0.2s ease;
+}
+
+.rx-aff-cta:not(:disabled):hover {
+  transform: translateY(-2px);
+}
+
+.rx-aff-cta:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+  box-shadow: none;
+}
+
+/* ---------- 被邀请人 ---------- */
+.rx-aff-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2.5rem 1rem;
+  font-size: 0.85rem;
+  color: var(--rx-muted);
+}
+
+/* 空态：三颗沿轨道转动的小点，暗示「等待第一位好友」 */
+.rx-aff-empty__orbit {
+  position: relative;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 9999px;
+  border: 1px dashed var(--rx-line-strong);
+  animation: rx-aff-orbit 9s linear infinite;
+}
+
+.rx-aff-empty__orbit i {
+  position: absolute;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 9999px;
+  background: var(--rx-ink);
+}
+
+.rx-aff-empty__orbit i:nth-child(1) { top: -0.28rem; left: calc(50% - 0.28rem); }
+.rx-aff-empty__orbit i:nth-child(2) { bottom: 0.2rem; left: 0.1rem; opacity: 0.5; }
+.rx-aff-empty__orbit i:nth-child(3) { bottom: 0.2rem; right: 0.1rem; opacity: 0.25; }
+
+@keyframes rx-aff-orbit {
+  to { transform: rotate(360deg); }
+}
+
+.rx-aff-table th {
+  padding: 0.6rem 0.75rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--rx-faint);
+  border-bottom: 1px solid var(--rx-line);
+}
+
+.rx-aff-table td {
+  padding: 0.75rem;
+  color: var(--rx-ink);
+  border-bottom: 1px solid var(--rx-line-soft);
+}
+
+.rx-aff-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.rx-aff-person {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.rx-aff-person__avatar {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 9999px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--rx-tint-ink);
+  background: var(--rx-tint);
+}
