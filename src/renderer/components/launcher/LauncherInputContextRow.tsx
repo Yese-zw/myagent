@@ -85,6 +85,7 @@ export default memo(function LauncherInputContextRow({
             detections={runtimeDetections}
             onChange={onRuntimeChange}
             variant="launcher"
+            integratedOnly
           />
         </div>
       )}

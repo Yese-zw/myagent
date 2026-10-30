@@ -8,7 +8,9 @@ vi.mock('./WorkspaceSelector', () => ({
 }));
 
 vi.mock('@/components/RuntimeSelector', () => ({
-  default: () => <button type="button">Runtime</button>,
+  default: (props: { integratedOnly?: boolean }) => (
+    <button type="button" data-integrated-only={String(!!props.integratedOnly)}>Runtime</button>
+  ),
 }));
 
 describe('LauncherInputContextRow', () => {
@@ -59,7 +61,9 @@ describe('LauncherInputContextRow', () => {
     );
 
     const workspaceChip = screen.getByRole('button', { name: 'Workspace' }).parentElement;
-    const runtimeChip = screen.getByRole('button', { name: 'Runtime' }).parentElement;
+    const runtimeButton = screen.getByRole('button', { name: 'Runtime' });
+    const runtimeChip = runtimeButton.parentElement;
+    expect(runtimeButton).toHaveAttribute('data-integrated-only', 'true');
     const launchButton = screen.getByRole('button', { name: '前往 Codex' });
     const launchChip = launchButton.parentElement;
     const logo = launchButton.querySelector('img');
