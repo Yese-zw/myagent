@@ -90,6 +90,22 @@ describe('sub2api account workspace', () => {
     expect(await screen.findByText('No redemptions yet')).toBeInTheDocument();
   });
 
+  it('keeps usage history inside the page without a horizontal scroller', async () => {
+    mocks.accountApi.mockImplementation(async (operation: string) => {
+      if (operation === 'usage') {
+        return { items: [{ id: 1, created_at: '2026-10-20T00:00:00Z', model: 'claude-sonnet', reasoning_effort: 'high', input_tokens: 12, output_tokens: 3, actual_cost: 0.01 }], total: 1, page: 1, page_size: 20 };
+      }
+      return dashboardPayload(operation);
+    });
+    render(<Account isActive />);
+    await userEvent.setup().click(await screen.findByRole('button', { name: 'Usage history' }));
+    expect(await screen.findByText('claude-sonnet')).toBeInTheDocument();
+    const table = screen.getByRole('table');
+    expect(table).toHaveClass('table-fixed');
+    expect(table).not.toHaveClass('min-w-[680px]');
+    expect(table.parentElement).toHaveClass('overflow-x-hidden', 'touch-pan-y');
+  });
+
   it('signs out from the account workspace', async () => {
     mocks.accountApi.mockImplementation(async (operation: string) => dashboardPayload(operation));
     mocks.logout.mockResolvedValue({ serverUrl: 'https://example.test', user: null });
