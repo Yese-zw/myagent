@@ -71,6 +71,9 @@ src-tauri/resources/document-processing/*
 !src-tauri/resources/document-processing/.gitkeep
 src-tauri/resources/speech-inference/*
 !src-tauri/resources/speech-inference/.gitkeep
+# SenseVoice archive is about 155 MB and exceeds GitHub's 100 MB blob limit.
+# The app downloads it from the URL in speech-models/manifest.json.
+src-tauri/resources/speech-models/assets/*sherpa-onnx-sense-voice*.tar.bz2
 src-tauri/resources/document-processing-cache/
 src-tauri/resources/tsx-runtime
 src-tauri/resources/npm-runtime-cache/
