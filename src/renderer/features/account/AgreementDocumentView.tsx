@@ -17,7 +17,7 @@ const markdown = {
   ol: ({ children }: { children?: ReactNode }) => <ol className="mb-4 list-decimal space-y-1 pl-6 text-[var(--ink-muted)]">{children}</ol>,
   li: ({ children }: { children?: ReactNode }) => <li className="leading-7">{children}</li>,
   blockquote: ({ children }: { children?: ReactNode }) => <blockquote className="my-5 border-l-4 border-[var(--line)] pl-4 text-[var(--ink-muted)]">{children}</blockquote>,
-  code: ({ children }: { children?: ReactNode }) => <code className="rounded bg-[var(--paper-inset)] px-1.5 py-0.5 font-mono text-[13px] text-[var(--ink)]">{children}</code>,
+  code: ({ children }: { children?: ReactNode }) => <code className="rounded bg-[var(--paper-inset)] px-1.5 py-0.5 font-mono text-sm text-[var(--ink)]">{children}</code>,
   pre: ({ children }: { children?: ReactNode }) => <pre className="my-5 overflow-x-auto rounded-lg bg-[var(--paper-inset)] p-4 text-sm text-[var(--ink)]">{children}</pre>,
   table: ({ children }: { children?: ReactNode }) => <div className="my-5 overflow-x-auto"><table className="w-full min-w-[480px] border-collapse text-sm">{children}</table></div>,
   th: ({ children }: { children?: ReactNode }) => <th className="border border-[var(--line)] bg-[var(--paper-inset)] px-3 py-2 text-left font-semibold text-[var(--ink)]">{children}</th>,
@@ -27,11 +27,11 @@ const markdown = {
   img: () => null,
 };
 
-function documentIcon(title: string) {
-  if (/政策|隐私|policy|privacy/i.test(title)) return ShieldIcon;
-  if (/国家|地区|country|region/i.test(title)) return GlobeIcon;
-  if (/特定|specific/i.test(title)) return SettingsIcon;
-  return DocumentIcon;
+function DocumentTypeIcon({ title, className }: { title: string; className: string }) {
+  if (/政策|隐私|policy|privacy/i.test(title)) return <ShieldIcon className={className} />;
+  if (/国家|地区|country|region/i.test(title)) return <GlobeIcon className={className} />;
+  if (/特定|specific/i.test(title)) return <SettingsIcon className={className} />;
+  return <DocumentIcon className={className} />;
 }
 
 export default function AgreementDocumentView({
@@ -46,14 +46,13 @@ export default function AgreementDocumentView({
   onClose: () => void;
 }) {
   const { t } = useTranslation('app');
-  const Icon = documentIcon(current.title);
   return (
     <OverlayBackdrop portal className="z-[270] px-4 py-6" onClose={onClose}>
       <article role="dialog" aria-modal="true" aria-labelledby="sub2api-agreement-title" className="flex max-h-[86vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--paper-elevated)] shadow-2xl">
         <header className="shrink-0 border-b border-[var(--line)] px-6 py-5">
           <div className="flex items-start gap-4">
             <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[var(--paper-inset)] text-[var(--accent)]">
-              <Icon className="h-5 w-5" />
+              <DocumentTypeIcon title={current.title} className="h-5 w-5" />
             </span>
             <div className="min-w-0 flex-1">
               <p className="text-xs font-medium uppercase tracking-wide text-[var(--accent)]">{t('sub2api.legalType')}</p>
@@ -66,7 +65,6 @@ export default function AgreementDocumentView({
           {documents.length > 1 && (
             <nav aria-label={t('sub2api.legalType')} className="mt-4 flex flex-wrap gap-2">
               {documents.map(item => {
-                const TabIcon = documentIcon(item.title);
                 const active = item.id === current.id;
                 return (
                   <button
@@ -76,7 +74,7 @@ export default function AgreementDocumentView({
                     onClick={() => onSelect(item)}
                     className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${active ? 'bg-[var(--hover-bg)] text-[var(--ink)]' : 'text-[var(--ink-muted)] hover:bg-[var(--paper-inset)] hover:text-[var(--ink)]'}`}
                   >
-                    <TabIcon className="h-3.5 w-3.5" />
+                    <DocumentTypeIcon title={item.title} className="h-3.5 w-3.5" />
                     {item.title}
                   </button>
                 );

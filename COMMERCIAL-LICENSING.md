@@ -40,7 +40,7 @@ commercial license, or legal advice. No commercial rights are granted unless
 and until the relevant parties execute a definitive written agreement.
 
 For licensing evaluation, enterprise terms, or a quotation, contact
-[myagents.io@gmail.com](mailto:myagents.io@gmail.com).
+[aipaper2025@163.com](mailto:aipaper2025@163.com).
 
 ### Language
 
@@ -77,7 +77,7 @@ LSAGENT 商业协议代为授权。客户仍需独立遵守所有适用的第三
 最终书面协议后，才会产生商业授权权利。
 
 如需许可评估、企业条款或报价，请联系
-[myagents.io@gmail.com](mailto:myagents.io@gmail.com)。
+[aipaper2025@163.com](mailto:aipaper2025@163.com)。
 
 ### 语言与效力
 

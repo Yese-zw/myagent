@@ -8,8 +8,6 @@ use serde::{Deserialize, Serialize};
 
 use super::types::{Error, Result};
 
-pub(super) const MANIFEST_URL: &str =
-    "https://download.myagents.io/runtimes/cliproxy/manifest-v1.json";
 pub(super) const MAX_MANIFEST_BYTES: usize = 256 * 1024;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -438,7 +436,7 @@ pub(super) mod tests {
             assert!(!safe_filename(name));
         }
         assert!(safe_filename("CLIProxyAPI.exe"));
-        assert!(download_url(MANIFEST_URL).is_ok());
+        assert!(download_url("https://download.myagents.io/runtimes/cliproxy/manifest-v1.json").is_ok());
         assert!(
             download_url("https://download.myagents.io.evil.test/runtimes/cliproxy/a.zip").is_err()
         );

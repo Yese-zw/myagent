@@ -305,12 +305,18 @@ export default function ImagePreview({ src, name, onClose }: ImagePreviewProps) 
 
     return createPortal(
         <OverlayBackdrop
-            ref={viewportRef}
-            onClose={onClose}
-            className={`z-[200] select-none overflow-hidden ${isDragging ? 'cursor-grabbing' : canDrag ? 'cursor-grab' : 'cursor-default'}`}
-            style={{ touchAction: 'none' }}
+            className="z-[200] select-none overflow-hidden"
             variant="dark"
         >
+            {/* The backdrop wraps children in a zero-size box, so the full-surface viewport is fixed to the window. */}
+            <div
+                ref={viewportRef}
+                className={`fixed inset-0 ${isDragging ? 'cursor-grabbing' : canDrag ? 'cursor-grab' : 'cursor-default'}`}
+                style={{ touchAction: 'none' }}
+                onMouseDown={(event) => {
+                    if (event.target === event.currentTarget) onClose();
+                }}
+            >
             {/* Header with title and controls */}
             <div
                 className="absolute left-0 right-0 top-0 z-20 flex items-center justify-between px-6 py-4"
@@ -386,6 +392,7 @@ export default function ImagePreview({ src, name, onClose }: ImagePreviewProps) 
             {/* Hint text */}
             <div className="pointer-events-none absolute bottom-4 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap text-xs text-white/50">
                 {t('imagePreview.hint')}
+            </div>
             </div>
         </OverlayBackdrop>,
         document.body

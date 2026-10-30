@@ -15,8 +15,10 @@
     "generating": "AI is responding",
     "unread": "Unread messages",
     "switchTo": "Switch to {{title}}",
-    "agentNetwork": "AgentNet Local Network"
-    ,"account": "Account"
+    "agentNetwork": "AgentNet Local Network",
+    "account": "Account",
+    "recharge": "Top up",
+    "invite": "Invite"
   },
   "sub2api": {
     "signIn": "Sign in / Register",
@@ -61,7 +63,15 @@
     "accountTabsLabel": "Account sections",
     "accountRequired": "Sign in to view your account",
     "accountRequiredHint": "Use the account button in the sidebar to sign in.",
-    "accountTabs": { "dashboard": "Dashboard", "profile": "Profile", "models": "Available models", "keys": "API keys", "usage": "Usage history", "orders": "My orders", "redeem": "Redeem" },
+    "accountTabs": {
+      "dashboard": "Dashboard",
+      "profile": "Profile",
+      "models": "Available models",
+      "keys": "API keys",
+      "usage": "Usage history",
+      "orders": "My orders",
+      "redeem": "Redeem"
+    },
     "dashboard": {
       "balance": "Balance",
       "available": "Available",
@@ -156,7 +166,18 @@
     "cancelOrderConfirm": "Cancel this pending order?",
     "previous": "Previous",
     "next": "Next",
-    "fields": { "created_at": "Time", "model": "Model", "request_type": "Type", "input_tokens": "Input tokens", "output_tokens": "Output tokens", "actual_cost": "Cost" },
+    "fields": {
+      "created_at": "Time",
+      "model": "Model",
+      "request_type": "Type",
+      "input_tokens": "Input tokens",
+      "output_tokens": "Output tokens",
+      "actual_cost": "Cost",
+      "reasoning_effort": "Reasoning effort",
+      "tokens": "Tokens",
+      "cache_read_tokens": "Cache read",
+      "cache_creation_tokens": "Cache write"
+    },
     "username": "Username",
     "save": "Save",
     "profileSaved": "Profile saved",
@@ -176,7 +197,22 @@
     "modelsLoadFailed": "Could not refresh available models.",
     "modelContext": "Context {{value}}",
     "modelOutput": "Output {{value}}",
-    "modelPrice": {"current": "Your price", "official": "Official", "discount": "{{percent}}% off", "unit": "USD per 1M tokens", "unitShort": "per 1M tokens (input / output)", "perRequest": "{{price}} per request", "kind": "Price type", "tier": "Context tier", "input": "Input", "output": "Output", "cache": "Cache", "cacheWrite": "Write", "cacheRead": "Read", "savings": "{{discount}} vs. official"},
+    "modelPrice": {
+      "current": "Your price",
+      "official": "Official",
+      "discount": "{{percent}}% off",
+      "unit": "USD per 1M tokens",
+      "unitShort": "per 1M tokens (input / output)",
+      "perRequest": "{{price}} per request",
+      "kind": "Price type",
+      "tier": "Context tier",
+      "input": "Input",
+      "output": "Output",
+      "cache": "Cache",
+      "cacheWrite": "Write",
+      "cacheRead": "Read",
+      "savings": "{{discount}} vs. official"
+    },
     "redeemPlaceholder": "Enter a redemption code",
     "redeem": "Redeem",
     "redeemSuccess": "Code redeemed successfully",
@@ -208,7 +244,13 @@
       "CODEX_APP_UNSUPPORTED": "Launching the Codex desktop app is not supported on this system.",
       "LAUNCH_FAILED": "Couldn't start the Codex desktop app. Try again.",
       "GATEWAY_KEY_MISSING": "This account has no usable API key. Sign in again and retry.",
-      "APP_NOT_CONFIGURED": "The server has no App default group yet (System Settings > App). Contact the administrator."
+      "APP_NOT_CONFIGURED": "The server has no App default group yet (System Settings > App). Contact the administrator.",
+      "TOO_MANY_PENDING": "Too many unpaid orders. Complete or cancel an existing order first.",
+      "CANCEL_RATE_LIMITED": "You are cancelling orders too often. Please try again later.",
+      "DAILY_LIMIT_EXCEEDED": "Today's payment limit has been reached. Try again tomorrow or use another payment method.",
+      "PAYMENT_INVALID_AMOUNT": "Invalid top-up amount. Please check and try again.",
+      "PAYMENT_DISABLED": "Online top-up is not available right now.",
+      "PAYMENT_GATEWAY_ERROR": "The payment channel is temporarily unavailable. Try again later or use another payment method."
     },
     "launchCodex": {
       "label": "Go to Codex",
@@ -227,6 +269,167 @@
         "go": "Continue",
         "cancel": "Cancel",
         "close": "Close"
+      }
+    },
+    "redeemCardTitle": "Redeem a code",
+    "redeemCardHint": "Balance, concurrency or subscription changes take effect right after redeeming.",
+    "redeemTotal": "{{count}} total",
+    "orderTypes": {
+      "balance": "Balance top-up",
+      "subscription": "Subscription"
+    },
+    "orderStatus": {
+      "PENDING": "Pending payment",
+      "PAID": "Paid",
+      "RECHARGING": "Crediting",
+      "COMPLETED": "Completed",
+      "EXPIRED": "Expired",
+      "CANCELLED": "Cancelled",
+      "FAILED": "Failed",
+      "REFUND_REQUESTED": "Refund requested",
+      "REFUNDING": "Refunding",
+      "REFUND_PENDING": "Refund pending",
+      "REFUNDED": "Refunded",
+      "PARTIALLY_REFUNDED": "Partially refunded",
+      "REFUND_FAILED": "Refund failed"
+    },
+    "redeemTitles": {
+      "balanceAddedRedeem": "Balance added (redeem)",
+      "balanceAddedAdmin": "Balance added (admin)",
+      "balanceDeductedAdmin": "Balance deducted (admin)",
+      "concurrencyAddedRedeem": "Concurrency added (redeem)",
+      "concurrencyAddedAdmin": "Concurrency added (admin)",
+      "concurrencyReducedAdmin": "Concurrency reduced (admin)",
+      "subscriptionAssigned": "Subscription assigned",
+      "adminAdjustment": "Admin adjustment",
+      "unknown": "Unknown"
+    },
+    "redeemValue": {
+      "concurrency": "{{value}} requests",
+      "subscription": "{{days}} days"
+    },
+    "balanceCard": {
+      "title": "Account balance",
+      "recharge": "Top up",
+      "invite": "Invite",
+      "low": "Low balance. Please top up soon."
+    },
+    "recharge": {
+      "title": "Top-up center",
+      "afterTopUp": "After top-up",
+      "currentBalance": "Current balance",
+      "ratePreview": "Current rate: $1 = {{amount}}",
+      "payAmount": "Amount to pay",
+      "emptyHint": "Pick an amount to preview the order details",
+      "rechargeAccount": "Top-up account",
+      "needPay": "Pay {{amount}}",
+      "quickAmounts": "Quick amounts",
+      "subtitle": "Add funds to your account balance and keep using every model once it arrives.",
+      "signInHint": "Sign in to top up your account",
+      "loading": "Loading top-up options",
+      "account": "Account: {{name}}",
+      "unavailable": "Online top-up is not available right now. Please contact the administrator.",
+      "chooseAmount": "Choose an amount",
+      "chooseMethod": "Choose a payment method",
+      "creditsTo": "Credits {{amount}}",
+      "bonusBadge": "+{{percent}}% bonus",
+      "discountBadge": "Save {{percent}}%",
+      "customAmount": "Custom amount",
+      "customPlaceholder": "Enter the amount in USD",
+      "rangeHint": "Per order {{min}} – {{max}}",
+      "amountNoMethod": "No payment method supports this amount. Please adjust it.",
+      "amountTooLow": "Minimum for this method is {{min}}",
+      "amountTooHigh": "Maximum for this method is {{max}}",
+      "methods": {
+        "alipay": "Alipay",
+        "wxpay": "WeChat Pay"
+      },
+      "methodFee": "Fee {{rate}}%",
+      "methodUnavailable": "Unavailable",
+      "summary": "Order summary",
+      "amount": "Top-up amount",
+      "discount": "Discount {{percent}}%",
+      "fee": "Fee ({{rate}}%)",
+      "bonus": "Bonus credit {{percent}}%",
+      "credited": "Credited balance",
+      "actualPay": "Total to pay",
+      "payNow": "Pay {{amount}} now",
+      "pickAmount": "Choose a top-up amount",
+      "secureHint": "Payments are processed securely through the official channel",
+      "unsupported": "This payment method is not supported in the desktop app. Please choose another.",
+      "scan": {
+        "alipay": "Scan with Alipay to pay",
+        "wxpay": "Scan with WeChat to pay",
+        "default": "Scan the code to pay"
+      },
+      "payInBrowser": "Please complete the payment in your browser",
+      "qrAlt": "Payment QR code",
+      "waiting": "Waiting for payment…",
+      "orderNo": "Order number",
+      "expiresIn": "Time left",
+      "openPayPage": "Open payment page",
+      "autoRefresh": "Your balance refreshes automatically after payment",
+      "outcome": {
+        "success": "Top-up successful",
+        "cancelled": "Order cancelled",
+        "expired": "Order expired",
+        "successHint": "{{amount}} has been credited. You can keep going.",
+        "retryHint": "Payment was not completed. You can start a new top-up."
+      },
+      "again": "Top up again",
+      "backToRecharge": "Back to top-up"
+    },
+    "invite": {
+      "title": "Invite & earn",
+      "ticketStub": "Invite pass",
+      "stamped": "Copied",
+      "eyebrow": "Share an invite",
+      "subtitle": "Share your invite code. When friends sign up and top up, you earn a rebate you can move to your balance.",
+      "signInHint": "Sign in to view your invite code and rebates",
+      "loading": "Loading invite details",
+      "statsLabel": "Invite stats",
+      "yourCode": "Your invite code",
+      "inviteLink": "Invite link",
+      "copyCode": "Copy code",
+      "copyLink": "Copy link",
+      "copied": "Copied",
+      "codeCopied": "Invite code copied",
+      "linkCopied": "Invite link copied",
+      "copyFailed": "Copy failed. Select the text and copy it manually.",
+      "shareTitle": "Invite friends",
+      "shareHint": "Send the code to new users and have them enter it when signing up.",
+      "stats": {
+        "rebateRate": "Rebate rate",
+        "rebateRateHint": "Rebate you earn on each top-up by an invited user",
+        "invitedUsers": "Invited users",
+        "availableQuota": "Available rebate",
+        "frozenQuota": "{{amount}} frozen",
+        "totalQuota": "Total rebate"
+      },
+      "transfer": {
+        "title": "Move rebate to balance",
+        "description": "Move all available rebate into your account balance in one step",
+        "button": "Transfer to balance",
+        "transferring": "Transferring…",
+        "empty": "No rebate available to transfer",
+        "success": "{{amount}} moved to your balance"
+      },
+      "invitees": {
+        "title": "Invited users",
+        "empty": "No invites yet. Share your code to get started.",
+        "columns": {
+          "email": "Email",
+          "username": "Username",
+          "rebate": "Rebate",
+          "joinedAt": "Joined"
+        }
+      },
+      "tips": {
+        "title": "How it works",
+        "line1": "Share your invite code with new users.",
+        "line2": "When an invited user tops up, you earn {{rate}} as rebate credit.",
+        "line3": "Rebate credit can be moved to your balance at any time.",
+        "line4": "Newly earned rebate stays frozen for a while before it can be transferred."
       }
     }
   },
@@ -624,7 +827,8 @@
     "openFailed": "The page could not be opened. Copy the link and try again.",
     "routeFailed": "The linked content could not be opened.",
     "copyLink": "Copy link",
-    "routeInvalid": "This in-app link is not supported"
+    "routeInvalid": "This in-app link is not supported",
+    "emptyAnnouncement": "This announcement has no content"
   },
   "contextUsage": {
     "aria": "Context usage {{percent}}%",

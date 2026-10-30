@@ -2862,43 +2862,6 @@ describe('admin-api agent set configuration intent', () => {
     );
   });
 
-  it.each([
-    ['providerId', 'codex-sub'],
-    ['model', 'gpt-5.6-sol'],
-  ])('accepts managed Codex %s changes through the product provider catalog', async (key, value) => {
-    const workspacePath = `/tmp/myagents-agent-managed-${key}`;
-    const settingProvider = key === 'providerId';
-    writeJson(join(scratch, '.myagents', 'config.json'), {
-      managedCodexProviderDevGate: true,
-      managedCodexRuntimeInstall: { status: 'installed', usable: true },
-      managedCodexAuth: { status: 'valid', authMethod: 'chatgpt' },
-      agents: [{
-        id: 'agent-managed-set',
-        name: 'Managed Set',
-        workspacePath,
-        providerId: settingProvider ? 'anthropic-sub' : 'codex-sub',
-        model: settingProvider ? 'claude-sonnet-4-6' : 'gpt-5.4-codex',
-        permissionMode: 'auto',
-      }],
-    });
-    writeJson(join(scratch, '.myagents', 'projects.json'), [{
-      id: 'project-managed-set',
-      name: 'Managed Set',
-      path: workspacePath,
-      agentId: 'agent-managed-set',
-      providerId: settingProvider ? 'anthropic-sub' : 'codex-sub',
-      model: settingProvider ? 'claude-sonnet-4-6' : 'gpt-5.4-codex',
-      permissionMode: 'auto',
-    }]);
-    const { handleAgentSet } = await import('./admin-api');
-
-    const result = await handleAgentSet({ id: 'agent-managed-set', key, value });
-
-    expect(result.success).toBe(true);
-    expect((readConfig().agents as Record<string, unknown>[])[0]).toMatchObject({ [key]: value });
-    expect(readJson(join(scratch, '.myagents', 'projects.json'))[0]).toMatchObject({ [key]: value });
-  });
-
   it('rejects an unverified subscription provider before mutating either store', async () => {
     const workspacePath = '/tmp/myagents-agent-unverified-subscription';
     const config = {
@@ -3193,23 +3156,6 @@ describe('admin-api model verify credential authority', () => {
     expect(providerVerifyMocks.verifyProviderViaSdk).not.toHaveBeenCalled();
   });
 
-  it('redirects runtime-managed subscriptions to the managed-provider owner', async () => {
-    writeJson(join(scratch, '.myagents', 'config.json'), { managedCodexProviderDevGate: true });
-    const { handleModelVerify } = await import('./admin-api');
-
-    const result = await handleModelVerify({ id: 'codex-sub' });
-
-    expect(result).toMatchObject({
-      success: false,
-      code: 'SUBSCRIPTION_AUTH_OWNER_REQUIRED',
-      recoveryHint: {
-        message: expect.stringContaining('Settings → Model Providers → Codex'),
-      },
-    });
-    expect((result.recoveryHint as { recoveryCommand?: string }).recoveryCommand).toBeUndefined();
-    expect(providerVerifyMocks.verifyProviderViaSdk).not.toHaveBeenCalled();
-    expect(providerVerifyMocks.verifySubscription).not.toHaveBeenCalled();
-  });
 });
 
 describe('admin-api config dry-run contract', () => {

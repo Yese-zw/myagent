@@ -12,7 +12,6 @@ use crate::speech_model_pack::{
     InstalledPackError, ModelPackAsset, ModelPackAssetFormat, ModelPackInstallPlan,
     ModelPackLegalSource,
 };
-use futures_util::StreamExt;
 use myagents_media_worker_protocol::{
     read_worker_response, write_control_frame, StartRequest, WorkerCommand, WorkerResponse,
     WorkloadIdentity, WorkloadInput, WorkloadKind, PROTOCOL_VERSION,
@@ -30,8 +29,6 @@ use std::thread;
 use std::time::{Duration, Instant};
 use uuid::Uuid;
 
-const MODEL_SETS_BASE_URL: &str = "https://download.myagents.io/models/speech/sets";
-const MODEL_DOWNLOAD_HOST: &str = "download.myagents.io";
 const MAX_MANIFEST_BYTES: u64 = 256 * 1024;
 const MAX_SIGNATURE_BYTES: u64 = 16 * 1024;
 const MAX_ARCHIVE_ENTRIES: usize = 4_096;
@@ -125,6 +122,7 @@ pub struct SpeechModelPackManager {
     models_root: PathBuf,
     worker_path: PathBuf,
     native_manifest_path: PathBuf,
+    bundled_models_dir: PathBuf,
     onnx_runtime_path: Option<PathBuf>,
     compute_coordinator: Arc<LocalComputeCoordinator>,
     plan: ModelPackInstallPlan,
@@ -171,10 +169,18 @@ impl SpeechModelPackManager {
         } else {
             0
         };
+        // <resources>/speech-inference/v1/manifest.json -> <resources>/speech-models
+        let bundled_models_dir = native_manifest_path
+            .parent()
+            .and_then(Path::parent)
+            .and_then(Path::parent)
+            .map(|resources| resources.join("speech-models"))
+            .unwrap_or_else(|| PathBuf::from("speech-models"));
         let manager = Arc::new(Self {
             models_root,
             worker_path,
             native_manifest_path,
+            bundled_models_dir,
             onnx_runtime_path,
             compute_coordinator,
             plan,
@@ -541,12 +547,8 @@ impl SpeechModelPackManager {
         {
             return Err("SPEECH_NATIVE_RUNTIME_UNAVAILABLE");
         }
-        // This client intentionally targets the signed first-party resource
-        // manifest and its pinned first-party HTTPS assets, never localhost.
-        let client_builder = speech_model_http_client_builder();
-        let client = crate::proxy_config::build_client_with_proxy(client_builder)
-            .map_err(|_| "SPEECH_RESOURCE_NETWORK")?;
-        let release_manifest = fetch_verified_release_manifest(&client, &self.plan).await?;
+        let release_manifest =
+            read_bundled_release_manifest(&self.bundled_models_dir, &self.plan)?;
         self.ensure_not_cancelled()?;
         self.set_install_stage(Operation::Downloading)?;
 
@@ -561,7 +563,6 @@ impl SpeechModelPackManager {
         }
         let result = self
             .download_extract_verify_activate(
-                &client,
                 &download_root,
                 &staging_root,
                 &operation_id,
@@ -577,7 +578,6 @@ impl SpeechModelPackManager {
 
     async fn download_extract_verify_activate(
         self: &Arc<Self>,
-        client: &reqwest::Client,
         download_root: &Path,
         staging_root: &Path,
         operation_id: &str,
@@ -587,8 +587,7 @@ impl SpeechModelPackManager {
         for asset in &self.plan.assets {
             self.ensure_not_cancelled()?;
             let destination = download_root.join(format!("{}.asset", asset.id));
-            self.download_exact(client, &asset.url, &destination, asset.size, &asset.sha256)
-                .await?;
+            self.copy_bundled_exact(&asset.url, &destination, asset.size, &asset.sha256)?;
             downloaded_assets.insert(asset.id.clone(), destination);
         }
         let mut downloaded_legal = HashMap::new();
@@ -598,8 +597,7 @@ impl SpeechModelPackManager {
             };
             self.ensure_not_cancelled()?;
             let destination = download_root.join(format!("{}.legal", legal.id));
-            self.download_exact(client, url, &destination, *size, sha256)
-                .await?;
+            self.copy_bundled_exact(url, &destination, *size, sha256)?;
             downloaded_legal.insert(legal.id.clone(), destination);
         }
         self.set_install_stage(Operation::Verifying)?;
@@ -680,45 +678,51 @@ impl SpeechModelPackManager {
         Ok((active, pointer, warning))
     }
 
-    async fn download_exact(
+    /// Copies a bundled asset into the operation directory while re-checking
+    /// the pinned size and SHA-256, so a damaged install never activates.
+    fn copy_bundled_exact(
         &self,
-        client: &reqwest::Client,
         url: &str,
         destination: &Path,
         expected_size: u64,
         expected_sha256: &str,
     ) -> Result<(), &'static str> {
-        let response = client
-            .get(url)
-            .send()
-            .await
-            .map_err(|_| "SPEECH_RESOURCE_NETWORK")?
-            .error_for_status()
-            .map_err(|_| "SPEECH_RESOURCE_NETWORK")?;
-        validate_model_resource_response(response.url())?;
-        if response
-            .content_length()
-            .is_some_and(|size| size != expected_size)
-        {
-            return Err("SPEECH_RESOURCE_DOWNLOAD_INVALID");
+        let file_name = url.rsplit('/').next().unwrap_or_default();
+        if !safe_relative_path(file_name) || file_name.contains('/') {
+            return Err("SPEECH_RESOURCE_BUNDLE_MISSING");
         }
+        let source = self
+            .bundled_models_dir
+            .join("assets")
+            .join(format!("{expected_sha256}-{file_name}"));
+        if !plain_file(&source) {
+            return Err("SPEECH_RESOURCE_BUNDLE_MISSING");
+        }
+        let mut input = BufReader::new(
+            File::open(&source).map_err(|_| "SPEECH_RESOURCE_BUNDLE_MISSING")?,
+        );
         let mut file = create_new_private_file(destination)?;
         let mut digest = Sha256::new();
         let mut received = 0_u64;
-        let mut stream = response.bytes_stream();
-        while let Some(chunk) = stream.next().await {
+        let mut buffer = vec![0_u8; 1024 * 1024];
+        loop {
             self.ensure_not_cancelled()?;
-            let chunk = chunk.map_err(|_| "SPEECH_RESOURCE_NETWORK")?;
+            let read = input
+                .read(&mut buffer)
+                .map_err(|_| "SPEECH_RESOURCE_BUNDLE_MISSING")?;
+            if read == 0 {
+                break;
+            }
             received = received
-                .checked_add(chunk.len() as u64)
+                .checked_add(read as u64)
                 .ok_or("SPEECH_RESOURCE_DOWNLOAD_INVALID")?;
             if received > expected_size {
                 return Err("SPEECH_RESOURCE_DOWNLOAD_INVALID");
             }
-            file.write_all(&chunk)
+            file.write_all(&buffer[..read])
                 .map_err(|_| "SPEECH_RESOURCE_STORE_WRITE_FAILED")?;
-            digest.update(&chunk);
-            self.add_downloaded_bytes(chunk.len() as u64)?;
+            digest.update(&buffer[..read]);
+            self.add_downloaded_bytes(read as u64)?;
         }
         file.flush()
             .and_then(|()| file.sync_all())
@@ -930,28 +934,30 @@ enum ActivePointerCommit {
     VisibleNotDurable,
 }
 
-async fn fetch_verified_release_manifest(
-    client: &reqwest::Client,
-    plan: &ModelPackInstallPlan,
+/// Release manifest + detached signature shipped inside the application bundle.
+/// Trust still comes from the same minisign verification as before; only the
+/// transport changed (no network).
+fn read_bundled_release_manifest(
+    bundled_dir: &Path,
+    _plan: &ModelPackInstallPlan,
 ) -> Result<VerifiedReleaseManifest, &'static str> {
-    let manifest_url = release_manifest_url(&plan.pack_revision);
-    let signature_url = format!("{manifest_url}.sig");
-    let manifest = fetch_limited_bytes(
-        client,
-        &manifest_url,
-        MAX_MANIFEST_BYTES,
-        MODEL_DOWNLOAD_HOST,
-    )
-    .await?;
-    let signature_bytes = fetch_limited_bytes(
-        client,
-        &signature_url,
-        MAX_SIGNATURE_BYTES,
-        MODEL_DOWNLOAD_HOST,
-    )
-    .await?;
-    let signature =
-        String::from_utf8(signature_bytes).map_err(|_| "SPEECH_RESOURCE_SIGNATURE_INVALID")?;
+    let read_limited = |name: &str, limit: u64| -> Result<Vec<u8>, &'static str> {
+        let path = bundled_dir.join(name);
+        if !plain_file(&path) {
+            return Err("SPEECH_RESOURCE_BUNDLE_MISSING");
+        }
+        let mut bytes = Vec::new();
+        File::open(&path)
+            .and_then(|file| file.take(limit + 1).read_to_end(&mut bytes))
+            .map_err(|_| "SPEECH_RESOURCE_BUNDLE_MISSING")?;
+        if bytes.len() as u64 > limit {
+            return Err("SPEECH_RESOURCE_MANIFEST_INVALID");
+        }
+        Ok(bytes)
+    };
+    let manifest = read_limited("manifest.json", MAX_MANIFEST_BYTES)?;
+    let signature = String::from_utf8(read_limited("manifest.json.sig", MAX_SIGNATURE_BYTES)?)
+        .map_err(|_| "SPEECH_RESOURCE_SIGNATURE_INVALID")?;
     let signature = signature.trim();
     if signature.is_empty() {
         return Err("SPEECH_RESOURCE_SIGNATURE_INVALID");
@@ -965,57 +971,6 @@ async fn fetch_verified_release_manifest(
         bytes: manifest,
         signature: signature.to_string(),
     })
-}
-
-fn release_manifest_url(pack_revision: &str) -> String {
-    format!("{MODEL_SETS_BASE_URL}/{pack_revision}/manifest.json")
-}
-
-#[allow(clippy::disallowed_methods)]
-fn speech_model_http_client_builder() -> reqwest::ClientBuilder {
-    reqwest::Client::builder()
-        .user_agent(format!("LSAGENT/{}", env!("CARGO_PKG_VERSION")))
-        .redirect(reqwest::redirect::Policy::none())
-        .connect_timeout(Duration::from_secs(30))
-        .timeout(Duration::from_secs(30 * 60))
-}
-
-async fn fetch_limited_bytes(
-    client: &reqwest::Client,
-    url: &str,
-    limit: u64,
-    expected_host: &str,
-) -> Result<Vec<u8>, &'static str> {
-    let response = client
-        .get(url)
-        .send()
-        .await
-        .map_err(|_| "SPEECH_RESOURCE_NETWORK")?
-        .error_for_status()
-        .map_err(|_| "SPEECH_RESOURCE_NETWORK")?;
-    if response.url().scheme() != "https" || response.url().host_str() != Some(expected_host) {
-        return Err("SPEECH_RESOURCE_NETWORK");
-    }
-    if response.content_length().is_some_and(|size| size > limit) {
-        return Err("SPEECH_RESOURCE_MANIFEST_INVALID");
-    }
-    let mut bytes = Vec::new();
-    let mut stream = response.bytes_stream();
-    while let Some(chunk) = stream.next().await {
-        let chunk = chunk.map_err(|_| "SPEECH_RESOURCE_NETWORK")?;
-        if (bytes.len() as u64).saturating_add(chunk.len() as u64) > limit {
-            return Err("SPEECH_RESOURCE_MANIFEST_INVALID");
-        }
-        bytes.extend_from_slice(&chunk);
-    }
-    Ok(bytes)
-}
-
-fn validate_model_resource_response(url: &reqwest::Url) -> Result<(), &'static str> {
-    if url.scheme() != "https" || url.host_str() != Some(MODEL_DOWNLOAD_HOST) {
-        return Err("SPEECH_RESOURCE_NETWORK");
-    }
-    Ok(())
 }
 
 fn total_download_bytes(plan: &ModelPackInstallPlan) -> u64 {
@@ -2001,64 +1956,22 @@ mod tests {
     }
 
     #[test]
-    fn release_manifest_url_uses_pack_revision_without_schema_suffix() {
-        assert_eq!(
-            release_manifest_url("local-standard-speech-v2"),
-            "https://download.myagents.io/models/speech/sets/local-standard-speech-v2/manifest.json"
-        );
-    }
-
-    #[test]
-    fn model_resource_response_only_accepts_first_party_https() {
-        assert!(validate_model_resource_response(
-            &reqwest::Url::parse("https://download.myagents.io/models/speech/assets/file").unwrap()
-        )
-        .is_ok());
-        assert!(validate_model_resource_response(
-            &reqwest::Url::parse("https://github.com/example/file").unwrap()
-        )
-        .is_err());
-        assert!(validate_model_resource_response(
-            &reqwest::Url::parse("http://download.myagents.io/models/speech/assets/file").unwrap()
-        )
-        .is_err());
-    }
-
-    #[tokio::test]
-    async fn speech_model_http_client_never_follows_redirects() {
-        use tokio::io::{AsyncReadExt, AsyncWriteExt};
-        use tokio::net::TcpListener;
-
-        let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
-        let address = listener.local_addr().unwrap();
-        let server = tauri::async_runtime::spawn(async move {
-            let (mut socket, _) = listener.accept().await.unwrap();
-            let mut request = [0_u8; 2048];
-            let _ = socket.read(&mut request).await.unwrap();
-            let response = format!(
-                "HTTP/1.1 307 Temporary Redirect\r\nLocation: http://{address}/leak\r\nContent-Length: 0\r\nConnection: close\r\n\r\n"
-            );
-            socket.write_all(response.as_bytes()).await.unwrap();
-            tokio::time::timeout(Duration::from_millis(250), listener.accept())
-                .await
-                .is_ok()
+    fn bundled_release_manifest_is_signed_and_every_asset_is_present() {
+        let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("resources/speech-models");
+        let plan = install_plan().unwrap();
+        read_bundled_release_manifest(&dir, &plan).expect("bundled manifest verifies");
+        let root = tempfile::tempdir().unwrap();
+        let manager = fixture_manager(root.path());
+        let manager = Arc::new(SpeechModelPackManager {
+            bundled_models_dir: dir.clone(),
+            ..Arc::try_unwrap(manager).ok().unwrap()
         });
-
-        let client = speech_model_http_client_builder()
-            .no_proxy()
-            .build()
-            .unwrap();
-        let response = client
-            .get(format!("http://{address}/manifest.json"))
-            .send()
-            .await
-            .unwrap();
-
-        assert_eq!(response.status(), reqwest::StatusCode::TEMPORARY_REDIRECT);
-        assert!(
-            !server.await.unwrap(),
-            "redirect target received a second request"
-        );
+        for asset in &plan.assets {
+            let out = root.path().join(format!("{}.asset", asset.id));
+            manager
+                .copy_bundled_exact(&asset.url, &out, asset.size, &asset.sha256)
+                .expect("bundled asset verifies");
+        }
     }
 
     #[test]

@@ -2,9 +2,8 @@
 name = "myagents"
 version = "1.0.0"
 description = "LSAGENT - Desktop Claude Code for everyone"
-authors = ["LSAGENT Team <myagents.io@gmail.com>"]
+authors = ["灵思AGENT Team <aipaper2025@163.com>"]
 license = "AGPL-3.0-only"
-repository = "https://github.com/hAcKlyc/MyAgents"
 homepage = "https://myagents.io"
 edition = "2021"
 # Protocol validation and the audited JWT dependency require Rust 1.88; the

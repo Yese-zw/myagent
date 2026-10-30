@@ -4,7 +4,7 @@
 
 **免费开源、本地优先的 Agent 工作台与任务系统**
 
-[中文](README.md) · [English](README.en.md) · [官网与下载](https://myagents.io) · [Releases](https://github.com/hAcKlyc/MyAgents/releases) · [贡献指南](CONTRIBUTING.md)
+[中文](README.md) · [English](README.en.md) · [官网与下载](https://myagents.io) · [贡献指南](CONTRIBUTING.md)
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
 [![macOS](https://img.shields.io/badge/macOS-13.0+-black.svg)](https://myagents.io)
@@ -40,7 +40,7 @@ LSAGENT 同时为人和 Agent 提供操作入口：你通过GUI使用， Agent �
 
 ## 快速开始
 
-本文面向 **0.5.0**。可下载版本与发布说明请以[官网](https://myagents.io)和 [Releases](https://github.com/hAcKlyc/MyAgents/releases) 为准。
+本文面向 **0.5.0**。可下载版本与发布说明请以[官网](https://myagents.io)为准。
 
 1. **安装客户端**：支持 macOS 13+（Apple Silicon / Intel）和 Windows 10+。下载对应安装包即可开始，无需自行安装 Node.js 或搭建服务器。
 2. **接入模型**：在「设置 → 模型供应商」中登录支持的订阅，或填写模型 API 配置，再选择匹配的 Runtime 与模型。具体接入方式见[模型与 Runtime 指南](bundled-skills/lsagent-docs/references/models-providers-runtimes.md)。
@@ -150,7 +150,7 @@ LSAGENT 客户端免费开源。你选择的模型订阅、API 或外部工具�
 - [开发指引](DEVELOPMENT.md)：环境准备、本地开发、构建与检查。
 - [贡献指南](CONTRIBUTING.md)：Issue、Pull Request 与贡献约定。
 - [架构文档](specs/ARCHITECTURE.md)：模块职责与设计约束。
-- [更新日志](CHANGELOG.md) · [问题反馈](https://github.com/hAcKlyc/MyAgents/issues)。
+- [更新日志](CHANGELOG.md) · [问题反馈](mailto:aipaper2025@163.com)。
 
 ## 许可证
 
@@ -160,7 +160,7 @@ LSAGENT 采用 [GNU Affero General Public License v3.0](LICENSE)
 
 如果你希望在不履行 AGPL 开源义务的情况下闭源修改、嵌入、OEM、分发或托管 LSAGENT，
 需要取得单独的商业许可证。请联系
-[myagents.io@gmail.com](mailto:myagents.io@gmail.com)。
+[aipaper2025@163.com](mailto:aipaper2025@163.com)。
 
 完整说明见 [LICENSING.md](LICENSING.md)，商业许可概要见
 [COMMERCIAL-LICENSING.md](COMMERCIAL-LICENSING.md)。第三方组件继续适用各自许可证，详见

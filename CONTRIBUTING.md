@@ -18,7 +18,7 @@ Please read and follow our [Code of Conduct](CODE_OF_CONDUCT.md).
 
 #### Reporting Bugs
 
-1. Check if the bug has already been reported in [Issues](https://github.com/hAcKlyc/MyAgents/issues)
+1. Check if the bug has already been reported in [feedback by email](mailto:aipaper2025@163.com)
 2. If not, create a new issue with:
    - Clear, descriptive title
    - Steps to reproduce
@@ -28,7 +28,7 @@ Please read and follow our [Code of Conduct](CODE_OF_CONDUCT.md).
 
 #### Suggesting Features
 
-1. Check existing [Issues](https://github.com/hAcKlyc/MyAgents/issues) for similar suggestions
+1. Check existing [feedback by email](mailto:aipaper2025@163.com) for similar suggestions
 2. Create a new issue with the "Feature Request" label
 3. Describe the feature and its use case clearly
 
@@ -98,7 +98,7 @@ LSAGENT/
 
 ### Questions?
 
-Feel free to open an issue or reach out at myagents.io@gmail.com
+Feel free to open an issue or reach out at aipaper2025@163.com
 
 ---
 
@@ -116,7 +116,7 @@ Feel free to open an issue or reach out at myagents.io@gmail.com
 
 #### 报告 Bug
 
-1. 先在 [Issues](https://github.com/hAcKlyc/MyAgents/issues) 中检查是否已有相同报告
+1. 先在 [feedback by email](mailto:aipaper2025@163.com) 中检查是否已有相同报告
 2. 如果没有，创建新 issue 并包含：
    - 清晰的标题
    - 复现步骤
@@ -126,7 +126,7 @@ Feel free to open an issue or reach out at myagents.io@gmail.com
 
 #### 功能建议
 
-1. 先检查 [Issues](https://github.com/hAcKlyc/MyAgents/issues) 中是否有类似建议
+1. 先检查 [feedback by email](mailto:aipaper2025@163.com) 中是否有类似建议
 2. 使用 "Feature Request" 标签创建新 issue
 3. 清晰描述功能及其使用场景
 
@@ -194,4 +194,4 @@ LSAGENT/
 
 ### 有问题？
 
-欢迎创建 issue 或发送邮件至 myagents.io@gmail.com
+欢迎创建 issue 或发送邮件至 aipaper2025@163.com

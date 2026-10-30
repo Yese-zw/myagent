@@ -66,24 +66,6 @@ describe('normalizeProviderOrder', () => {
     expect(normalizeProviderOrder(['a', 'b', 'c'], ['c', 'a'])).toEqual(['c', 'a', 'b']);
   });
 
-  it('pins Token Dance first while preserving every other saved relative position', () => {
-    const ids = withManagedCodexProviderCatalog(PRESET_PROVIDERS, DEFAULT_CONFIG)
-      .map(provider => provider.id);
-    const legacyOrder = ['deepseek', SUBSCRIPTION_PROVIDER_ID];
-    const introduced = normalizeProviderOrder(ids, legacyOrder);
-    expect(introduced.slice(0, 5)).toEqual([
-      TOKENDANCE_PROVIDER_ID, 'deepseek', SUBSCRIPTION_PROVIDER_ID,
-      CODEX_SUBSCRIPTION_PROVIDER_ID, XAI_SUBSCRIPTION_PROVIDER_ID,
-    ]);
-    const explicitOrder = ['deepseek', TOKENDANCE_PROVIDER_ID, SUBSCRIPTION_PROVIDER_ID];
-    const ordered = normalizeProviderOrder(ids, explicitOrder);
-    expect(ordered.slice(0, 3)).toEqual([TOKENDANCE_PROVIDER_ID, 'deepseek', SUBSCRIPTION_PROVIDER_ID]);
-    expect(normalizeProviderOrder(ids, ['unknown', 'deepseek', TOKENDANCE_PROVIDER_ID, TOKENDANCE_PROVIDER_ID]).slice(0, 2))
-      .toEqual([TOKENDANCE_PROVIDER_ID, 'deepseek']);
-    expect(new Set(ordered).size).toBe(ids.length);
-    expect(normalizeProviderOrder(ids, ordered)).toEqual(ordered);
-    expect(legacyOrder).toEqual(['deepseek', SUBSCRIPTION_PROVIDER_ID]);
-  });
 
   it('places newly introduced Codex subscription after Anthropic subscription when the saved order is missing it', () => {
     expect(normalizeProviderOrder(
@@ -481,45 +463,9 @@ describe('Managed Codex provider readiness', () => {
   it('derives every shared runtime identity field from the single lock', () => {
     expect(MANAGED_CODEX_REQUIRED_RUNTIME.version).toBe(managedCodexRuntimeLock.version);
     expect(MANAGED_CODEX_REQUIRED_RUNTIME.runtimeSet).toBe(`codex-${managedCodexRuntimeLock.version}`);
-    expect(MANAGED_CODEX_REQUIRED_RUNTIME.manifestBaseUrl).toBe(
-      `https://download.myagents.io/runtimes/codex/sets/codex-${managedCodexRuntimeLock.version}`,
-    );
+    expect(MANAGED_CODEX_REQUIRED_RUNTIME.manifestBaseUrl).toBe('');
   });
 
-  it('auto-updates stale installs and retries a failed upgrade on the next App launch', () => {
-    const staleInstall = {
-      installedVersion: '0.0.0-previous',
-      requiredVersion: MANAGED_CODEX_REQUIRED_RUNTIME.version,
-    };
-
-    expect(shouldAutoUpdateManagedCodexRuntime({
-      managedCodexProviderDevGate: true,
-      managedCodexRuntimeInstall: { status: 'installed', ...staleInstall },
-    })).toBe(true);
-    expect(shouldAutoUpdateManagedCodexRuntime({
-      managedCodexProviderDevGate: true,
-      managedCodexRuntimeInstall: { status: 'update-required', ...staleInstall },
-    })).toBe(true);
-    expect(shouldAutoUpdateManagedCodexRuntime({
-      managedCodexProviderDevGate: true,
-      managedCodexRuntimeInstall: { status: 'error', ...staleInstall },
-    })).toBe(true);
-    expect(shouldAutoUpdateManagedCodexRuntime({
-      managedCodexProviderDevGate: true,
-      managedCodexRuntimeInstall: {
-        status: 'error',
-        installedVersion: MANAGED_CODEX_REQUIRED_RUNTIME.version,
-      },
-    })).toBe(true);
-    expect(shouldAutoUpdateManagedCodexRuntime({
-      managedCodexProviderDevGate: true,
-      managedCodexRuntimeInstall: { status: 'downloading', ...staleInstall },
-    })).toBe(true);
-    expect(shouldAutoUpdateManagedCodexRuntime({
-      managedCodexProviderDevGate: true,
-      managedCodexRuntimeInstall: { status: 'checking', ...staleInstall },
-    })).toBe(true);
-  });
 
   it('keeps a verified stale runtime usable while its replacement downloads or retries', () => {
     const staleVersion = '0.0.0-previous';
@@ -565,12 +511,6 @@ describe('Managed Codex provider readiness', () => {
     })).toBe(false);
   });
 
-  it('defaults the developer gate on but still honors explicit disablement', () => {
-    expect(DEFAULT_CONFIG.managedCodexProviderDevGate).toBe(true);
-    expect(isManagedCodexProviderGateEnabled({})).toBe(false);
-    expect(isManagedCodexProviderGateEnabled({ managedCodexProviderDevGate: true })).toBe(true);
-    expect(isManagedCodexProviderGateEnabled({ managedCodexProviderDevGate: false })).toBe(false);
-  });
 
   it('keeps the provider out of the catalogue while the developer gate is explicitly off', () => {
     expect(withManagedCodexProviderCatalog([MANAGED_CODEX_PROVIDER], {
@@ -578,23 +518,7 @@ describe('Managed Codex provider readiness', () => {
     }).some(provider => provider.id === CODEX_SUBSCRIPTION_PROVIDER_ID)).toBe(false);
   });
 
-  it('inserts the provider after Anthropic subscription in the default catalogue', () => {
-    const catalog = withManagedCodexProviderCatalog(PRESET_PROVIDERS, DEFAULT_CONFIG);
 
-    const subscriptionIndex = catalog.findIndex(provider => provider.id === SUBSCRIPTION_PROVIDER_ID);
-    expect(subscriptionIndex).toBeGreaterThanOrEqual(0);
-    expect(catalog[subscriptionIndex + 1]?.id).toBe(CODEX_SUBSCRIPTION_PROVIDER_ID);
-  });
-
-  it('shows the provider card by default but keeps it unselectable until ready', () => {
-    const catalog = withManagedCodexProviderCatalog([], DEFAULT_CONFIG);
-    const providers = applyManagedCodexProviderReadiness(catalog, DEFAULT_CONFIG);
-
-    expect(catalog.map(provider => provider.id)).toEqual([CODEX_SUBSCRIPTION_PROVIDER_ID]);
-    expect(providers[0].enabled).toBeUndefined();
-    expect(providers[0].runtimeReady).toBe(false);
-    expect(getManagedCodexProviderReadiness(DEFAULT_CONFIG).reason).toBe('runtime-not-installed');
-  });
 
   it('derives Codex subscription models from the managed runtime model list', () => {
     const provider = withManagedCodexRuntimeModels(MANAGED_CODEX_PROVIDER, [
@@ -616,50 +540,7 @@ describe('Managed Codex provider readiness', () => {
     });
   });
 
-  it('requires exact runtime version, subscription auth, and no explicit disablement', () => {
-    const runtime = {
-      status: 'installed' as const,
-      usable: true,
-      installedVersion: MANAGED_CODEX_REQUIRED_RUNTIME.version,
-      requiredVersion: MANAGED_CODEX_REQUIRED_RUNTIME.version,
-    };
-    const auth = {
-      status: 'valid' as const,
-      authMethod: 'chatgpt' as const,
-    };
 
-    expect(isManagedCodexRequiredRuntimeInstalled(runtime)).toBe(true);
-    expect(isManagedCodexSubscriptionAuthValid(auth)).toBe(true);
-    expect(getManagedCodexProviderReadiness({
-      managedCodexProviderDevGate: true,
-      managedCodexRuntimeInstall: runtime,
-      managedCodexAuth: auth,
-    })).toMatchObject({
-      visible: true,
-      selectable: true,
-      reason: 'ready',
-    });
-  });
-
-  it('keeps a verified stale runtime selectable while the required version updates', () => {
-    expect(getManagedCodexProviderReadiness({
-      managedCodexProviderDevGate: true,
-      managedCodexRuntimeInstall: {
-        status: 'downloading',
-        usable: true,
-        installedVersion: '0.0.0-previous',
-        requiredVersion: MANAGED_CODEX_REQUIRED_RUNTIME.version,
-      },
-      managedCodexAuth: {
-        status: 'valid',
-        authMethod: 'chatgpt',
-      },
-    })).toMatchObject({
-      visible: true,
-      selectable: true,
-      reason: 'ready',
-    });
-  });
 
   it('does not treat Codex API-key auth as subscription readiness', () => {
     expect(isManagedCodexSubscriptionAuthValid({
@@ -668,24 +549,11 @@ describe('Managed Codex provider readiness', () => {
     })).toBe(false);
   });
 
-  it('preserves explicit provider disablement even after readiness succeeds', () => {
-    const providers = applyManagedCodexProviderReadiness([
-      { ...MANAGED_CODEX_PROVIDER, enabled: false },
-    ], {
-      managedCodexProviderDevGate: true,
-      disabledProviderIds: [CODEX_SUBSCRIPTION_PROVIDER_ID],
-      managedCodexRuntimeInstall: {
-        status: 'installed',
-        usable: true,
-        installedVersion: MANAGED_CODEX_REQUIRED_RUNTIME.version,
-      },
-      managedCodexAuth: {
-        status: 'valid',
-        authMethod: 'chatgpt',
-      },
-    });
+});
 
-    expect(providers[0].enabled).toBe(false);
-    expect(providers[0].runtimeReady).toBe(true);
+describe('Managed Codex provider availability', () => {
+  it('stays disabled regardless of the legacy developer gate', () => {
+    expect(isManagedCodexProviderGateEnabled({ managedCodexProviderDevGate: true })).toBe(false);
+    expect(isManagedCodexProviderGateEnabled({})).toBe(false);
   });
 });

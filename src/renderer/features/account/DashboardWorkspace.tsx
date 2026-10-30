@@ -14,8 +14,9 @@ import {
   Tooltip,
   type ChartConfiguration,
 } from 'chart.js';
-import { ChevronDownIcon, LoaderIcon } from '@/components/icons';
+import { LoaderIcon } from '@/components/icons';
 import { sub2api, sub2apiErrorCode } from '@/api/sub2api';
+import CustomSelect from '@/components/CustomSelect';
 import DateRangePicker from './DateRangePicker';
 
 Chart.register(ArcElement, CategoryScale, DoughnutController, Filler, Legend, LineController, LineElement, LinearScale, PointElement, Tooltip);
@@ -206,15 +207,15 @@ export default function DashboardWorkspace({
           <div className="ml-auto flex items-center gap-2">
             <span className="text-sm font-medium text-[var(--ink)]">{t('sub2api.dashboard.granularity')}:</span>
             <div className="relative w-28">
-              <select
+              <CustomSelect
                 value={granularity}
-                onChange={event => setGranularity(event.target.value === 'hour' ? 'hour' : 'day')}
-                className="w-full appearance-none rounded-lg border border-[var(--line)] bg-[var(--paper-elevated)] px-3 py-2 pr-8 text-sm font-medium text-[var(--ink)] outline-none hover:border-[var(--ink-muted)] focus:border-[var(--focus-border)] focus:ring-2 focus:ring-[var(--focus-border)]/30"
-              >
-                <option value="day">{t('sub2api.dashboard.day')}</option>
-                <option value="hour">{t('sub2api.dashboard.hour')}</option>
-              </select>
-              <ChevronDownIcon className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--ink-muted)]" />
+                options={[
+                  { value: 'day', label: t('sub2api.dashboard.day') },
+                  { value: 'hour', label: t('sub2api.dashboard.hour') },
+                ]}
+                onChange={value => setGranularity(value === 'hour' ? 'hour' : 'day')}
+                ariaLabel={t('sub2api.dashboard.granularity')}
+              />
             </div>
           </div>
         </div>

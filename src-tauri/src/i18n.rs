@@ -150,35 +150,35 @@ fn persist_to_disk(value: UiLanguage) -> Result<(), String> {
 
 pub fn t<'a>(key: &'a str, locale: SupportedLocale) -> &'a str {
     match (locale, key) {
-        (SupportedLocale::ZhCn, "tray.open") => "打开 LSAGENT",
+        (SupportedLocale::ZhCn, "tray.open") => "打开 灵思AGENT",
         (SupportedLocale::ZhCn, "tray.recording") => "正在录音…",
         (SupportedLocale::ZhCn, "tray.settings") => "设置",
         (SupportedLocale::ZhCn, "tray.forceWakeLock") => "阻止电脑睡眠",
         (SupportedLocale::ZhCn, "tray.exit") => "退出",
-        (SupportedLocale::ZhCn, "notification.sessionCompleteTitle") => "LSAGENT - 任务完成",
+        (SupportedLocale::ZhCn, "notification.sessionCompleteTitle") => "灵思AGENT - 任务完成",
         (SupportedLocale::ZhCn, "notification.sessionCompleteBody") => "请您查看结果",
-        (SupportedLocale::ZhCn, "notification.sessionStoppedTitle") => "LSAGENT - 任务已停止",
+        (SupportedLocale::ZhCn, "notification.sessionStoppedTitle") => "灵思AGENT - 任务已停止",
         (SupportedLocale::ZhCn, "notification.sessionStoppedBody") => "请您查看当前结果",
-        (SupportedLocale::ZhCn, "notification.sessionErrorTitle") => "LSAGENT - 任务失败",
+        (SupportedLocale::ZhCn, "notification.sessionErrorTitle") => "灵思AGENT - 任务失败",
         (SupportedLocale::ZhCn, "notification.sessionErrorBody") => "请您查看错误详情",
-        (SupportedLocale::ZhCn, "notification.centerAnnouncementTitle") => "LSAGENT 公告",
+        (SupportedLocale::ZhCn, "notification.centerAnnouncementTitle") => "灵思AGENT 公告",
         (SupportedLocale::ZhCn, "notification.centerCommentTitle") => "Issue 有新评论",
-        (SupportedLocale::EnUs, "tray.open") => "Open LSAGENT",
+        (SupportedLocale::EnUs, "tray.open") => "Open 灵思AGENT",
         (SupportedLocale::EnUs, "tray.recording") => "Recording…",
         (SupportedLocale::EnUs, "tray.settings") => "Settings",
         (SupportedLocale::EnUs, "tray.forceWakeLock") => "Prevent computer sleep",
         (SupportedLocale::EnUs, "tray.exit") => "Quit",
-        (SupportedLocale::EnUs, "notification.sessionCompleteTitle") => "LSAGENT - Task complete",
+        (SupportedLocale::EnUs, "notification.sessionCompleteTitle") => "灵思AGENT - Task complete",
         (SupportedLocale::EnUs, "notification.sessionCompleteBody") => "Please review the result",
-        (SupportedLocale::EnUs, "notification.sessionStoppedTitle") => "LSAGENT - Task stopped",
+        (SupportedLocale::EnUs, "notification.sessionStoppedTitle") => "灵思AGENT - Task stopped",
         (SupportedLocale::EnUs, "notification.sessionStoppedBody") => {
             "Please review the current result"
         }
-        (SupportedLocale::EnUs, "notification.sessionErrorTitle") => "LSAGENT - Task failed",
+        (SupportedLocale::EnUs, "notification.sessionErrorTitle") => "灵思AGENT - Task failed",
         (SupportedLocale::EnUs, "notification.sessionErrorBody") => {
             "Please review the error details"
         }
-        (SupportedLocale::EnUs, "notification.centerAnnouncementTitle") => "LSAGENT announcement",
+        (SupportedLocale::EnUs, "notification.centerAnnouncementTitle") => "灵思AGENT announcement",
         (SupportedLocale::EnUs, "notification.centerCommentTitle") => "New Issue comment",
         _ => key,
     }
@@ -277,7 +277,7 @@ mod tests {
     fn translates_native_session_completion_notifications() {
         assert_eq!(
             t("notification.sessionCompleteTitle", SupportedLocale::ZhCn),
-            "LSAGENT - 任务完成"
+            "灵思AGENT - 任务完成"
         );
         assert_eq!(
             t("notification.sessionErrorBody", SupportedLocale::EnUs),

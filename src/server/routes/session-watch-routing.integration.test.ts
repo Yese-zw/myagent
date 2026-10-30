@@ -29,10 +29,6 @@ const reference: NetworkReturnReference = {
   opId: '00000000-0000-4000-8000-000000000001',
   returnRouteId: '00000000-0000-4000-8000-000000000002',
 };
-const replacement: NetworkReturnReference = {
-  opId: '00000000-0000-4000-8000-000000000003',
-  returnRouteId: '00000000-0000-4000-8000-000000000004',
-};
 
 function pending(watchId: string, watcherSessionId: string, networkReturn?: NetworkReturnReference) {
   return registerPendingSessionWatch({

@@ -1,7 +1,7 @@
 /* English localization */
-CFBundleDisplayName = "LSAGENT";
-CFBundleName = "LSAGENT";
-NSAppleEventsUsageDescription = "LSAGENT needs to control other apps so the AI can activate windows, run AppleScript, and perform desktop automation on your behalf.";
-NSMicrophoneUsageDescription = "LSAGENT uses the microphone when you record a meeting and stores the recording locally.";
-NSAudioCaptureUsageDescription = "LSAGENT captures system audio when you record a meeting and stores the recording locally.";
-NSScreenCaptureUsageDescription = "LSAGENT uses Screen Recording permission to capture screen content when you request a screenshot, or to capture system audio with ScreenCaptureKit when you record a meeting; meeting recording doesn't save screen video.";
+CFBundleDisplayName = "灵思AGENT";
+CFBundleName = "灵思AGENT";
+NSAppleEventsUsageDescription = "灵思AGENT needs to control other apps so the AI can activate windows, run AppleScript, and perform desktop automation on your behalf.";
+NSMicrophoneUsageDescription = "灵思AGENT uses the microphone when you record a meeting and stores the recording locally.";
+NSAudioCaptureUsageDescription = "灵思AGENT captures system audio when you record a meeting and stores the recording locally.";
+NSScreenCaptureUsageDescription = "灵思AGENT uses Screen Recording permission to capture screen content when you request a screenshot, or to capture system audio with ScreenCaptureKit when you record a meeting; meeting recording doesn't save screen video.";

@@ -20,8 +20,8 @@ export function buildPackagedGatewayProvider(models: ModelEntity[] = []): Provid
   const baseUrl = packagedGatewayBaseUrl();
   return {
     id: MYAGENTS_PROVIDER_ID,
-    name: 'LSAGENT',
-    vendor: 'LSAGENT',
+    name: '灵思AGENT',
+    vendor: '灵思AGENT',
     cloudProvider: '官方',
     type: 'api',
     primaryModel: models[0]?.model ?? '',

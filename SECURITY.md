@@ -16,7 +16,7 @@
 
 ### Reporting a Vulnerability
 
-If you discover a security vulnerability, please report it by emailing **myagents.io@gmail.com**.
+If you discover a security vulnerability, please report it by emailing **aipaper2025@163.com**.
 
 **Please do NOT:**
 - Open a public GitHub issue for security vulnerabilities
@@ -57,7 +57,7 @@ When using LSAGENT:
 
 ### 报告漏洞
 
-如果您发现安全漏洞，请发送邮件至 **myagents.io@gmail.com**。
+如果您发现安全漏洞，请发送邮件至 **aipaper2025@163.com**。
 
 **请勿：**
 - 为安全漏洞创建公开的 GitHub issue

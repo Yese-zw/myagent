@@ -559,7 +559,7 @@ export function createCompatRuntime(rustPort: number, botId: string, pluginId: s
                   'Content-Type': 'application/json',
                   ...(process.env.MYAGENTS_INTERNAL_CLI_TOKEN
                     ? {
-                        'X-LSAGENT-Internal-Cli-Token':
+                        'x-myagents-internal-cli-token':
                           process.env.MYAGENTS_INTERNAL_CLI_TOKEN,
                       }
                     : {}),
@@ -785,7 +785,7 @@ export function createCompatRuntime(rustPort: number, botId: string, pluginId: s
                   'Content-Type': 'application/json',
                   ...(process.env.MYAGENTS_INTERNAL_CLI_TOKEN
                     ? {
-                        'X-LSAGENT-Internal-Cli-Token':
+                        'x-myagents-internal-cli-token':
                           process.env.MYAGENTS_INTERNAL_CLI_TOKEN,
                       }
                     : {}),

@@ -65,7 +65,7 @@ export default function Account({ isActive }: { isActive: boolean }) {
     } finally {
       if (current === sequence.current) setRefreshing(false);
     }
-  }, [account.user, cacheKey, section, t]);
+  }, [account.user, cacheKey, page, section, t]);
   useEffect(() => {
     if (isActive) void load();
   }, [isActive, load, refreshKey]);

@@ -1732,7 +1732,7 @@ export async function handleAgentList(
   }
 }
 
-export async function handleAgentDiscovery(payload: { localOnly?: boolean } = {}): Promise<AdminResponse> {
+export async function handleAgentDiscovery(_payload: { localOnly?: boolean } = {}): Promise<AdminResponse> {
   try {
     const { getAgentDiscovery } = await import('./agent-discovery');
     return { success: true, data: await getAgentDiscovery() };

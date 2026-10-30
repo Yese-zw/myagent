@@ -106,7 +106,7 @@ process.stdout.write(lock.packRevision);
 NODE
 )
 
-PUBLIC_BASE_URL="${DOWNLOAD_BASE_URL}/models/speech/sets/${PACK_REVISION}"
+PUBLIC_BASE_URL="https://download.myagents.io/models/speech/sets/${PACK_REVISION}"
 R2_TARGET="r2:${R2_BUCKET}/models/speech/sets/${PACK_REVISION}/"
 
 if [ ! -f "$ENV_FILE" ]; then

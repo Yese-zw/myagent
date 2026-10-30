@@ -1,6 +1,6 @@
 {
   "name": "myagents",
-  "description": "LSAGENT - Desktop Claude Code for everyone. AI-powered productivity, not just for developers.",
+  "description": "灵思AGENT - Desktop Claude Code for everyone. AI-powered productivity, not just for developers.",
   "type": "module",
   "version": "1.0.0",
   "license": "AGPL-3.0-only",
@@ -20,14 +20,10 @@
       "onFail": "error"
     }
   },
-  "author": "LSAGENT Team <myagents.io@gmail.com>",
+  "author": "灵思AGENT Team <aipaper2025@163.com>",
   "homepage": "https://api.lingsiai.cn/home",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/hAcKlyc/MyAgents.git"
-  },
   "bugs": {
-    "url": "https://github.com/hAcKlyc/MyAgents/issues"
+    "email": "aipaper2025@163.com"
   },
   "keywords": [
     "claude",

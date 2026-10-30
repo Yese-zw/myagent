@@ -26,7 +26,7 @@ brand right must be expressly granted in a written agreement.
 
 This policy does not limit any use that applicable law permits without a
 license. It is not legal advice. For trademark or brand-licensing inquiries,
-contact [myagents.io@gmail.com](mailto:myagents.io@gmail.com).
+contact [aipaper2025@163.com](mailto:aipaper2025@163.com).
 
 ### Language
 
@@ -50,7 +50,7 @@ LSAGENT 的软件许可（包括 AGPL 及任何商业软件许可）本身不授
 均必须在书面协议中明确授予。
 
 本政策不限制适用法律允许无需许可即可进行的使用，也不构成法律意见。商标或品牌授权咨询请联系
-[myagents.io@gmail.com](mailto:myagents.io@gmail.com)。
+[aipaper2025@163.com](mailto:aipaper2025@163.com)。
 
 ### 语言与效力
 

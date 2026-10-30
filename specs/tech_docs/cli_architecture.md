@@ -456,7 +456,7 @@ session event 类型时必须同时更新该渲染层、目标 Sidecar 处理路
 
 外部 CLI 的 addressed Session 读写（list/start/send/get/state）必须在生产 Sidecar composition 中登记为 common：Global Host 只委托目标 owner，不要求调用方拥有 Session。`sidecar-composition.unit.test.ts` 从公开 capability 表逐项验证 Global 能进入 caller admission，并验证 watch 管理与当前 Session 私有端点仍留在 Session role；不能只用 development-union 或下层 handler 测试证明入口可用。
 
-原本地命令与本地 ID 继续使用原路径。Agent list 合并在线网络对象，show/start/list 接受 qualified Agent selector，get/send/state/watch 接受 qualified Session selector；完整代号不能截短或按名称猜对象。Node 统一 router 只选择寻址/传输，Rust App 拥有设备身份与 E2EE，目标仍交给原 Inbox/SessionEngine。start/send 只确认异步接纳；内部 Session 保留原回投与 watch，外部 CLI 仍 one-way。离线明确失败，无云端留存或自动重发。实现/预算/回程 owner 见 [Agent 网络](./agent_network.md)。
+原本地命令与本地 ID 继续使用原路径。Agent list 合并在线网络对象，show/start/list 接受 qualified Agent selector，get/send/state/watch 接受 qualified Session selector；完整代号不能截短或按名称猜对象。Node 统一 router 只选择寻址/传输，Rust App 拥有设备身份与 E2EE，目标仍交给原 Inbox/SessionEngine。start/send 只确认异步接纳；内部 Session 保留原回投与 watch，外部 CLI 仍 one-way。离线明确失败，无云端留存或自动重发。实现/预算/回程 owner 见 Agent 网络。
 
 `session get` 经 Rust 解析当前 transcript owner：有 ready Session Sidecar 时，通过其仅属 Session 的 exact route `/api/internal/session/text-page` 读取真实内存/流式投影，并验证内部 caller credential；无活跃 owner 时读取持久历史。capability 表必须登记该委托端点，不能把 Global 或调用方 overlay 当作目标实时历史，也不能开放整个 `/api/internal/` prefix。
 

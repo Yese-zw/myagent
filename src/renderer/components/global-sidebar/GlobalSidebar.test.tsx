@@ -1498,7 +1498,7 @@ describe('GlobalSidebar rail flyout', () => {
     expect(coldFilters).toHaveTextContent(String(i18n.t('app:historyOverlay.filters.favorite')));
     expect(document.querySelector('[data-history-search-fallback-compact]')).toBeInTheDocument();
 
-    const backdrop = coldPanel?.parentElement ?? null;
+    const backdrop = coldPanel?.closest<HTMLElement>('[data-overlay-backdrop]') ?? null;
     expect(container).not.toContainElement(backdrop);
     expect(backdrop?.parentElement).toBe(document.body);
 

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CalendarIcon, ChevronDownIcon, ChevronRightIcon } from '@/components/icons';
 
@@ -41,10 +41,10 @@ export default function DateRangePicker({
       return { start: formatDate(new Date(now.getFullYear(), now.getMonth() - 1, 1)), end: formatDate(new Date(now.getFullYear(), now.getMonth(), 0)) };
     } },
   ]), [t]);
-  const matchPreset = (start: string, end: string) => presets.find(item => {
+  const matchPreset = useCallback((start: string, end: string) => presets.find(item => {
     const range = item.range();
     return range.start === start && range.end === end;
-  })?.value ?? null;
+  })?.value ?? null, [presets]);
   const [open, setOpen] = useState(false);
   const [draftStart, setDraftStart] = useState(startDate);
   const [draftEnd, setDraftEnd] = useState(endDate);
@@ -53,20 +53,28 @@ export default function DateRangePicker({
   const menuRef = useRef<HTMLDivElement>(null);
   const [menuStyle, setMenuStyle] = useState<CSSProperties>({});
 
-  useEffect(() => {
+  const [synced, setSynced] = useState({ startDate, endDate, presets });
+  if (synced.startDate !== startDate || synced.endDate !== endDate || synced.presets !== presets) {
+    setSynced({ startDate, endDate, presets });
     setDraftStart(startDate);
     setDraftEnd(endDate);
     setPreset(matchPreset(startDate, endDate));
-  }, [endDate, presets, startDate]);
+  }
+
+  const toggleOpen = () => {
+    if (!open) {
+      const trigger = triggerRef.current?.getBoundingClientRect();
+      if (trigger) {
+        const width = Math.max(320, trigger.width);
+        const left = Math.min(Math.max(8, trigger.left), window.innerWidth - width - 8);
+        setMenuStyle({ position: 'fixed', top: trigger.bottom + 4, left, minWidth: width, zIndex: 80 });
+      }
+    }
+    setOpen(value => !value);
+  };
 
   useEffect(() => {
     if (!open) return;
-    const trigger = triggerRef.current?.getBoundingClientRect();
-    if (trigger) {
-      const width = Math.max(320, trigger.width);
-      const left = Math.min(Math.max(8, trigger.left), window.innerWidth - width - 8);
-      setMenuStyle({ position: 'fixed', top: trigger.bottom + 4, left, minWidth: width, zIndex: 80 });
-    }
     const onPointer = (event: MouseEvent) => {
       const target = event.target as Node;
       if (!triggerRef.current?.contains(target) && !menuRef.current?.contains(target)) setOpen(false);
@@ -97,7 +105,7 @@ export default function DateRangePicker({
         ref={triggerRef}
         type="button"
         aria-expanded={open}
-        onClick={() => setOpen(value => !value)}
+        onClick={toggleOpen}
         className={`flex items-center gap-2 rounded-lg border bg-[var(--paper-elevated)] px-3 py-2 text-sm text-[var(--ink)] transition-colors hover:border-[var(--ink-muted)] ${open ? 'border-[var(--focus-border)] ring-2 ring-[var(--focus-border)]/30' : 'border-[var(--line)]'}`}
       >
         <CalendarIcon className="h-4 w-4 text-[var(--ink-muted)]" />

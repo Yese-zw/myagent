@@ -8,7 +8,6 @@ import {
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { i18n } from "@/i18n";
-import { REACT_LOG_EVENT } from "@/utils/frontendLogger";
 
 import { ToastProvider } from "@/components/Toast";
 import { DEFAULT_CONFIG, type AppConfig, type Provider } from "@/config/types";
@@ -145,6 +144,13 @@ function getImageToolSwitch(): HTMLElement {
   return imageToolSwitch;
 }
 
+function getDimmer(): HTMLElement | null {
+  return screen
+    .getByRole("heading", { name: "图片理解设置" })
+    .closest<HTMLElement>("[data-overlay-backdrop]")
+    ?.querySelector<HTMLElement>(":scope > [aria-hidden='true']") ?? null;
+}
+
 describe("Settings image-understanding enable flow", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -175,30 +181,20 @@ describe("Settings image-understanding enable flow", () => {
     });
   });
 
-  it("keeps a real provider model panel stable when Settings receives request logs (#582)", async () => {
-    await i18n.changeLanguage('en-US');
-    let resolveModels!: (value: unknown) => void;
-    settingsMocks.invoke.mockImplementation(async (command: string) => {
-      if (command === 'cmd_fetch_provider_models') {
-        return new Promise(resolve => { resolveModels = resolve; });
-      }
-      return undefined;
-    });
-    const user = userEvent.setup();
-    render(<ToastProvider><Settings mode="settings" initialSection="providers" isActive /></ToastProvider>);
-    await user.click(screen.getByTitle('Manage'));
-    await user.click(screen.getByRole('button', { name: 'Manage models' }));
-    const calls = () => settingsMocks.invoke.mock.calls.filter(([command]) => command === 'cmd_fetch_provider_models');
-    expect(calls()).toHaveLength(1);
-    for (let index = 0; index < 5; index++) {
-      act(() => window.dispatchEvent(new CustomEvent(REACT_LOG_EVENT, { detail: {
-        source: 'rust', level: 'info', message: '[model-discovery] Fetching models', timestamp: '2026-09-11 12:00:00',
-      } })));
-    }
-    expect(calls()).toHaveLength(1);
-    await act(async () => resolveModels({ data: [{ id: 'settings-discovered-model' }] }));
-    expect(screen.getByText('settings-discovered-model')).toBeInTheDocument();
-    expect(calls()).toHaveLength(1);
+  it("no longer exposes the provider management section (packaged account gateway is the only AI backend)", async () => {
+    await i18n.changeLanguage("en-US");
+    settingsMocks.invoke.mockResolvedValue(undefined);
+    render(
+      <ToastProvider>
+        <Settings mode="settings" initialSection="providers" isActive />
+      </ToastProvider>,
+    );
+    await waitFor(() =>
+      expect(screen.queryByTitle("Manage")).not.toBeInTheDocument(),
+    );
+    expect(
+      screen.queryByRole("button", { name: "Manage models" }),
+    ).not.toBeInTheDocument();
   });
 
   it("keeps the switch off on cancel, then locks dismissal until confirmed save enables it", async () => {
@@ -240,9 +236,7 @@ describe("Settings image-understanding enable flow", () => {
     ).not.toBeInTheDocument();
 
     await user.click(imageToolSwitch);
-    const backdrop = screen
-      .getByRole("heading", { name: "图片理解设置" })
-      .closest(".fixed.inset-0");
+    const backdrop = getDimmer();
     expect(backdrop).not.toBeNull();
     fireEvent.mouseDown(backdrop!);
     expect(
@@ -262,11 +256,7 @@ describe("Settings image-understanding enable flow", () => {
 
     expect(settingsMocks.atomicModifyConfig).toHaveBeenCalledOnce();
     expect(screen.getByRole("button", { name: "取消" })).toBeDisabled();
-    fireEvent.mouseDown(
-      screen
-        .getByRole("heading", { name: "图片理解设置" })
-        .closest(".fixed.inset-0")!,
-    );
+    fireEvent.mouseDown(getDimmer()!);
     act(() => expect(dismissTopmost()).toBe(true));
     expect(
       screen.getByRole("heading", { name: "图片理解设置" }),

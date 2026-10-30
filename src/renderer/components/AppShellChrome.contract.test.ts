@@ -345,7 +345,7 @@ describe('App Shell chrome contract', () => {
       'sticky top-0',
     );
     expect(settings).toContain(
-      'className="h-full flex-1 overflow-y-auto overscroll-contain"',
+      'className="h-full flex-1 overflow-y-auto overscroll-contain [scrollbar-gutter:stable]"',
     );
   });
 

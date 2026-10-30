@@ -18,7 +18,7 @@ LSAGENT 使用 Tauri v2 + Rust、React 19 + TypeScript，以及 Node.js v24 Side
 先克隆本仓库，贡献代码时可替换为自己的 fork：
 
 ```bash
-git clone https://github.com/hAcKlyc/MyAgents.git
+git clone <你的仓库地址>
 cd LSAGENT
 ```
 

@@ -163,7 +163,7 @@ describe('SimpleChatInput send paths', () => {
   it('replaces the exact @ fragment, preserves the tail/caret and keeps typed mentions on rejected send', async () => {
     await i18n.changeLanguage('zh-CN');
     const agent = { selector: 'local', name: 'Review Agent', isLocal: true, deviceId: null, deviceName: null, platform: null, description: 'Reviewer', source: null };
-    workspaceMocks.discovery.mockResolvedValue({ items: [agent], complete: true, networkStatus: 'connecting', authGeneration: 0, principalId: null, networkId: null });
+    workspaceMocks.discovery.mockResolvedValue({ items: [agent], complete: true, networkStatus: 'signedOut', authGeneration: 0, principalId: null, networkId: null });
     const onSend = vi.fn().mockResolvedValue(false);
     renderInput({ value: 'before  after', onSend });
     const input = screen.getByRole('textbox') as HTMLTextAreaElement;

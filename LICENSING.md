@@ -63,7 +63,7 @@ arrangements.
 
 Commercial rights arise only under a written agreement executed by the relevant
 parties. For an evaluation or quotation, contact
-[myagents.io@gmail.com](mailto:myagents.io@gmail.com).
+[aipaper2025@163.com](mailto:aipaper2025@163.com).
 See [COMMERCIAL-LICENSING.md](COMMERCIAL-LICENSING.md) for a non-binding overview
 of typical commercial terms.
 
@@ -140,7 +140,7 @@ AGPL 允许个人和组织运行、研究、修改、复制、分发和商业使
 商业许可。具体结论取决于实际架构、分发方式、网络交互和合同安排。
 
 商业权利仅根据相关各方正式签署的书面协议产生。如需评估或报价，请联系
-[myagents.io@gmail.com](mailto:myagents.io@gmail.com)。
+[aipaper2025@163.com](mailto:aipaper2025@163.com)。
 典型商业条款的非约束性概要见 [COMMERCIAL-LICENSING.md](COMMERCIAL-LICENSING.md)。
 
 ### 第三方材料

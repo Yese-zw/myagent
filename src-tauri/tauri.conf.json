@@ -2,7 +2,7 @@
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "灵思AGENT",
   "version": "1.0.0",
-  "identifier": "com.myagents.app",
+  "identifier": "com.lsagents.app",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:5173",
@@ -19,7 +19,7 @@
           "$HOME/.myagents/**"
         ]
       },
-      "csp": "default-src 'self' ipc: tauri: asset: http://ipc.localhost; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' ipc: tauri: asset: http://ipc.localhost http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://download.myagents.io; img-src 'self' data: blob: asset: myagents-resource: myagents: http://myagents-resource.localhost http://myagents.localhost http://asset.localhost https://asset.localhost https://download.myagents.io https:; media-src 'self' blob: asset: myagents-resource: myagents: http://myagents-resource.localhost http://myagents.localhost http://asset.localhost https://asset.localhost;",
+      "csp": "default-src 'self' ipc: tauri: asset: http://ipc.localhost; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' ipc: tauri: asset: http://ipc.localhost http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:*; img-src 'self' data: blob: asset: myagents-resource: myagents: http://myagents-resource.localhost http://myagents.localhost http://asset.localhost https://asset.localhost https:; media-src 'self' blob: asset: myagents-resource: myagents: http://myagents-resource.localhost http://myagents.localhost http://asset.localhost https://asset.localhost;",
       "dangerousDisableAssetCspModification": true
     }
   },
@@ -59,6 +59,7 @@
       "../src-tauri/resources/cli": "cli",
       "../src-tauri/resources/document-processing": "document-processing",
       "../src-tauri/resources/speech-inference": "speech-inference",
+      "../src-tauri/resources/speech-models": "speech-models",
       "../bundled-workspaces": "bundled-workspaces",
       "../LICENSE": "legal/LICENSE",
       "../LICENSING.md": "legal/LICENSING.md",

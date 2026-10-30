@@ -119,7 +119,7 @@ payload，`[System]收到来自系统投送的信息` 是唯一 visible tail。�
 
 `src/shared/agentMentions.ts::composeQueryReminder` 是 Desktop query 组合入口；`SessionEngine` 的公共 facade 在选择具体 Runtime 后、进入 adapter 前处理结构化 context。Goal owner 提供 primary Goal context；任务讨论/悬浮球入口提供 typed context；Agent 提及提供当前 discovery 信息。各部分进入同一个 leading envelope，首个 primary tag 保留原 badge；仅 Agent 信息时使用 `AGENT_MENTIONS` badge。变量字段先 escape，Agent description 不成为产品 instruction；不能把用户输入的 XML 解析成可信 metadata。
 
-原 `SessionMessage.desktopQuery` 保存 visibleText 与非秘密 typed context，builtin/external 原 queue/codec/rewind 都保持它。retry 使用此 annotation 重新查目录和组合，不能重用旧 hidden 字符串再追加 envelope。展示与 Desktop→IM 镜像仍走既有 visible helpers。具体 identity/草稿/分页边界见 [Agent 网络](./agent_network.md)。
+原 `SessionMessage.desktopQuery` 保存 visibleText 与非秘密 typed context，builtin/external 原 queue/codec/rewind 都保持它。retry 使用此 annotation 重新查目录和组合，不能重用旧 hidden 字符串再追加 envelope。展示与 Desktop→IM 镜像仍走既有 visible helpers。具体 identity/草稿/分页边界见 Agent 网络。
 
 ## 生产使用点
 

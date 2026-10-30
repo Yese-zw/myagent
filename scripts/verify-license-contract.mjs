@@ -9,7 +9,7 @@ const read = (path) => normalizeTextLineEndings(readFileSync(resolve(root, path)
 const json = (path) => JSON.parse(read(path));
 
 const expectedLicense = 'AGPL-3.0-only';
-const expectedEmail = 'myagents.io@gmail.com';
+const expectedEmail = 'aipaper2025@163.com';
 const canonicalLicenseSha256 = '0d96a4ff68ad6d4b6f1f30f713b18d5184912ba8dd389f86aa7710db079abcb0';
 const legalFiles = [
   'LICENSE',

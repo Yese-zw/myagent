@@ -32,7 +32,7 @@ We as members, contributors, and leaders pledge to make participation in our com
 
 ### Enforcement
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the project team at myagents.io@gmail.com. All complaints will be reviewed and investigated promptly and fairly.
+Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the project team at aipaper2025@163.com. All complaints will be reviewed and investigated promptly and fairly.
 
 ### Attribution
 
@@ -68,7 +68,7 @@ This Code of Conduct is adapted from the [Contributor Covenant](https://www.cont
 
 ### 执行
 
-可以向项目团队报告滥用、骚扰或其他不可接受的行为，邮箱：myagents.io@gmail.com。所有投诉都将得到及时、公正的审查和调查。
+可以向项目团队报告滥用、骚扰或其他不可接受的行为，邮箱：aipaper2025@163.com。所有投诉都将得到及时、公正的审查和调查。
 
 ### 归属
 

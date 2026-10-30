@@ -21,6 +21,7 @@ const CODEX_PROVIDER_ID: &str = "codex-sub";
 pub(crate) const REQUIRED_VERSION: &str = env!("MYAGENTS_MANAGED_CODEX_VERSION");
 pub(crate) const REQUIRED_RUNTIME_SET: &str = env!("MYAGENTS_MANAGED_CODEX_RUNTIME_SET");
 const RUNTIME_SETS_BASE_URL: &str = "https://download.myagents.io/runtimes/codex/sets";
+const MANAGED_CODEX_DOWNLOAD_ENABLED: bool = false;
 const MANIFEST_SCHEMA_VERSION: u32 = 1;
 const DOWNLOAD_HOST: &str = "download.myagents.io";
 const DOWNLOAD_PATH_PREFIX: &str = "/runtimes/codex/";
@@ -2420,6 +2421,10 @@ pub async fn cmd_managed_codex_check_update() -> Result<ManagedCodexStatus, Stri
 
 #[tauri::command]
 pub async fn cmd_managed_codex_download() -> Result<ManagedCodexStatus, String> {
+    // 灵思AGENT 不分发托管 Codex 运行时，且不再依赖上游下载服务。
+    if !MANAGED_CODEX_DOWNLOAD_ENABLED {
+        return Err("[managed-codex] 当前版本未提供 Codex 运行时下载".to_string());
+    }
     let runtime_handle = tokio::runtime::Handle::current();
     tauri::async_runtime::spawn_blocking(move || -> Result<ManagedCodexStatus, String> {
         with_runtime_install_lock(|| {

@@ -30,7 +30,7 @@ describe('external CLI admission', () => {
   it('recognizes the App-injected internal capability before the public allowlist', async () => {
     const result = await admitAdminRequest(
       request({
-        'X-LSAGENT-Internal-Cli-Token': 'internal-capability',
+        'x-myagents-internal-cli-token': 'internal-capability',
       }),
       'config/set',
     );

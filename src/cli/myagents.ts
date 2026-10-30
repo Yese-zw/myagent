@@ -588,7 +588,7 @@ async function canShowInternalTopHelp(
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-LSAGENT-Internal-Cli-Token': token,
+        'x-myagents-internal-cli-token': token,
       },
       body: '{}',
       signal: AbortSignal.timeout(3_000),
@@ -621,7 +621,7 @@ export async function callApi(
       headers: {
         'Content-Type': 'application/json',
         ...(internalToken
-          ? { 'X-LSAGENT-Internal-Cli-Token': internalToken }
+          ? { 'x-myagents-internal-cli-token': internalToken }
           : externalToken
             ? { Authorization: `Bearer ${externalToken}` }
             : {}),

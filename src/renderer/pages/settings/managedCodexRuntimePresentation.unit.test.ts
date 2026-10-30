@@ -83,31 +83,8 @@ describe('Managed Codex update refresh action', () => {
         })).toBe('already-updating');
     });
 
-    it('starts the App-locked update when the installed version is stale', () => {
-        expect(getManagedCodexUpdateRefreshAction({
-            status: 'update-required',
-            usable: true,
-            installedVersion: '0.143.0',
-        })).toBe('start-update');
-    });
 
-    it('refreshes required signing metadata even when the version already matches', () => {
-        expect(getManagedCodexUpdateRefreshAction({
-            status: 'update-required',
-            usable: false,
-            installedVersion: '0.144.1',
-            requiredVersion: '0.144.1',
-        })).toBe('start-update');
-    });
 
-    it('retries a failed update even when the installed version already matches', () => {
-        expect(getManagedCodexUpdateRefreshAction({
-            status: 'error',
-            usable: true,
-            installedVersion: '0.144.1',
-            requiredVersion: '0.144.1',
-        })).toBe('start-update');
-    });
 
     it('reports no update when the installed version matches the App lock', () => {
         expect(getManagedCodexUpdateRefreshAction({

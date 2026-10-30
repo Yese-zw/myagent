@@ -33,7 +33,7 @@ function AccountField({
       <label htmlFor={id} className="mb-1.5 flex items-center gap-2 text-sm font-medium text-[var(--ink)]">
         {label}
         {badge && (
-          <span className="rounded-full bg-[var(--paper-inset)] px-2 py-0.5 text-[11px] font-normal text-[var(--ink-muted)]">
+          <span className="rounded-full bg-[var(--paper-inset)] px-2 py-0.5 text-xs font-normal text-[var(--ink-muted)]">
             {badge}
           </span>
         )}
@@ -263,7 +263,7 @@ export function Sub2apiAccountDialog({ account, settings, onAccount, onClose }: 
                 </div>
               </AccountField>
             </>}
-            {settings?.login_agreement_enabled && <div className="flex items-start gap-2 text-[13px] leading-5 text-[var(--ink-muted)]">
+            {settings?.login_agreement_enabled && <div className="flex items-start gap-2 text-sm leading-5 text-[var(--ink-muted)]">
               <input id="sub2api-agreed" type="checkbox" checked={agreed} disabled={busy} onChange={event => setAgreed(event.target.checked)} className="mt-1 h-4 w-4 accent-[var(--accent)]" />
               <p className="min-w-0">
                 <label htmlFor="sub2api-agreed" className="cursor-pointer">{t('sub2api.agree')} </label>

@@ -29,7 +29,7 @@ Write-Host "  $csp" -ForegroundColor DarkGray
 Write-Host ""
 
 # 验证关键部分
-$required = @("http://ipc.localhost", "asset:", "connect-src", "https://download.myagents.io")
+$required = @("http://ipc.localhost", "asset:", "connect-src")
 $missing = @()
 
 foreach ($part in $required) {

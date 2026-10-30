@@ -380,7 +380,13 @@ fn resolve_agent_runtime_identity_by_id_with_policy(
     ))
 }
 
+const MANAGED_CODEX_PROVIDER_AVAILABLE: bool = false;
+
 fn managed_codex_provider_ready(cfg: &serde_json::Value) -> bool {
+    // 托管 Codex 在灵思AGENT 中已停用；与 TS 侧 isManagedCodexProviderGateEnabled 保持一致。
+    if !MANAGED_CODEX_PROVIDER_AVAILABLE {
+        return false;
+    }
     let install = cfg.get("managedCodexRuntimeInstall");
     let auth = cfg.get("managedCodexAuth");
     let runtime_usable = install
@@ -682,89 +688,6 @@ pub(super) fn validate_sidecar_runtime_invariant(
 mod tests {
     use super::*;
 
-    #[test]
-    fn managed_codex_provider_ready_requires_explicit_gate_install_and_chatgpt_auth() {
-        let missing_gate = serde_json::json!({
-            "managedCodexRuntimeInstall": {
-                "status": "installed",
-                "usable": true,
-                "installedVersion": crate::managed_codex::REQUIRED_VERSION
-            },
-            "managedCodexAuth": {
-                "status": "valid",
-                "authMethod": "chatgpt"
-            }
-        });
-        assert!(!managed_codex_provider_ready(&missing_gate));
-
-        let ready = serde_json::json!({
-            "managedCodexProviderDevGate": true,
-            "managedCodexRuntimeInstall": {
-                "status": "installed",
-                "usable": true,
-                "installedVersion": crate::managed_codex::REQUIRED_VERSION
-            },
-            "managedCodexAuth": {
-                "status": "valid",
-                "authMethod": "chatgpt"
-            }
-        });
-        assert!(managed_codex_provider_ready(&ready));
-
-        let stale_but_usable = serde_json::json!({
-            "managedCodexProviderDevGate": true,
-            "managedCodexRuntimeInstall": {
-                "status": "downloading",
-                "usable": true,
-                "installedVersion": "0.0.0-previous"
-            },
-            "managedCodexAuth": {
-                "status": "valid",
-                "authMethod": "chatgpt"
-            }
-        });
-        assert!(managed_codex_provider_ready(&stale_but_usable));
-
-        let gate_off = serde_json::json!({
-            "managedCodexProviderDevGate": false,
-            "managedCodexRuntimeInstall": {
-                "status": "installed",
-                "installedVersion": crate::managed_codex::REQUIRED_VERSION
-            },
-            "managedCodexAuth": {
-                "status": "valid",
-                "authMethod": "chatgpt"
-            }
-        });
-        assert!(!managed_codex_provider_ready(&gate_off));
-
-        let api_key_auth = serde_json::json!({
-            "managedCodexProviderDevGate": true,
-            "managedCodexRuntimeInstall": {
-                "status": "installed",
-                "installedVersion": crate::managed_codex::REQUIRED_VERSION
-            },
-            "managedCodexAuth": {
-                "status": "valid",
-                "authMethod": "api-key"
-            }
-        });
-        assert!(!managed_codex_provider_ready(&api_key_auth));
-
-        let disabled = serde_json::json!({
-            "managedCodexProviderDevGate": true,
-            "disabledProviderIds": [CODEX_SUBSCRIPTION_PROVIDER_ID],
-            "managedCodexRuntimeInstall": {
-                "status": "installed",
-                "installedVersion": crate::managed_codex::REQUIRED_VERSION
-            },
-            "managedCodexAuth": {
-                "status": "valid",
-                "authMethod": "chatgpt"
-            }
-        });
-        assert!(!managed_codex_provider_ready(&disabled));
-    }
 
     #[test]
     fn workspace_path_match_reuses_canonical_workspace_identity() {
@@ -867,56 +790,6 @@ mod tests {
         assert_eq!(identity.runtime_source, None);
     }
 
-    #[test]
-    fn managed_codex_provider_only_owns_managed_compatible_agent_shapes() {
-        let config = serde_json::json!({
-            "managedCodexProviderDevGate": true,
-            "managedCodexRuntimeInstall": {
-                "usable": true
-            },
-            "managedCodexAuth": {
-                "status": "valid",
-                "authMethod": "chatgpt"
-            },
-            "agents": [
-                { "id": "current", "runtime": "builtin", "providerId": CODEX_SUBSCRIPTION_PROVIDER_ID },
-                {
-                    "id": "legacy",
-                    "runtime": "codex",
-                    "runtimeConfig": { "source": "managed-provider" },
-                    "providerId": CODEX_SUBSCRIPTION_PROVIDER_ID
-                },
-                { "id": "system-codex", "runtime": "codex", "providerId": CODEX_SUBSCRIPTION_PROVIDER_ID },
-                { "id": "claude-code", "runtime": "claude-code", "providerId": CODEX_SUBSCRIPTION_PROVIDER_ID },
-                {
-                    "id": "other-external",
-                    "runtime": "claude-code",
-                    "runtimeConfig": { "source": "managed-provider" },
-                    "providerId": CODEX_SUBSCRIPTION_PROVIDER_ID
-                },
-                { "id": "ordinary-provider", "runtime": "claude-code", "providerId": "anthropic-api" }
-            ]
-        });
-
-        for agent_id in ["current", "legacy"] {
-            let identity = resolve_agent_runtime_identity_by_id_from_value(&config, agent_id)
-                .expect("managed Agent identity");
-            assert_eq!(identity.runtime, "codex");
-            assert_eq!(identity.runtime_source.as_deref(), Some("managed-provider"));
-        }
-
-        for (agent_id, expected_runtime) in [
-            ("system-codex", "codex"),
-            ("claude-code", "claude-code"),
-            ("other-external", "claude-code"),
-            ("ordinary-provider", "claude-code"),
-        ] {
-            let identity = resolve_agent_runtime_identity_by_id_from_value(&config, agent_id)
-                .expect("explicit external Agent identity");
-            assert_eq!(identity.runtime, expected_runtime);
-            assert_eq!(identity.runtime_source.as_deref(), Some("system-cli"));
-        }
-    }
 
     #[test]
     fn explicit_external_choice_wins_over_dormant_managed_provider() {
@@ -1016,80 +889,6 @@ mod tests {
         assert!(identity.compatibility_error.is_some());
     }
 
-    #[test]
-    fn integrated_preferences_and_provider_constraints_follow_central_precedence() {
-        let config = serde_json::json!({
-            "managedCodexProviderDevGate": true,
-            "managedCodexRuntimeInstall": { "usable": true },
-            "managedCodexAuth": { "status": "valid", "authMethod": "chatgpt" },
-            "agents": [
-                {
-                    "id": "dsh",
-                    "runtimePreference": { "family": "integrated", "id": "dsh" }
-                },
-                {
-                    "id": "anthropic-sub",
-                    "providerId": ANTHROPIC_SUBSCRIPTION_PROVIDER_ID,
-                    "runtimePreference": { "family": "integrated", "id": "dsh" }
-                },
-                {
-                    "id": "antigravity",
-                    "providerId": ANTIGRAVITY_SUBSCRIPTION_PROVIDER_ID,
-                    "runtimePreference": { "family": "integrated", "id": "dsh" }
-                },
-                {
-                    "id": "anthropic-api",
-                    "providerId": "anthropic-api",
-                    "runtimePreference": { "family": "integrated", "id": "dsh" }
-                },
-                {
-                    "id": "managed",
-                    "providerId": CODEX_SUBSCRIPTION_PROVIDER_ID,
-                    "runtimePreference": { "family": "integrated", "id": "dsh" }
-                },
-                {
-                    "id": "external-wins",
-                    "providerId": CODEX_SUBSCRIPTION_PROVIDER_ID,
-                    "runtimePreference": { "family": "external", "id": "claude-code" }
-                }
-            ]
-        });
-
-        assert_eq!(
-            resolve_agent_runtime_identity_by_id_from_value(&config, "dsh")
-                .expect("DSH identity")
-                .runtime,
-            "dsh"
-        );
-        assert_eq!(
-            resolve_agent_runtime_identity_by_id_from_value(&config, "anthropic-sub")
-                .expect("Claude constraint")
-                .runtime,
-            "builtin"
-        );
-        assert_eq!(
-            resolve_agent_runtime_identity_by_id_from_value(&config, "antigravity")
-                .expect("Antigravity API route")
-                .runtime,
-            "dsh"
-        );
-        assert_eq!(
-            resolve_agent_runtime_identity_by_id_from_value(&config, "anthropic-api")
-                .expect("Claude API constraint")
-                .runtime,
-            "builtin"
-        );
-        let managed = resolve_agent_runtime_identity_by_id_from_value(&config, "managed")
-            .expect("managed Codex constraint");
-        assert_eq!(managed.runtime, "codex");
-        assert_eq!(managed.runtime_source.as_deref(), Some("managed-provider"));
-        assert_eq!(
-            resolve_agent_runtime_identity_by_id_from_value(&config, "external-wins")
-                .expect("explicit External preference")
-                .runtime,
-            "claude-code"
-        );
-    }
 
     #[test]
     fn dsh_only_policy_drives_real_agent_birth_and_rejects_incompatible_routes() {
@@ -1287,5 +1086,15 @@ mod tests {
         assert!(!session_metadata_matches_workspace_from_json(
             "missing", "/repo/a", &sessions,
         ));
+    }
+
+    #[test]
+    fn managed_codex_provider_is_never_ready() {
+        let cfg = serde_json::json!({
+            "managedCodexProviderDevGate": true,
+            "managedCodexRuntimeInstall": { "usable": true, "installedVersion": crate::managed_codex::REQUIRED_VERSION },
+            "managedCodexAuth": { "status": "valid", "authMethod": "chatgpt" }
+        });
+        assert!(!managed_codex_provider_ready(&cfg));
     }
 }

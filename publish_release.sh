@@ -22,7 +22,7 @@ ENV_FILE="${PROJECT_DIR}/.env"
 
 # 配置
 R2_BUCKET="myagents-releases"
-DOWNLOAD_BASE_URL="https://download.myagents.io"
+DOWNLOAD_BASE_URL="${DOWNLOAD_BASE_URL:?请先设置 DOWNLOAD_BASE_URL（你自己的下载域名，例如 https://download.example.com）}"
 DMG_MOUNT=""
 
 cd "${PROJECT_DIR}"

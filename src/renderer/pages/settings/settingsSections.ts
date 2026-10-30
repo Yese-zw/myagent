@@ -29,8 +29,6 @@ export const VALID_SECTIONS: SettingsSection[] = [
   'developer',
 ];
 
-export const MYAGENTS_GITHUB_URL = 'https://github.com/hAcKlyc/MyAgents';
-export const MYAGENTS_SOURCE_CODE_URL = MYAGENTS_GITHUB_URL;
 
 export const PLAYWRIGHT_DEVICE_PRESETS = [
   'iPhone 15 Pro',

@@ -19,7 +19,8 @@ Set-Location $ProjectDir
 $EnvFile = Join-Path $ProjectDir ".env"
 $RuntimeLockFile = Join-Path $ProjectDir "src\shared\managed-codex-runtime.json"
 $R2Bucket = "myagents-releases"
-$DownloadBaseUrl = "https://download.myagents.io"
+$DownloadBaseUrl = $env:DOWNLOAD_BASE_URL
+if (-not $DownloadBaseUrl) { throw "请先设置环境变量 DOWNLOAD_BASE_URL（你自己的下载域名）" }
 if (-not $OutDir) {
     $OutDir = Join-Path $ProjectDir "dist\managed-codex"
 }

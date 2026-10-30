@@ -174,7 +174,7 @@ jobs:
       - name: Generate update manifests and upload to R2
         env:
           VERSION: ${{ steps.version.outputs.version }}
-          DOWNLOAD_BASE_URL: https://download.myagents.io
+          DOWNLOAD_BASE_URL: ${{ vars.DOWNLOAD_BASE_URL }}
         run: |
           # Create update directory
           mkdir -p update-manifests
@@ -280,7 +280,7 @@ jobs:
       - name: Summary
         env:
           VERSION: ${{ steps.version.outputs.version }}
-          DOWNLOAD_BASE_URL: https://download.myagents.io
+          DOWNLOAD_BASE_URL: ${{ vars.DOWNLOAD_BASE_URL }}
         run: |
           echo "## Release v${VERSION} Published" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY

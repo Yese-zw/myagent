@@ -8,7 +8,7 @@ use base64::{engine::general_purpose, Engine as _};
 use minisign_verify::{PublicKey, Signature};
 
 // Keep this in sync with `tauri.conf.json > plugins.updater.pubkey`.
-pub(crate) const MYAGENTS_MINISIGN_PUBKEY: &str = "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEY3RkQ5QjIzMTE4RTgyRTkKUldUcGdvNFJJNXY5OTB3T2pnUzVUbjFrV203Zk5ZTDg0NVJRdGI0UVRranJzTUsvM0hGcmFlc0IK";
+pub(crate) const MYAGENTS_MINISIGN_PUBKEY: &str = "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDZEMjQxMjIzOUQxQ0I3QjMKUldTenR4eWRJeElrYlJjdmFpSUNXbEJmTnljeHRWdTVDUGJkY0pQdk5JdEVwcFA1MDRpVG45MFoK";
 
 fn decode_base64_text(value: &str, label: &str) -> Result<String, String> {
     let bytes = general_purpose::STANDARD

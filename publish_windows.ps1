@@ -76,7 +76,8 @@ $EnvFile = Join-Path $ProjectDir ".env"
 
 # 配置
 $R2Bucket = "myagents-releases"
-$DownloadBaseUrl = "https://download.myagents.io"
+$DownloadBaseUrl = $env:DOWNLOAD_BASE_URL
+if (-not $DownloadBaseUrl) { throw "请先设置环境变量 DOWNLOAD_BASE_URL（你自己的下载域名）" }
 
 Write-Host ""
 Write-Host "=========================================" -ForegroundColor Cyan

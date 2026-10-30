@@ -308,8 +308,7 @@ try {
     # 验证关键 CSP 指令是否存在
     $requiredCspParts = @(
         "http://ipc.localhost",
-        "asset:",
-        "https://download.myagents.io"
+        "asset:"
     )
 
     $missingParts = @()

@@ -4,7 +4,7 @@
 
 **A free, open-source, local-first Agent workbench and task system**
 
-[中文](README.md) · [English](README.en.md) · [Website & Download](https://myagents.io) · [Releases](https://github.com/hAcKlyc/MyAgents/releases) · [Contributing](CONTRIBUTING.md)
+[中文](README.md) · [English](README.en.md) · [Website & Download](https://myagents.io) · [Contributing](CONTRIBUTING.md)
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
 [![macOS](https://img.shields.io/badge/macOS-13.0+-black.svg)](https://myagents.io)
@@ -38,7 +38,7 @@ No server of your own is needed. Connect the computers you already have, with yo
 
 ## Quick start
 
-This document covers **0.5.0**. Check the [website](https://myagents.io) and [Releases](https://github.com/hAcKlyc/MyAgents/releases) for available downloads and release notes.
+This document covers **0.5.0**. Check the [website](https://myagents.io) for available downloads and release notes.
 
 1. **Install the app**: macOS 13+ (Apple Silicon / Intel) and Windows 10+ are supported. Download the appropriate installer; no separate Node.js installation or server setup is required.
 2. **Connect a model**: in Settings → Model Providers, sign in to a supported subscription or configure a model API, then select a compatible runtime and model. See the [model and runtime guide](bundled-skills/lsagent-docs/references/models-providers-runtimes.md).
@@ -150,7 +150,7 @@ Contributions, documentation improvements, and issue reports are welcome.
 - [Development guide](DEVELOPMENT.md#english): setup, local development, builds, and checks.
 - [Contributing](CONTRIBUTING.md): Issues, Pull Requests, and contribution terms.
 - [Architecture](specs/ARCHITECTURE.md): module responsibilities and design constraints.
-- [Changelog](CHANGELOG.md) · [Report an issue](https://github.com/hAcKlyc/MyAgents/issues).
+- [Changelog](CHANGELOG.md) · [Report an issue](mailto:aipaper2025@163.com).
 
 ## License
 
@@ -160,7 +160,7 @@ Individuals and companies may use it for free, including commercially, when
 they comply with the AGPL. A separate commercial license is required for
 closed-source modification, embedding, OEM distribution, proprietary
 distribution, or hosted offerings that do not comply with the AGPL. Contact
-[myagents.io@gmail.com](mailto:myagents.io@gmail.com).
+[aipaper2025@163.com](mailto:aipaper2025@163.com).
 
 See [LICENSING.md](LICENSING.md) for details,
 [COMMERCIAL-LICENSING.md](COMMERCIAL-LICENSING.md) for a commercial licensing

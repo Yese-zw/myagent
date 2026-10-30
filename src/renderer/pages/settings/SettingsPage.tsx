@@ -6299,48 +6299,6 @@ export default function Settings({
                       </div>
                     </div>)}
 
-                    {/* Managed Codex Provider Gate */}
-                    {!linuxDesktop && (<div className="rounded-xl border border-[var(--line)] bg-[var(--paper-elevated)] p-5">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1 pr-4">
-                          <h3 className="text-sm font-medium text-[var(--ink)]">
-                            {tSettings('about.developer.codexProviderTitle')}
-                          </h3>
-                          <p className="mt-1 text-xs text-[var(--ink-muted)]">
-                            {tSettings(
-                              'about.developer.codexProviderDescription',
-                            )}
-                          </p>
-                        </div>
-                        <button
-                          onClick={() => {
-                            const nextEnabled =
-                              !managedCodexProviderGateEnabled;
-                            console.info(
-                              `[managed-codex] developer gate toggle requested runtime=codex runtimeSource=managed-provider enabled=${nextEnabled}`,
-                            );
-                            updateConfig({
-                              managedCodexProviderDevGate: nextEnabled,
-                            });
-                          }}
-                          aria-pressed={managedCodexProviderGateEnabled}
-                          className={`relative h-6 w-11 shrink-0 cursor-pointer rounded-full transition-colors ${
-                            managedCodexProviderGateEnabled
-                              ? 'bg-[var(--accent)]'
-                              : 'bg-[var(--line-strong)]'
-                          }`}
-                        >
-                          <span
-                            className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-[var(--toggle-thumb)] shadow transition-transform ${
-                              managedCodexProviderGateEnabled
-                                ? 'translate-x-5'
-                                : 'translate-x-0'
-                            }`}
-                          />
-                        </button>
-                      </div>
-                    </div>)}
-
                     {/* Split View Toggle */}
                     <div className="rounded-xl border border-[var(--line)] bg-[var(--paper-elevated)] p-5">
                       <div className="flex items-center justify-between">

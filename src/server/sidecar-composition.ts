@@ -109,7 +109,6 @@ const SESSION_PREFIXES = [
 
 const GLOBAL_EXACT_PATHS = new Set([
   '/agent/upload',
-  '/api/assets/qr-code',
   '/api/browser/session/retire',
   '/api/edge-tts/preview',
   '/api/global-stats',

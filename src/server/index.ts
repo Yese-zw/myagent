@@ -167,7 +167,6 @@ import {
   getPluginDetail,
   PluginStoreError,
 } from './plugins/store';
-import { handleQrCodeAssetRoute } from './routes/qr-code-asset';
 import { shouldLogHttpRequest } from './http-log-policy';
 
 type SpaceSkillExportPackage = {
@@ -5336,12 +5335,6 @@ async function main() {
           );
         }
       }
-
-      const qrCodeAssetResponse = await handleQrCodeAssetRoute(
-        pathname,
-        request,
-      );
-      if (qrCodeAssetResponse) return qrCodeAssetResponse;
 
       // ============= END PROVIDER VERIFICATION API =============
 

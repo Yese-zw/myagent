@@ -1525,7 +1525,7 @@ fn state() -> &'static Mutex<MockState> {
 fn initial_state() -> MockState {
     let user = json!({
         "id": MOCK_OWNER_USER_ID,
-        "email": "myagents.io@gmail.com",
+        "email": "aipaper2025@163.com",
         "name": "Ethan",
         "avatarUrl": mock_avatar_preset_url("people", "person-01", 128),
         "avatarSource": "preset",

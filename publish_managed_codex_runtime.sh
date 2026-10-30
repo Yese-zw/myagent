@@ -10,7 +10,7 @@ PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ENV_FILE="${PROJECT_DIR}/.env"
 RUNTIME_LOCK_FILE="${PROJECT_DIR}/src/shared/managed-codex-runtime.json"
 R2_BUCKET="myagents-releases"
-DOWNLOAD_BASE_URL="https://download.myagents.io"
+DOWNLOAD_BASE_URL="${DOWNLOAD_BASE_URL:?请先设置 DOWNLOAD_BASE_URL（你自己的下载域名，例如 https://download.example.com）}"
 DEFAULT_OUT_DIR="${PROJECT_DIR}/dist/managed-codex"
 
 RED='\033[0;31m'

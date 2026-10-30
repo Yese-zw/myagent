@@ -814,7 +814,7 @@ export const MANAGED_CODEX_REQUIRED_RUNTIME = {
   component: 'codex',
   version: managedCodexVersion,
   runtimeSet: managedCodexRuntimeSet,
-  manifestBaseUrl: `https://download.myagents.io/runtimes/codex/sets/${managedCodexRuntimeSet}`,
+  manifestBaseUrl: '',
   manifestPublicKeyId: 'myagents-runtime-manifest-ed25519-2026-06',
 } as const;
 
@@ -1410,7 +1410,9 @@ type ManagedCodexConfigLike = Pick<
 export function isManagedCodexProviderGateEnabled(
   config: Pick<AppConfig, 'managedCodexProviderDevGate'>,
 ): boolean {
-  return config.managedCodexProviderDevGate === true;
+  // 托管 Codex 在灵思AGENT 中已停用（不提供运行时下载），忽略历史配置里的开关。
+  void config;
+  return false;
 }
 
 export function shouldAutoUpdateManagedCodexRuntime(
@@ -2708,7 +2710,7 @@ export const PRESET_MCP_SERVERS: McpServerDefinition[] = [
   {
     id: MANAGED_BROWSER_MCP_ID,
     name: '浏览器',
-    description: 'LSAGENT 托管的 Chromium，支持多对话隔离与登录状态复用',
+    description: '灵思AGENT 托管的 Chromium，支持多对话隔离与登录状态复用',
     type: 'stdio',
     // Product-owned sentinel. Runtime adapters project only this preset to the
     // authenticated application Browser Host; it is never spawned as stdio.
