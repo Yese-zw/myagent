@@ -24,6 +24,12 @@ export interface UpdateReadyInfo {
     version: string;
 }
 
+/** A newer published release the user must install before using the App. */
+export interface ForceUpdateInfo {
+    version: string;
+    notes: string;
+}
+
 /** Result of a manual update check, used by caller for user-facing feedback (toast) */
 export type CheckUpdateResult = 'up-to-date' | 'downloading' | 'error';
 
@@ -57,6 +63,27 @@ interface UseUpdaterResult {
     pendingUpdateOnStartup: string | null;
     /** Dismiss the startup pending update dialog (keeps "Restart to Update" button visible) */
     dismissPendingUpdate: () => void;
+    /** Newer forced release, when the server requires an update before the App can be used. */
+    forceUpdate: ForceUpdateInfo | null;
+    /** The downloaded package is the forced release and can be installed. */
+    forceUpdateInstallable: boolean;
+    /** The forced package could not be downloaded; the dialog offers a retry. */
+    forceUpdateFailed: boolean;
+    /** Download the forced release again. */
+    retryForceUpdate: () => Promise<void>;
+}
+
+/** `none` clears a previous block. `ignore` leaves it alone (unexpected payload or network error). */
+function parseForceNotice(notice: unknown): ForceUpdateInfo | 'none' | 'ignore' {
+    if (notice == null) return 'none';
+    if (typeof notice !== 'object') return 'ignore';
+    const value = notice as { version?: unknown; notes?: unknown; force?: unknown };
+    if (value.force !== true) return 'none';
+    if (typeof value.version !== 'string' || value.version.length === 0) return 'ignore';
+    return {
+        version: value.version,
+        notes: typeof value.notes === 'string' ? value.notes : '',
+    };
 }
 
 // Windows and macOS defer installation until the user's explicit restart action.
@@ -80,8 +107,11 @@ export function useUpdater(): UseUpdaterResult {
     const [preparing, setPreparing] = useState(false);
     // Windows/macOS: version from disk-persisted pending update (shown as startup dialog)
     const [pendingUpdateOnStartup, setPendingUpdateOnStartup] = useState<string | null>(null);
+    const [forceUpdate, setForceUpdate] = useState<ForceUpdateInfo | null>(null);
+    const [forceUpdateFailed, setForceUpdateFailed] = useState(false);
     const intervalRef = useRef<NodeJS.Timeout | null>(null);
     const updateReadyRef = useRef(false);
+    const updateVersionRef = useRef<string | null>(null);
     // Ref guards for checkForUpdate to prevent race conditions on rapid clicks.
     // State values in a useCallback closure can be stale; refs are always current.
     const checkingRef = useRef(false);
@@ -94,6 +124,10 @@ export function useUpdater(): UseUpdaterResult {
     useEffect(() => {
         updateReadyRef.current = updateReady;
     }, [updateReady]);
+
+    useEffect(() => {
+        updateVersionRef.current = updateVersion;
+    }, [updateVersion]);
 
     // Manual update check: test connectivity → compare version → download if needed
     // Returns a result string so the caller can show appropriate toast feedback.
@@ -292,6 +326,7 @@ export function useUpdater(): UseUpdaterResult {
             setUpdateReady(true);
             setDownloading(false);
             setPreparing(false);
+            setForceUpdateFailed(false);
         }, ac.signal);
 
         // `download-started` hides the install button: the bytes that
@@ -339,6 +374,62 @@ export function useUpdater(): UseUpdaterResult {
         void checkPending();
     }, []);
 
+    const applyForceNotice = useCallback((notice: unknown) => {
+        const parsed = parseForceNotice(notice);
+        if (parsed === 'ignore') return;
+        if (parsed === 'none') {
+            setForceUpdate(null);
+            setForceUpdateFailed(false);
+            return;
+        }
+        setForceUpdate(parsed);
+    }, []);
+
+    const downloadForcedUpdate = useCallback(async () => {
+        setForceUpdateFailed(false);
+        try {
+            const downloaded = await invoke('check_and_download_update') as boolean;
+            if (!downloaded && !updateReadyRef.current) {
+                setForceUpdateFailed(true);
+            }
+        } catch (err) {
+            if (err === 'UPDATER_DISABLED_IN_DEVELOPMENT') return;
+            console.error('[useUpdater] Forced update download failed:', err);
+            setForceUpdateFailed(true);
+        }
+    }, []);
+
+    const retryForceUpdate = useCallback(async () => {
+        await downloadForcedUpdate();
+    }, [downloadForcedUpdate]);
+
+    // On entry, ask whether this release must be installed before the App can be used.
+    // A failed request leaves any existing block in place and does not invent one.
+    useEffect(() => {
+        if (!isTauriEnvironment() || isLinuxDesktop()) return;
+        let cancelled = false;
+        const run = async () => {
+            try {
+                const notice = await invoke('peek_app_update');
+                if (cancelled) return;
+                const parsed = parseForceNotice(notice);
+                if (parsed === 'ignore') return;
+                applyForceNotice(notice);
+                if (parsed === 'none') return;
+                const alreadyReady = updateReadyRef.current
+                    && compareVersions(updateVersionRef.current ?? '', parsed.version) >= 0;
+                if (!alreadyReady) await downloadForcedUpdate();
+            } catch (err) {
+                if (cancelled || err === 'UPDATER_DISABLED_IN_DEVELOPMENT') return;
+                console.error('[useUpdater] Forced update check failed:', err);
+            }
+        };
+        void run();
+        return () => {
+            cancelled = true;
+        };
+    }, [applyForceNotice, downloadForcedUpdate]);
+
     // Periodic background check (silent - just triggers Rust to check and download)
     // Uses ref to avoid recreating interval when updateReady changes
     useEffect(() => {
@@ -350,9 +441,15 @@ export function useUpdater(): UseUpdaterResult {
             // if the server has something NEWER (latest-wins protocol).
             // This ensures v0.1.61 replaces a cached v0.1.60 seamlessly.
             try {
-                await invoke('check_and_download_update');
+                const downloaded = await invoke('check_and_download_update') as boolean;
                 // Track update_check event only after successful check
                 track('update_check');
+                const notice = await invoke('peek_app_update');
+                applyForceNotice(notice);
+                const parsed = parseForceNotice(notice);
+                if (parsed !== 'none' && parsed !== 'ignore' && !downloaded && !updateReadyRef.current) {
+                    setForceUpdateFailed(true);
+                }
             } catch (err) {
                 // Packaged debug builds are deliberately disabled by Rust
                 // even when renderer debug logging is off.
@@ -372,7 +469,17 @@ export function useUpdater(): UseUpdaterResult {
                 intervalRef.current = null;
             }
         };
-    }, []); // Empty deps - interval created once on mount
+    }, [applyForceNotice]);
+
+    const forceUpdateInstallable = Boolean(
+        forceUpdate
+        && updateReady
+        && updateVersion
+        && compareVersions(updateVersion, forceUpdate.version) >= 0
+        && !preparing
+        && !downloading
+        && !installing,
+    );
 
     return {
         updateReady,
@@ -385,5 +492,9 @@ export function useUpdater(): UseUpdaterResult {
         checkForUpdate,
         pendingUpdateOnStartup,
         dismissPendingUpdate,
+        forceUpdate,
+        forceUpdateInstallable,
+        forceUpdateFailed,
+        retryForceUpdate,
     };
 }

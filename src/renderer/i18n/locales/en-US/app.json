@@ -541,7 +541,15 @@
     "newVersionTitle": "New version available",
     "newVersionMessage": "Version v{{version}} has been downloaded. Install now?",
     "install": "Install",
-    "later": "Later"
+    "later": "Later",
+    "forceUpdateTitle": "Update required to continue",
+    "forceUpdateVersion": "Latest version v{{version}}",
+    "forceUpdateNotes": "Release notes",
+    "forceUpdateEmptyNotes": "Install the latest version to continue.",
+    "forceUpdateNow": "Update now",
+    "forceUpdateDownloading": "Downloading update…",
+    "forceUpdateInstalling": "Installing…",
+    "forceUpdateRetry": "Retry"
   },
   "tabProvider": {
     "reconnecting": "Conversation updates interrupted. Reconnecting automatically…",

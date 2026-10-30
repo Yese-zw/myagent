@@ -1,6 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "bundle": {
+    "publisher": "灵思科技",
     "resources": {
       "../src-tauri/resources/cliproxy": "cliproxy",
       "../src-tauri/resources/vcruntime140.dll": "vcruntime140.dll",

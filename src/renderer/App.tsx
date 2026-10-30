@@ -47,6 +47,7 @@ import {
   setAppActiveCorrelation,
 } from '@/api/tauriClient';
 import ConfirmDialog from '@/components/ConfirmDialog';
+import ForceUpdateDialog, { forceUpdatePhase } from '@/components/ForceUpdateDialog';
 import BugReportOverlay from '@/components/BugReportOverlay';
 import { DispatchTaskDialog } from '@/components/task-center/DispatchTaskDialog';
 import CustomTitleBar from '@/components/CustomTitleBar';
@@ -372,6 +373,10 @@ export default function App({ rendererAttachment = COLD_RENDERER_ATTACHMENT }: {
     checkForUpdate,
     pendingUpdateOnStartup,
     dismissPendingUpdate,
+    forceUpdate,
+    forceUpdateInstallable,
+    forceUpdateFailed,
+    retryForceUpdate,
   } = useUpdater();
 
   // Stable callback for Settings prop — ref pattern ensures memo comparator correctness
@@ -4853,6 +4858,8 @@ export default function App({ rendererAttachment = COLD_RENDERER_ATTACHMENT }: {
               cancelText={t('appChrome.cancel')}
               confirmVariant="danger"
               loading={exitConfirmState.loading}
+              overlayClassName={forceUpdate ? 'z-[450]' : undefined}
+              layerZ={forceUpdate ? 450 : undefined}
               onConfirm={() => {
                 const pending = exitConfirmState;
                 setExitConfirmState((current) =>
@@ -4885,7 +4892,27 @@ export default function App({ rendererAttachment = COLD_RENDERER_ATTACHMENT }: {
           cache/disk state. Comes back into view automatically when the
           download completes (the dialog reads pendingUpdateOnStartup, which
           is unchanged; only the visibility gate is `updatePreparing`). */}
-          {pendingUpdateOnStartup && !updatePreparing && (
+          {forceUpdate && (
+            <ForceUpdateDialog
+              version={forceUpdate.version}
+              notes={forceUpdate.notes}
+              phase={forceUpdatePhase({
+                installing: updateInstalling,
+                installable: forceUpdateInstallable,
+                failed: forceUpdateFailed,
+              })}
+              captureKeyboard={!exitConfirmState}
+              onUpdate={() => {
+                if (forceUpdateInstallable) {
+                  void handleRestartAndUpdate();
+                  return;
+                }
+                void retryForceUpdate();
+              }}
+            />
+          )}
+
+          {pendingUpdateOnStartup && !updatePreparing && !forceUpdate && (
             <ConfirmDialog
               title={t('appChrome.newVersionTitle')}
               message={t('appChrome.newVersionMessage', {

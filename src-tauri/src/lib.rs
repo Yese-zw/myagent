@@ -497,6 +497,7 @@ pub fn run() {
             updater::check_and_download_update,
             updater::restart_app,
             updater::test_update_connectivity,
+            updater::peek_app_update,
             updater::check_pending_update,
             updater::install_pending_update,
             // Platform & device info

@@ -1,4 +1,4 @@
-import { act, renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
 import { useUpdater } from './useUpdater';
 
@@ -55,6 +55,21 @@ it('does not log the expected development updater rejection as an error', async 
     await act(async () => { await vi.advanceTimersByTimeAsync(31 * 60 * 1000); });
     expect(error).not.toHaveBeenCalled();
   } finally { unmount(); error.mockRestore(); mocks.invoke.mockReset(); }
+});
+
+it('blocks on entry when the published release is a forced update', async () => {
+  mocks.platform = 'darwin-aarch64';
+  mocks.invoke.mockImplementation(async (command: string) => {
+    if (command === 'peek_app_update') return { version: '9.0.0', notes: '必须更新', force: true };
+    if (command === 'check_and_download_update') return true;
+    return null;
+  });
+  const { result, unmount } = renderHook(() => useUpdater());
+  try {
+    await waitFor(() => expect(result.current.forceUpdate).toEqual({ version: '9.0.0', notes: '必须更新' }));
+    expect(mocks.invoke).toHaveBeenCalledWith('check_and_download_update');
+    expect(result.current.forceUpdateFailed).toBe(false);
+  } finally { unmount(); mocks.invoke.mockReset(); }
 });
 
 it('treats a 204 manifest response as up to date without downloading', async () => {

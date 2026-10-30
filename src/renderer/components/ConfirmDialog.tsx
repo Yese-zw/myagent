@@ -25,6 +25,10 @@ interface ConfirmDialogProps {
      * Escape-to-cancel stays on, button clicks still work.
      */
     disableEnterShortcut?: boolean;
+    /** Tailwind z-index class. Defaults to the standard dialog layer. */
+    overlayClassName?: string;
+    /** Cmd+W dismissal priority. Keep this aligned with overlayClassName. */
+    layerZ?: number;
     onConfirm: () => void;
     onCancel: () => void;
 }
@@ -40,12 +44,14 @@ export default function ConfirmDialog({
     danger = false,
     loading = false,
     disableEnterShortcut = false,
+    overlayClassName = 'z-[300]',
+    layerZ = 300,
     onConfirm,
     onCancel
 }: ConfirmDialogProps) {
     const { t } = useTranslation('common');
-    // Cmd+W dismissal: z-[300] matches the component's CSS z-index
-    useCloseLayer(() => { onCancel(); return true; }, 300);
+    // Cmd+W dismissal priority matches the overlay z-index.
+    useCloseLayer(() => { onCancel(); return true; }, layerZ);
 
     // Support both old and new props
     const finalConfirmText = confirmText || confirmLabel || t('actions.confirm');
@@ -75,7 +81,7 @@ export default function ConfirmDialog({
     // dialog behind sibling FloatingPortal content (Popover/DropdownMenu) at
     // body level — observed 2026-05-08 with SessionHistoryDropdown.
     return createPortal(
-        <OverlayBackdrop onClose={loading ? undefined : onCancel} className="z-[300] px-4">
+        <OverlayBackdrop onClose={loading ? undefined : onCancel} className={`${overlayClassName} px-4`}>
             <div className="glass-panel w-full max-w-sm">
                 <div className="border-b border-[var(--line)] px-5 py-4">
                     <div className="break-words text-lg font-semibold text-[var(--ink)]">{title}</div>

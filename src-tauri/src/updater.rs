@@ -543,7 +543,9 @@ async fn check_and_download_silently(app: &AppHandle) -> Result<Option<String>, 
             "[Updater] Checking for updates... Current: v{}, Target: {}, Endpoint: {}",
             current_version,
             target,
-            update_endpoint(target).map(|u| u.to_string()).unwrap_or_default()
+            update_endpoint(target)
+                .map(|u| u.to_string())
+                .unwrap_or_default()
         ),
     );
 
@@ -1173,7 +1175,7 @@ async fn resolve_update_with_retries(
 /// Expected JSON structure for Tauri v2 updater (per-platform file)
 /// Reference: https://v2.tauri.app/plugin/updater/
 /// Required fields: version, signature, url
-/// Optional fields: notes, pub_date
+/// Optional fields: notes, pub_date, force
 #[derive(Clone, Serialize, serde::Deserialize, Debug)]
 struct UpdateJsonFormat {
     version: String,
@@ -1183,6 +1185,75 @@ struct UpdateJsonFormat {
     pub_date: Option<String>,
     signature: String,
     url: String,
+    /// Read by the desktop App. The Tauri updater ignores this extra field.
+    #[serde(default)]
+    force: bool,
+}
+
+/// A published release that is newer than this App and must be installed
+/// before the user can keep working.
+#[derive(Clone, Serialize, Debug, PartialEq, Eq)]
+pub struct AppUpdateNotice {
+    pub version: String,
+    pub notes: String,
+}
+
+/// `None` means this response does not require a blocking update.
+/// Network and JSON failures stay as `Err` so a failed check does not
+/// clear a block that was already shown.
+fn forced_update_notice(
+    status: u16,
+    body: &str,
+    current_version: &str,
+) -> Result<Option<AppUpdateNotice>, String> {
+    if status == 204 {
+        return Ok(None);
+    }
+    if status != 200 {
+        return Err(format!("Update manifest status {status}"));
+    }
+    let parsed: UpdateJsonFormat =
+        serde_json::from_str(body).map_err(|e| format!("Invalid update manifest: {e}"))?;
+    if !parsed.force || !is_version_greater(&parsed.version, current_version) {
+        return Ok(None);
+    }
+    Ok(Some(AppUpdateNotice {
+        version: parsed.version,
+        notes: parsed.notes.unwrap_or_default(),
+    }))
+}
+
+/// Read whether the published release is a forced update for this App.
+/// Returns `None` when the server has no newer forced release.
+#[tauri::command]
+pub async fn peek_app_update(app: AppHandle) -> Result<Option<AppUpdateNotice>, String> {
+    if let Some(reason) = update_disabled_reason(cfg!(debug_assertions), std::env::consts::OS) {
+        return Err(reason.to_string());
+    }
+    let target = get_update_target();
+    let url = update_endpoint(target)?.to_string();
+    let current_version = app.package_info().version.to_string();
+    #[allow(clippy::disallowed_methods)]
+    let builder = reqwest::Client::builder()
+        .user_agent(format!("LSAGENT-Updater/{current_version}"))
+        .timeout(std::time::Duration::from_secs(15));
+    let client = proxy_config::build_client_with_proxy(builder)
+        .map_err(|e| format!("Failed to build HTTP client: {e}"))?;
+    let response = client
+        .get(&url)
+        .send()
+        .await
+        .map_err(|e| format!("HTTP request failed: {e}"))?;
+    let status = response.status().as_u16();
+    let body = if status == 204 {
+        String::new()
+    } else {
+        response
+            .text()
+            .await
+            .map_err(|e| format!("Failed to read response body: {e}"))?
+    };
+    forced_update_notice(status, &body, &current_version)
 }
 
 /// Get the update target string for the current platform
@@ -1271,8 +1342,9 @@ pub async fn test_update_connectivity(app: AppHandle) -> Result<String, String> 
     let json_parse_result = match serde_json::from_str::<UpdateJsonFormat>(&body) {
         Ok(parsed) => {
             format!(
-                "✓ JSON valid!\n  version: {}\n  url: {}\n  signature length: {} chars",
+                "✓ JSON valid!\n  version: {}\n  force: {}\n  url: {}\n  signature length: {} chars",
                 parsed.version,
+                parsed.force,
                 parsed.url,
                 parsed.signature.len()
             )
@@ -1319,7 +1391,10 @@ mod tests {
     fn update_endpoint_uses_packaged_sub2api_origin() {
         let defaults: serde_json::Value =
             serde_json::from_str(include_str!("../../src/shared/sub2api-defaults.json")).unwrap();
-        let server = defaults["serverUrl"].as_str().unwrap().trim_end_matches('/');
+        let server = defaults["serverUrl"]
+            .as_str()
+            .unwrap()
+            .trim_end_matches('/');
         assert_eq!(
             update_endpoint("darwin-aarch64").unwrap().as_str(),
             format!("{server}/api/v1/app/update/darwin-aarch64")
@@ -1459,5 +1534,25 @@ mod tests {
         assert_eq!(stats.skipped_reparse_or_symlink, 1);
         assert!(std::fs::symlink_metadata(&link).is_ok());
         assert!(target.exists());
+    }
+
+    #[test]
+    fn forced_update_notice_only_blocks_a_newer_forced_release() {
+        let body = r#"{"version":"1.2.0","notes":"安全修复","url":"https://cdn.example.com/a.tar.gz","signature":"sig","force":true}"#;
+        assert_eq!(
+            forced_update_notice(200, body, "1.1.0").unwrap(),
+            Some(AppUpdateNotice {
+                version: "1.2.0".to_string(),
+                notes: "安全修复".to_string(),
+            })
+        );
+        assert_eq!(forced_update_notice(200, body, "1.2.0").unwrap(), None);
+        assert_eq!(forced_update_notice(200, body, "1.3.0").unwrap(), None);
+
+        let optional = r#"{"version":"9.0.0","notes":"optional","url":"https://cdn.example.com/a.tar.gz","signature":"sig"}"#;
+        assert_eq!(forced_update_notice(200, optional, "1.0.0").unwrap(), None);
+        assert_eq!(forced_update_notice(204, "", "1.0.0").unwrap(), None);
+        assert!(forced_update_notice(500, "nope", "1.0.0").is_err());
+        assert!(forced_update_notice(200, "{", "1.0.0").is_err());
     }
 }
