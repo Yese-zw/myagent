@@ -2,6 +2,13 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
+    // Store-packaged Codex is started inside its package identity. That helper
+    // must exit before CLI or GUI startup, and it never reads account data.
+    #[cfg(windows)]
+    if let Some(code) = app_lib::try_codex_package_launch() {
+        std::process::exit(code);
+    }
+
     let args: Vec<String> = std::env::args().skip(1).collect();
 
     // CLI mode: the canonical HOME launcher supplies a private marker; known

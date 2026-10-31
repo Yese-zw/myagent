@@ -79,9 +79,11 @@ fn write_profile(home: &Path, base_url: &str, api_key: &str, provider_name: &str
 /// Link its rollout stores to the user's `~/.codex` so the gateway instance
 /// lists the same conversations. Only history is shared; auth and config stay
 /// profile-local. Sessions already recorded in the profile are moved over.
-#[cfg(unix)]
+///
+/// Unix uses symlinks. Windows uses directory junctions and file hard links so
+/// the same link works without Developer Mode, and later messages written by
+/// either side stay in the user's Codex history.
 pub(super) fn share_history(home: &Path, user_home: &Path) {
-    use std::os::unix::fs::symlink;
     if !user_home.is_dir() {
         return;
     }
@@ -93,18 +95,18 @@ pub(super) fn share_history(home: &Path, user_home: &Path) {
     ] {
         let shared = user_home.join(name);
         let local = home.join(name);
-        if fs::symlink_metadata(&local).is_ok_and(|meta| meta.file_type().is_symlink()) {
+        if is_reparse(&local) || same_history_file(&local, &shared) {
             continue;
         }
         if is_dir {
             if fs::create_dir_all(&shared).is_err() {
                 continue;
             }
-            if local.is_dir() {
+            if is_real_dir(&local) {
                 merge_dir(&local, &shared);
                 let _ = fs::remove_dir_all(&local);
             }
-        } else if local.is_file() {
+        } else if is_real_file(&local) {
             if !shared.exists() {
                 let _ = fs::rename(&local, &shared);
             } else if let Ok(extra) = fs::read(&local) {
@@ -120,18 +122,89 @@ pub(super) fn share_history(home: &Path, user_home: &Path) {
                 let _ = fs::remove_file(&local);
             }
         }
-        if !shared.exists() {
+        if !shared.exists() || local.exists() {
             continue;
         }
-        let _ = symlink(&shared, &local);
+        let _ = create_history_link(&shared, &local, is_dir);
     }
 }
 
-#[cfg(not(unix))]
-pub(super) fn share_history(_home: &Path, _user_home: &Path) {}
+fn is_reparse(path: &Path) -> bool {
+    #[cfg(unix)]
+    {
+        fs::symlink_metadata(path).is_ok_and(|meta| meta.file_type().is_symlink())
+    }
+    #[cfg(windows)]
+    {
+        use std::os::windows::fs::MetadataExt;
+        const FILE_ATTRIBUTE_REPARSE_POINT: u32 = 0x400;
+        junction::exists(path).ok() == Some(true)
+            || fs::symlink_metadata(path).is_ok_and(|meta| {
+                meta.file_type().is_symlink()
+                    || meta.file_attributes() & FILE_ATTRIBUTE_REPARSE_POINT != 0
+            })
+    }
+    #[cfg(not(any(unix, windows)))]
+    {
+        let _ = path;
+        false
+    }
+}
+
+/// A Windows file hard link has no symlink bit. The second launch must see it
+/// as the user's history file, not append the log onto itself.
+fn same_history_file(local: &Path, shared: &Path) -> bool {
+    #[cfg(windows)]
+    {
+        use std::os::windows::fs::MetadataExt;
+        let (Ok(local), Ok(shared)) = (fs::metadata(local), fs::metadata(shared)) else {
+            return false;
+        };
+        return local.file_index() == shared.file_index()
+            && local.volume_serial_number() == shared.volume_serial_number();
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = (local, shared);
+        false
+    }
+}
+
+fn is_real_dir(path: &Path) -> bool {
+    !is_reparse(path) && fs::metadata(path).is_ok_and(|meta| meta.is_dir())
+}
+
+fn is_real_file(path: &Path) -> bool {
+    !is_reparse(path) && fs::metadata(path).is_ok_and(|meta| meta.is_file())
+}
+
+fn create_history_link(shared: &Path, local: &Path, is_dir: bool) -> std::io::Result<()> {
+    #[cfg(unix)]
+    {
+        let _ = is_dir;
+        std::os::unix::fs::symlink(shared, local)
+    }
+    #[cfg(windows)]
+    {
+        if is_dir {
+            junction::create(shared, local)
+        } else if fs::hard_link(shared, local).is_ok() {
+            Ok(())
+        } else {
+            std::os::windows::fs::symlink_file(shared, local)
+        }
+    }
+    #[cfg(not(any(unix, windows)))]
+    {
+        let _ = (shared, local, is_dir);
+        Err(std::io::Error::new(
+            std::io::ErrorKind::Unsupported,
+            "history links are unavailable",
+        ))
+    }
+}
 
 /// Move entries from `from` into `to` without overwriting existing ones.
-#[cfg(unix)]
 fn merge_dir(from: &Path, to: &Path) {
     let Ok(entries) = fs::read_dir(from) else {
         return;
@@ -139,11 +212,11 @@ fn merge_dir(from: &Path, to: &Path) {
     for entry in entries.flatten() {
         let target = to.join(entry.file_name());
         let source = entry.path();
-        if source.is_dir() && !fs::symlink_metadata(&source).is_ok_and(|m| m.file_type().is_symlink()) {
+        if is_real_dir(&source) {
             if fs::create_dir_all(&target).is_ok() {
                 merge_dir(&source, &target);
             }
-        } else if !target.exists() {
+        } else if !is_reparse(&source) && !target.exists() {
             let _ = fs::rename(&source, &target);
         }
     }
@@ -396,17 +469,41 @@ mod platform {
     }
 }
 
-#[cfg(not(target_os = "macos"))]
+#[cfg(any(test, target_os = "windows"))]
+#[path = "codex_launch_windows.rs"]
+mod windows_codex;
+
+#[cfg(target_os = "windows")]
 mod platform {
-    use super::*;
+    use std::path::Path;
+
+    use super::{windows_codex, Result};
+
+    pub(super) fn installed_app_name() -> Option<String> {
+        windows_codex::installed_app_name()
+    }
+
+    pub(super) fn launch(home: &Path, app_data: &Path) -> Result<super::LaunchOutcome> {
+        windows_codex::launch(home, app_data)
+    }
+}
+
+#[cfg(target_os = "windows")]
+pub(super) fn try_package_launch() -> Option<i32> {
+    windows_codex::try_package_launch()
+}
+
+#[cfg(not(any(target_os = "macos", target_os = "windows")))]
+mod platform {
+    use std::path::Path;
+
+    use super::{AuthError, LaunchOutcome, Result};
 
     pub(super) fn installed_app_name() -> Option<String> {
         None
     }
 
     pub(super) fn launch(_home: &Path, _app_data: &Path) -> Result<LaunchOutcome> {
-        // Windows ships Codex as a Store package that needs AppUserModelId
-        // activation; not wired yet.
         Err(AuthError::new("CODEX_APP_UNSUPPORTED"))
     }
 }

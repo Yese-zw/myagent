@@ -127,6 +127,13 @@ pub fn is_cli_mode(args: &[String]) -> bool {
     cli::is_cli_mode(args)
 }
 
+/// Windows Store Codex activation entry. Runs before Tauri so the helper
+/// process does not open a second window.
+#[cfg(windows)]
+pub fn try_codex_package_launch() -> Option<i32> {
+    sub2api::try_codex_package_launch()
+}
+
 /// Run in CLI mode — forward args to the Bun CLI script and return exit code.
 pub fn run_cli(args: &[String]) -> i32 {
     cli::run(args)

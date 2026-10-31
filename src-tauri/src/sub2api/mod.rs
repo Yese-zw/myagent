@@ -4,6 +4,11 @@ mod captcha;
 mod codex_launch;
 mod store;
 
+#[cfg(windows)]
+pub(crate) fn try_codex_package_launch() -> Option<i32> {
+    codex_launch::try_package_launch()
+}
+
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::time::Duration;
