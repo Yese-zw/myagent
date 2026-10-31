@@ -956,21 +956,61 @@ fn read_bundled_release_manifest(
         Ok(bytes)
     };
     let manifest = read_limited("manifest.json", MAX_MANIFEST_BYTES)?;
-    let signature = String::from_utf8(read_limited("manifest.json.sig", MAX_SIGNATURE_BYTES)?)
-        .map_err(|_| "SPEECH_RESOURCE_SIGNATURE_INVALID")?;
-    let signature = signature.trim();
-    if signature.is_empty() {
-        return Err("SPEECH_RESOURCE_SIGNATURE_INVALID");
-    }
-    crate::resource_signature::verify_minisign_bytes(&manifest, signature, "speech model manifest")
-        .map_err(|_| "SPEECH_RESOURCE_SIGNATURE_INVALID")?;
+    let signature_text = String::from_utf8(read_limited(
+        "manifest.json.sig",
+        MAX_SIGNATURE_BYTES,
+    )?)
+    .map_err(|_| "SPEECH_RESOURCE_SIGNATURE_INVALID")?;
+    let signature = normalized_detached_signature(&signature_text)?;
+    // Windows text checkout can insert a BOM or CR into the bundled JSON and
+    // signature. Only bytes that still pass the detached signature are kept,
+    // and those exact signed bytes are what later gets installed.
+    let manifest = signed_manifest_bytes(&manifest, &signature)?;
     if !manifest_matches_source_lock(&manifest) {
         return Err("SPEECH_RESOURCE_MANIFEST_INVALID");
     }
     Ok(VerifiedReleaseManifest {
         bytes: manifest,
-        signature: signature.to_string(),
+        signature,
     })
+}
+
+fn normalized_detached_signature(raw: &str) -> Result<String, &'static str> {
+    let mut signature = raw.trim().trim_start_matches('\u{feff}').to_string();
+    if signature.contains('\r') {
+        signature.retain(|character| character != '\r');
+    }
+    if signature.is_empty() {
+        return Err("SPEECH_RESOURCE_SIGNATURE_INVALID");
+    }
+    Ok(signature)
+}
+
+fn signed_manifest_bytes(manifest: &[u8], signature: &str) -> Result<Vec<u8>, &'static str> {
+    if verify_speech_manifest(manifest, signature) {
+        return Ok(manifest.to_vec());
+    }
+    let canonical = windows_text_bytes(manifest);
+    if canonical.as_slice() != manifest && verify_speech_manifest(&canonical, signature) {
+        return Ok(canonical);
+    }
+    Err("SPEECH_RESOURCE_SIGNATURE_INVALID")
+}
+
+fn verify_speech_manifest(manifest: &[u8], signature: &str) -> bool {
+    crate::resource_signature::verify_minisign_bytes(manifest, signature, "speech model manifest")
+        .is_ok()
+}
+
+/// Drops a leading UTF-8 BOM and CR bytes. This is not a signature bypass:
+/// the caller still requires the result to verify as the signed payload.
+fn windows_text_bytes(bytes: &[u8]) -> Vec<u8> {
+    let bytes = bytes.strip_prefix(b"\xEF\xBB\xBF").unwrap_or(bytes);
+    bytes
+        .iter()
+        .copied()
+        .filter(|byte| *byte != b'\r')
+        .collect()
 }
 
 fn total_download_bytes(plan: &ModelPackInstallPlan) -> u64 {
@@ -1953,6 +1993,48 @@ mod tests {
             model_probe_worker_error("UNTRUSTED_WORKER_DETAIL"),
             "SPEECH_WORKER_PROTOCOL_ERROR"
         );
+    }
+
+    #[test]
+    fn windows_text_checkout_of_bundled_manifest_installs_the_signed_bytes() {
+        let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("resources/speech-models");
+        let original = fs::read(dir.join("manifest.json")).unwrap();
+        let signature = fs::read(dir.join("manifest.json.sig")).unwrap();
+        assert!(!original.contains(&b'\r'));
+        let plan = install_plan().unwrap();
+        let root = tempfile::tempdir().unwrap();
+        let bundled = root.path().join("speech-models");
+        fs::create_dir_all(&bundled).unwrap();
+
+        let crlf_manifest = |bytes: &[u8]| -> Vec<u8> {
+            let mut converted = Vec::with_capacity(bytes.len() + 16);
+            converted.extend_from_slice(b"\xEF\xBB\xBF");
+            for byte in bytes {
+                if *byte == b'\n' {
+                    converted.push(b'\r');
+                }
+                converted.push(*byte);
+            }
+            converted
+        };
+        fs::write(bundled.join("manifest.json"), crlf_manifest(&original)).unwrap();
+        let mut signature_text = String::from_utf8(signature.clone()).unwrap();
+        signature_text.insert_str(0, "\u{feff}");
+        signature_text.push_str("\r\n");
+        fs::write(bundled.join("manifest.json.sig"), signature_text).unwrap();
+
+        let verified = read_bundled_release_manifest(&bundled, &plan)
+            .expect("windows text checkout still verifies");
+        assert_eq!(verified.bytes, original);
+
+        let mut tampered = original.clone();
+        let index = tampered.iter().position(|byte| *byte == b'1').unwrap();
+        tampered[index] = b'2';
+        fs::write(bundled.join("manifest.json"), crlf_manifest(&tampered)).unwrap();
+        assert!(matches!(
+            read_bundled_release_manifest(&bundled, &plan),
+            Err("SPEECH_RESOURCE_SIGNATURE_INVALID")
+        ));
     }
 
     #[test]

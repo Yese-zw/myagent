@@ -156,18 +156,36 @@ fn is_reparse(path: &Path) -> bool {
 fn same_history_file(local: &Path, shared: &Path) -> bool {
     #[cfg(windows)]
     {
-        use std::os::windows::fs::MetadataExt;
-        let (Ok(local), Ok(shared)) = (fs::metadata(local), fs::metadata(shared)) else {
-            return false;
-        };
-        return local.file_index() == shared.file_index()
-            && local.volume_serial_number() == shared.volume_serial_number();
+        return windows_file_id(local)
+            .zip(windows_file_id(shared))
+            .is_some_and(|(local, shared)| local == shared);
     }
     #[cfg(not(windows))]
     {
         let _ = (local, shared);
         false
     }
+}
+
+/// `MetadataExt::file_index` is still unstable on the pinned toolchain.
+/// The handle query is the stable way to tell a hard link from a second file.
+#[cfg(windows)]
+fn windows_file_id(path: &Path) -> Option<(u32, u32, u32)> {
+    use std::os::windows::io::AsRawHandle;
+    use windows_sys::Win32::Storage::FileSystem::{
+        GetFileInformationByHandle, BY_HANDLE_FILE_INFORMATION,
+    };
+
+    let file = fs::File::open(path).ok()?;
+    let mut info: BY_HANDLE_FILE_INFORMATION = unsafe { std::mem::zeroed() };
+    if unsafe { GetFileInformationByHandle(file.as_raw_handle() as _, &mut info) } == 0 {
+        return None;
+    }
+    Some((
+        info.dwVolumeSerialNumber,
+        info.nFileIndexHigh,
+        info.nFileIndexLow,
+    ))
 }
 
 fn is_real_dir(path: &Path) -> bool {

@@ -214,6 +214,23 @@ test("compiled speech model source lock uses canonical LF bytes", () => {
     false,
     "model-pack-source-lock.json must use LF-only line endings so Windows builds embed the signed manifest bytes",
   );
+  const bundledManifest = readFileSync(
+    join(repoRoot, "src-tauri/resources/speech-models/manifest.json"),
+  );
+  assert.deepEqual(bundledManifest, sourceBytes);
+  const attributes = readFileSync(join(repoRoot, ".gitattributes"), "utf8");
+  assert.match(
+    attributes,
+    /^src-tauri\/resources\/speech-models\/manifest\.json text eol=lf$/m,
+  );
+  assert.match(
+    attributes,
+    /^src-tauri\/resources\/speech-models\/manifest\.json\.sig -text$/m,
+  );
+  assert.match(
+    attributes,
+    /^src-tauri\/resources\/speech-models\/assets\/\* -text$/m,
+  );
 });
 
 test("speech model packager publishes the exact compiled source-lock bytes", () => {

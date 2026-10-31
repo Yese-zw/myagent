@@ -10,3 +10,8 @@ vendor/tauri/** -text
 .github/cliproxy/manifest-v1.json.sig text eol=lf
 src-tauri/src/cliproxy/fixtures/internal-manifest.json text eol=lf
 src-tauri/src/cliproxy/fixtures/internal-manifest.json.sig text eol=lf
+# The installer verifies this bundled manifest and its content-addressed assets
+# byte for byte. Keep the signed JSON as LF and do not rewrite asset bytes.
+src-tauri/resources/speech-models/manifest.json text eol=lf
+src-tauri/resources/speech-models/manifest.json.sig -text
+src-tauri/resources/speech-models/assets/* -text
