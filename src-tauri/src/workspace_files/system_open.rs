@@ -112,7 +112,14 @@ pub(super) fn validate_external_open_path(
             .ok_or("Cannot resolve home directory")?
             .join(relative)
     } else {
-        PathBuf::from(full_path)
+        // `/C:/Users/x` (URL-style) is not absolute on Windows; drop the slash.
+        let b = full_path.as_bytes();
+        let url_style_drive = b.len() >= 4
+            && b[0] == b'/'
+            && b[1].is_ascii_alphabetic()
+            && b[2] == b':'
+            && (b[3] == b'/' || b[3] == b'\\');
+        PathBuf::from(if url_style_drive { &full_path[1..] } else { full_path })
     };
     if !target.is_absolute() {
         return Err("Path must be absolute".to_string());

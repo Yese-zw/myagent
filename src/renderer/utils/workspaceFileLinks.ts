@@ -40,7 +40,9 @@ export function resolveFileLinkTarget(
   // Protocol/fragment syntax belongs to the encoded reference too. A decoded
   // filename such as `note:12.md` or `#note.md` is an ordinary native filename.
   if (!filePath && hasUnsupportedScheme(referencePath)) return null;
-  const localPath = filePath ?? (format === 'url' ? decodeUriLoose(referencePath) : referencePath);
+  const localPath = stripLeadingSlashBeforeDrive(
+    filePath ?? (format === 'url' ? decodeUriLoose(referencePath) : referencePath),
+  );
 
   const initialLineNumber = suffixLine ?? hashLine;
   const relativePath = workspace && !localPath.startsWith('~/') ? toWorkspaceRelativePath(localPath, workspace) : null;
@@ -74,7 +76,7 @@ export function resolveFileActionTarget(
   // Structured tool `file_path` values are native filenames, not Markdown
   // references. Preserve legal POSIX names such as `report:12` / `note#L3`
   // verbatim; only inline/Markdown references opt into line parsing above.
-  const path = rawPath?.trim();
+  const path = rawPath?.trim() && stripLeadingSlashBeforeDrive(rawPath.trim());
   if (!path || hasUnsupportedScheme(path)) return null;
   const workspaceRelative = workspacePath ? toWorkspaceRelativePath(path, workspacePath) : null;
   if (workspaceRelative) return { scope: 'workspace', path: workspaceRelative };
@@ -255,6 +257,11 @@ function normalizeRelativePath(rawPath: string, windowsStyle = false): string | 
   }
 
   return stack.length > 0 ? stack.join('/') : null;
+}
+
+/** `/C:/Users/x` (URL-style Windows path, common in model output) → `C:/Users/x`. */
+function stripLeadingSlashBeforeDrive(rawPath: string): string {
+  return /^\/[A-Za-z]:[\\/]/.test(rawPath) ? rawPath.slice(1) : rawPath;
 }
 
 function isAbsolutePath(rawPath: string): boolean {
