@@ -1607,7 +1607,12 @@ export default function FilePreviewModal({
         <OverlayBackdrop onClose={handleClose} className="z-[210]" style={{ padding: '3vh 3vw', display: isPreviewActive ? undefined : 'none' }}>
             {/* Modal content */}
             <div
-                className="@container glass-panel relative flex h-full w-full max-w-7xl flex-col overflow-hidden"
+                className="@container glass-panel relative flex flex-col overflow-hidden"
+                // OverlayBackdrop's content wrapper is shrink-to-fit (max-h/max-w only), so
+                // `h-full w-full` has nothing definite to resolve against: viewers that depend
+                // on a definite height (docx/pdf/xlsx/pptx) collapse or never scroll. Size explicitly
+                // (backdrop padding is 3vh 3vw).
+                style={{ width: 'min(94vw, 80rem)', height: '94vh' }}
                 onWheel={(e) => e.stopPropagation()}
             >
                 {/* Header — 3-col grid keeps the markdown view-mode toggle visually centered */}
